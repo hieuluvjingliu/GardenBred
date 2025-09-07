@@ -24,7 +24,9 @@ app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ---- DB & migrations ----
-const db = new Database(path.join(__dirname, 'game.db'));
+//const db = new Database(path.join(__dirname, 'game.db'));
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'game.db');
+const db = new Database(DB_PATH);
 function runMigrations() {
   const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
   db.exec(sql);
