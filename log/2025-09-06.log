@@ -1,0 +1,2127 @@
+{"t":1757182893593,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757182893740,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757182893751,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182893760,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182893781,"level":"ws","msg":"connected","userId":1}
+{"t":1757182898272,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182898283,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182906942,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182906903,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182906966,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182906979,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182907524,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"water","qty":1}}
+{"t":1757182907562,"level":"action","msg":"shop_buy_seed","userId":1,"class":"water","qty":1,"cost":100}
+{"t":1757182907581,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182907595,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182908014,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757182908051,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757182908081,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182908092,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182908257,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182908265,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182908523,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"earth","qty":1}}
+{"t":1757182908550,"level":"action","msg":"shop_buy_seed","userId":1,"class":"earth","qty":1,"cost":100}
+{"t":1757182908573,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182908583,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182918261,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182918275,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182921169,"level":"http","msg":"POST /floors/buy","ip":"::1","body":{}}
+{"t":1757182921293,"level":"action","msg":"floor_buy","userId":1,"idx":2,"price":2000}
+{"t":1757182921302,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182921313,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182928882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182928899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182938258,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182938278,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182942821,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182942859,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182942887,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182942894,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943025,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943053,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943077,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943092,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943227,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943257,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943284,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943295,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943400,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943429,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943456,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943469,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943580,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943608,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943635,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943649,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943760,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943787,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943810,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943824,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182943919,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182943947,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182943966,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182943980,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182944097,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182944125,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182944149,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182944160,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182944446,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182944483,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182944508,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182944520,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182944781,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182944809,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182944839,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182944852,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182945106,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182945144,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182945170,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182945183,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182945437,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182945466,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182945491,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182945502,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182945609,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182945637,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182945659,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182945673,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182945898,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757182945934,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757182945956,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182945967,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182948267,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182948287,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182957231,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182957270,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182957302,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182957315,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182957577,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182957603,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182957627,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182957640,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182957744,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182957769,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182957792,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182957805,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182957929,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182957955,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182957979,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182957991,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958092,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182958120,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182958156,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958144,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958266,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958276,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958279,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182958302,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182958326,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958340,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958599,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182958636,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182958662,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958672,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958751,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182958776,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182958797,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958812,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182958912,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182958939,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182958960,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182958974,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182959071,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182959098,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182959122,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182959135,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182959229,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182959256,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182959281,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182959292,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182959379,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757182959407,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757182959435,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182959445,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182963202,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":1,"seedId":1}}
+{"t":1757182963251,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":1,"potId":1,"seedId":1,"class":"fire","mature_at":1757183164205}
+{"t":1757182963279,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182963265,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182964061,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":2,"seedId":2}}
+{"t":1757182967674,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":2,"seedId":2}}
+{"t":1757182969098,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182969118,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182978258,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182978277,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182978413,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":2,"seedId":2}}
+{"t":1757182983712,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":3,"potId":2,"seedId":2}}
+{"t":1757182983759,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":3,"potId":2,"seedId":2,"class":"water","mature_at":1757183184714}
+{"t":1757182983769,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182983780,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182986437,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":2,"potId":3,"seedId":3}}
+{"t":1757182986482,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":2,"potId":3,"seedId":3,"class":"wind","mature_at":1757183187440}
+{"t":1757182986502,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182986515,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182988256,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182988274,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182990359,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":4,"potId":4,"seedId":4}}
+{"t":1757182990395,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":4,"potId":4,"seedId":4,"class":"earth","mature_at":1757183191361}
+{"t":1757182990406,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182990418,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182992239,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":5,"potId":5,"seedId":5}}
+{"t":1757182992285,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":5,"potId":5,"seedId":5,"class":"fire","mature_at":1757183193242}
+{"t":1757182992295,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182992306,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757182994598,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":6,"seedId":6}}
+{"t":1757182997505,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":6,"seedId":6}}
+{"t":1757182998637,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757182998654,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183005070,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":8,"potId":6,"seedId":6,"class":"fire","mature_at":1757183206023}
+{"t":1757183005021,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":8,"potId":6,"seedId":6}}
+{"t":1757183005080,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183005093,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183007084,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":7,"potId":7,"seedId":7}}
+{"t":1757183007134,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":7,"potId":7,"seedId":7,"class":"fire","mature_at":1757183208088}
+{"t":1757183007147,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183007158,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183008278,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183008261,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183009190,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":6,"potId":8,"seedId":8}}
+{"t":1757183009236,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":6,"potId":8,"seedId":8,"class":"fire","mature_at":1757183210191}
+{"t":1757183009244,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183009257,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183018266,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183018287,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183021379,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":9,"potId":9,"seedId":9}}
+{"t":1757183021429,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":9,"potId":9,"seedId":9,"class":"fire","mature_at":1757183222382}
+{"t":1757183021443,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183021456,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183023469,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":10,"potId":10,"seedId":10}}
+{"t":1757183023519,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":10,"potId":10,"seedId":10,"class":"fire","mature_at":1757183224471}
+{"t":1757183023533,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183023547,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183028269,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183028290,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183038257,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183038276,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183048269,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183048289,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183058881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183058900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183068877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183068896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183078273,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183078282,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183088261,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183088284,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183098259,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183098281,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183108369,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183108389,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183118877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183118894,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183128258,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183128275,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183138283,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183138305,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183148877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183148896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183158876,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183158891,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183168897,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183168879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183178257,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183178266,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183188882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183188903,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183198876,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183198884,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183208879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183208897,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183218893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183218911,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183228879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183228890,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183238262,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183238282,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183248271,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183248291,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183254927,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test2"}}
+{"t":1757183255063,"level":"action","msg":"auth_login","userId":2,"username":"test2"}
+{"t":1757183255070,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183255081,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183255091,"level":"ws","msg":"connected","userId":2}
+{"t":1757183258062,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183258082,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183258445,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183258453,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183258889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183258906,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183259892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183259910,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183263265,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183263285,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183263908,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183263926,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183266742,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183266761,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183267565,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183267584,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183268877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183268887,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183269896,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183269914,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183270031,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183270042,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183270200,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183270211,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183270952,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183270961,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757183278880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183278896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183279894,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183279912,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183288884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183288909,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183290891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183290912,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183298883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183298894,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183300878,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183300886,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183308888,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183308907,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183309901,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183309921,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183318878,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183318899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183319898,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183319914,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183328884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183328901,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183329906,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183329917,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183338885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183338907,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183340892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183340913,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183350891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183350910,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183360885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183360892,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183368891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183368908,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183370892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183370911,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183380889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183380907,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183390890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183390902,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183428887,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183428908,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183428919,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183428906,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183436143,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test1"}}
+{"t":1757183436270,"level":"action","msg":"auth_login","userId":3,"username":"test1"}
+{"t":1757183436311,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183436320,"level":"action","msg":"state_fetch","userId":3}
+{"t":1757183436337,"level":"ws","msg":"connected","userId":3}
+{"t":1757183440400,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757183440530,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757183440574,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183440584,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183440601,"level":"ws","msg":"connected","userId":1}
+{"t":1757183444399,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183444416,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183448902,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183448888,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183451203,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183451221,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183451223,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183451232,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183453846,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183453865,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183456156,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183456175,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183458065,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183458083,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183458889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183458901,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183459904,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183459924,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183468887,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183468905,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183470903,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183470883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183472028,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183472040,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183473268,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183473279,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183473824,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183473835,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183474024,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183474035,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183474235,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183474247,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183474484,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183474503,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183475348,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183475367,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183475939,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183475959,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183476383,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183476402,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183476765,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183476746,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183477997,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183478017,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183478549,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183478561,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183478755,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757183478764,"level":"action","msg":"online_list","userId":2,"count":3}
+{"t":1757183478892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183478906,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183479893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183479909,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183488881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183488899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183490873,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183490890,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183498890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183498900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183500881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183500902,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183508892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183508911,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183510891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183510901,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183518882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183518904,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183520876,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183520897,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183530885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183530906,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183540881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183540900,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183548878,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183548899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183608886,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183608908,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183608905,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183608919,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183642383,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183642404,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183648802,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183648823,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183661092,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757183661189,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757183661199,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183661207,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183661241,"level":"ws","msg":"connected","userId":1}
+{"t":1757183668607,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183668615,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183668877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183668890,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757183678596,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183678614,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183704015,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757183704100,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757183704109,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183704116,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183704133,"level":"ws","msg":"connected","userId":1}
+{"t":1757183709618,"level":"http","msg":"POST /floors/buy","ip":"::1","body":{}}
+{"t":1757183709723,"level":"action","msg":"floor_buy","userId":1,"idx":2,"price":2000}
+{"t":1757183709730,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183709738,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183710993,"level":"http","msg":"POST /floors/buy","ip":"::1","body":{}}
+{"t":1757183711099,"level":"action","msg":"floor_buy","userId":1,"idx":3,"price":3000}
+{"t":1757183711107,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183711115,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183711632,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183711640,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183715648,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183715680,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183715698,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183715711,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183716827,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183716858,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183716877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183716890,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183716998,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183717023,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183717041,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183717052,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183717183,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183717207,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183717226,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183717239,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183717359,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183717380,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183717399,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183717410,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183718461,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183718495,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183718515,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183718526,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183718628,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183718651,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183718670,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183718681,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183718812,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183718834,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183718853,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183718864,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183719001,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183719024,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183719043,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183719054,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183719178,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183719202,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183719221,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183719231,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183719350,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757183719373,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757183719393,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183719406,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183721630,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183721647,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183728882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183731639,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183731649,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183735565,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183735597,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183735618,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183735628,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183735753,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183735778,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183735798,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183735811,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183735938,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183735962,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183735982,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183735993,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183736328,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183736359,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183736378,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183736389,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183736508,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183736532,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183736556,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183736568,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183736697,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183736720,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183736739,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183736749,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183736897,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183736920,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183736939,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183736950,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183737097,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183737122,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183737141,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183737152,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183737304,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183737329,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183737349,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183737360,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183737510,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183737535,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183737554,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183737565,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183737711,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183737735,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183737754,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183737764,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183737913,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183737937,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183737957,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183737968,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183738090,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183738113,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183738133,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183738144,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183738260,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183738284,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183738303,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183738314,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183739709,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183739733,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183739753,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183739764,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183739886,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183739910,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183739930,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183739941,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183740067,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183740091,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183740121,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183740110,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183740244,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183740267,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183740287,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183740300,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183740734,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757183740757,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757183740781,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183740792,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183741634,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183741643,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183749387,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183749420,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183749444,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183749457,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183751642,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183751654,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183753530,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183753564,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183753584,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183753598,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183753707,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183753739,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183753760,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183753771,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183753900,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183753928,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183753948,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183753966,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183754073,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183754103,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183754123,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183754136,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183754257,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183754286,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183754305,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183754319,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183754444,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183761627,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183761644,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183766435,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":1}}
+{"t":1757183766471,"level":"action","msg":"sell_shop","userId":1,"seedId":1,"class":"fire","paid":110}
+{"t":1757183767682,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183767701,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183768229,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":2}}
+{"t":1757183768264,"level":"action","msg":"sell_shop","userId":1,"seedId":2,"class":"fire","paid":110}
+{"t":1757183768892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183768903,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183769410,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":3}}
+{"t":1757183769433,"level":"action","msg":"sell_shop","userId":1,"seedId":3,"class":"fire","paid":110}
+{"t":1757183770053,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183770071,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183770792,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":4}}
+{"t":1757183770820,"level":"action","msg":"sell_shop","userId":1,"seedId":4,"class":"fire","paid":110}
+{"t":1757183772335,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183772355,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183772359,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183772368,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183773091,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":5}}
+{"t":1757183773124,"level":"action","msg":"sell_shop","userId":1,"seedId":5,"class":"fire","paid":110}
+{"t":1757183773745,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183773757,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183774285,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":6}}
+{"t":1757183774313,"level":"action","msg":"sell_shop","userId":1,"seedId":6,"class":"fire","paid":110}
+{"t":1757183774972,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183774982,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183775567,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":7}}
+{"t":1757183775592,"level":"action","msg":"sell_shop","userId":1,"seedId":7,"class":"fire","paid":110}
+{"t":1757183776176,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183776159,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183779245,"level":"http","msg":"POST /sell/shop","ip":"::1","body":{"seedId":8}}
+{"t":1757183779281,"level":"action","msg":"sell_shop","userId":1,"seedId":8,"class":"fire","paid":110}
+{"t":1757183780024,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183780044,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183781629,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183781642,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183785265,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183785298,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183785319,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183785330,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183785446,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183785470,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183785492,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183785505,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183785657,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757183785633,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183785676,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183785690,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183785809,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757183788889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183791332,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":1,"seedId":9}}
+{"t":1757183791366,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":1,"potId":1,"seedId":9,"class":"fire","mature_at":1757183992334}
+{"t":1757183791374,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183791385,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183791631,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183791649,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183793854,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":2,"seedId":10}}
+{"t":1757183800504,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":2,"seedId":10}}
+{"t":1757183801628,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183801638,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183804014,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":2,"slot":1,"potId":2,"seedId":10}}
+{"t":1757183804058,"level":"action","msg":"plant","userId":1,"floorId":2,"slot":1,"potId":2,"seedId":10,"class":"fire","mature_at":1757184005015}
+{"t":1757183804065,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183804077,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183806717,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":3,"slot":1,"potId":3,"seedId":11}}
+{"t":1757183806759,"level":"action","msg":"plant","userId":1,"floorId":3,"slot":1,"potId":3,"seedId":11,"class":"fire","mature_at":1757184007718}
+{"t":1757183806777,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183806766,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183811627,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183811635,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183815805,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":10,"potId":4,"seedId":12}}
+{"t":1757183815849,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":10,"potId":4,"seedId":12,"class":"wind","mature_at":1757184016808}
+{"t":1757183815854,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183815866,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183821630,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183821651,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183831643,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183831661,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183831926,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":5,"seedId":13}}
+{"t":1757183841638,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183841652,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183848890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183851629,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183851647,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183861651,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183861640,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183871640,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183871660,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183881635,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183881647,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183891885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183891894,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183901891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183901909,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757183908885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183911885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757183911904,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184091176,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184127599,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757184127704,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757184127713,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184127720,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184127742,"level":"ws","msg":"connected","userId":1}
+{"t":1757184130076,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184130088,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184130800,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184134777,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test1"}}
+{"t":1757184134905,"level":"action","msg":"auth_login","userId":2,"username":"test1"}
+{"t":1757184134911,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184134921,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184134932,"level":"ws","msg":"connected","userId":2}
+{"t":1757184139101,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757184139136,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757184139161,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184139170,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184139765,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"water","qty":1}}
+{"t":1757184139796,"level":"action","msg":"shop_buy_seed","userId":1,"class":"water","qty":1,"cost":100}
+{"t":1757184139814,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184139827,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184140078,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184140096,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184140226,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757184140250,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757184140269,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184140281,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184142890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184142905,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184145585,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757184145620,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757184145639,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184145648,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184147654,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":1,"seedId":1}}
+{"t":1757184147701,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":1,"potId":1,"seedId":1,"class":"fire","mature_at":1757184348658}
+{"t":1757184147713,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184147727,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184150078,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184150086,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184152207,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"earth","qty":1}}
+{"t":1757184152240,"level":"action","msg":"shop_buy_seed","userId":2,"class":"earth","qty":1,"cost":100}
+{"t":1757184152247,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184152259,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184152772,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184152788,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184153849,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"gold","qty":1}}
+{"t":1757184153884,"level":"action","msg":"shop_buy_pot","userId":2,"type":"gold","qty":1,"cost":300}
+{"t":1757184153894,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184153905,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184155527,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":2,"slot":1,"potId":2,"seedId":4}}
+{"t":1757184155562,"level":"action","msg":"plant","userId":2,"floorId":2,"slot":1,"potId":2,"seedId":4,"class":"earth","mature_at":1757184455529}
+{"t":1757184155571,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184155579,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184160069,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184160091,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184162490,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184162501,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184162512,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184162523,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184162535,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184162525,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184162879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184162901,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184167385,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184167402,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184167435,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184167444,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184167445,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184167453,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184168008,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184168025,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184168051,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184168064,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184168066,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184168075,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184168415,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184168431,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184168459,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184168470,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184168472,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184168482,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184168783,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184168801,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184168833,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184168841,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184168852,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184168844,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184169602,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184169614,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184169640,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184169650,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184169651,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184169660,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184170071,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184170089,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184170092,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184170100,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184170135,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184170144,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184170145,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184170154,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184170847,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184170866,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184170878,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184170869,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184170900,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184170911,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184170921,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184170912,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184171570,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184171579,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184171582,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184171591,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184171613,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184171624,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184171626,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184171635,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184172877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184172885,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184173419,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184173430,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184173441,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184173432,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184173465,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184173477,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184173478,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184173488,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184173989,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184174007,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184174009,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184174017,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184174039,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184174050,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184174061,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184174051,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184174759,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184174769,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184174778,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184174770,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184174793,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184174804,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184174805,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184174813,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184174983,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184174992,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175004,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184174994,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175025,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175037,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184175048,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184175039,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175178,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184175188,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175198,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184175189,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175220,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175231,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184175233,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175243,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184175353,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184175363,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175364,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175372,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184175394,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175405,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184175406,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175414,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184175548,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184175559,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175562,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175571,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184175594,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175604,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184175607,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175616,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184175743,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184175752,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175753,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175762,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184175788,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175798,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184175800,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184175810,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184175947,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184175958,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184175970,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184175959,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184175994,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176005,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176007,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176017,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184176123,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184176132,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184176142,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184176133,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184176165,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176176,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176177,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176186,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184176329,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184176320,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184176330,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184176338,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184176361,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176371,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176381,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184176372,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176517,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184176526,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184176528,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184176536,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184176557,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176568,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176577,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184176569,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176724,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184176733,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184176743,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184176735,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184176766,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176775,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176776,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176786,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184176928,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184176937,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184176939,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184176948,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184176971,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176983,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184176985,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184176994,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184177123,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184177131,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184177141,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184177133,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184177163,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177174,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184177176,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177185,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184177315,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184177306,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184177317,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184177326,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184177348,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177358,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184177369,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184177360,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177497,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184177508,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184177518,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184177509,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184177541,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177554,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184177556,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184177565,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184177956,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184177974,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757184177975,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184177984,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184177997,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178021,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184178010,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184178011,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178409,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184178427,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757184178436,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184178428,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184178459,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178469,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184178481,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184178471,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178705,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184178714,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757184178725,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184178715,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184178747,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178758,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178756,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184178768,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184178877,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184178887,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757184178897,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184178889,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184178920,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178930,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184178932,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184178941,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184179154,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184179171,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757184179172,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184179181,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184179204,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184179215,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184179216,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184179227,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184179753,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184179772,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184179773,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184179784,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184179807,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184179818,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184179830,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184179820,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184180073,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184180086,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184180194,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184180203,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184180214,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184180204,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184180227,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184180241,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184180243,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184180252,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184180654,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184180665,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184180667,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184180676,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184180694,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184180706,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184180708,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184180717,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184181063,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184181082,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184181084,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184181094,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184181117,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184181128,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184181139,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184181130,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184182730,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184182750,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184182762,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184182751,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184182786,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184182798,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184182809,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184182800,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184182892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184182904,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184185414,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184185424,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184185423,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184185434,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184185447,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184185459,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184185460,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184185469,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184185785,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184185794,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184185796,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184185805,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184185829,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184185840,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184185841,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184185853,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184186161,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184186170,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184186181,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184186172,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184186204,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186216,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186215,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184186227,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184186559,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184186577,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184186587,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184186578,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184186609,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186621,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186620,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184186631,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184186928,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184186939,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184186941,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184186954,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184186969,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186982,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184186983,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184186992,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184187285,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184187305,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184187308,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184187320,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184187346,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184187358,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184187360,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184187369,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184187681,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184187699,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184187701,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184187712,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184187735,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184187748,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184187757,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184187746,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184188083,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184188093,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184188095,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184188105,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184188127,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188138,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184188140,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188149,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184188452,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184188470,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184188471,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184188479,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184188501,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188511,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184188513,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188522,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184188713,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184188722,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184188733,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184188724,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184188756,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188767,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184188769,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184188779,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184189080,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184189100,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184189102,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184189112,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184189136,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189147,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184189148,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189158,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184189302,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184189311,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184189312,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184189320,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184189342,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189353,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184189355,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189364,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184189484,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184189493,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184189494,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184189503,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184189528,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189538,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184189548,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184189539,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189697,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184189706,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184189716,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184189708,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184189732,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189743,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184189753,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184189744,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189894,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184189903,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184189905,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184189913,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184189935,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189946,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184189947,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184189956,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184190078,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184190090,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184190371,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184190382,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184190395,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184190383,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184190411,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184190422,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184190431,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184190423,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184192882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184192903,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184200072,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184200088,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184202804,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184202786,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184207310,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184207294,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184207312,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184207320,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184207339,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184207350,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184207359,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184207351,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184207882,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184207898,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184207900,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184207907,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184207926,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184207935,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184207936,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184207944,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184208651,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184208668,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184208678,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184208669,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184208700,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184208710,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184208711,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184208720,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184209395,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184209387,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184209403,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184209396,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184209427,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184209436,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184209437,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184209446,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184209934,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184209941,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184209942,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184209950,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184209973,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184209982,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184209991,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184209982,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184210070,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184210078,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184210542,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184210550,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184210551,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184210557,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184210574,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184210583,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184210591,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184210584,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184211216,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184211231,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184211223,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184211224,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184211248,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184211259,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184211268,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184211260,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184211881,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184211897,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184211898,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184211906,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184211929,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184211938,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184211947,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184211940,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184212587,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184212596,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184212599,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184212608,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184212634,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184212654,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184212645,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184212646,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184212778,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184212787,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184213178,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184213197,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184213200,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184213210,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184213236,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213247,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213255,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184213246,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184213397,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184213406,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184213408,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184213416,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184213441,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213452,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184213454,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213461,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184213592,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184213601,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184213603,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184213611,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184213635,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213647,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184213648,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213656,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184213795,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184213787,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184213797,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184213804,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184213821,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213831,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184213832,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184213840,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184213980,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184213988,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184213989,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184213998,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214023,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214031,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214043,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184214032,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214155,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184214163,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184214164,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184214172,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214195,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214204,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214214,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184214205,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214340,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184214349,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184214352,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184214360,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214385,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214394,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214395,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214404,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184214510,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184214519,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184214529,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214520,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184214561,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214552,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214572,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184214563,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214708,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184214700,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184214709,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184214718,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214741,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214751,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214762,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184214753,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214889,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184214899,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184214910,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184214901,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184214934,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214946,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184214947,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184214956,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184216125,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184216135,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184216137,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184216146,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184216169,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184216180,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184216189,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184216181,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184217172,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184217191,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184217190,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184217199,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184217215,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184217226,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184217236,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184217228,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184217823,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184217839,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184217841,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184217850,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184217872,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184217884,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184217882,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184217892,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184218588,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184218608,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184218609,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184218624,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184218648,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184218658,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184218667,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184218659,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184220079,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184220088,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184221934,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184221943,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":10}
+{"t":1757184221945,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184221953,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184221980,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184221988,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184221990,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184221998,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184222772,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184222789,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184273144,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184273164,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184282886,"level":"http","msg":"GET /me/state","ip":"::ffff:127.0.0.1","body":{}}
+{"t":1757184282903,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184287369,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test1"}}
+{"t":1757184287509,"level":"action","msg":"auth_login","userId":2,"username":"test1"}
+{"t":1757184287520,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184287528,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184287552,"level":"ws","msg":"connected","userId":2}
+{"t":1757184295120,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184295128,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184305130,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184305140,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184315891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184315911,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184325898,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184325910,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184328879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184328897,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184335885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184335904,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184345888,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184345897,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184355126,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184355144,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184365133,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184365143,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184375883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184375904,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184385876,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184385883,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184388880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184388898,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184395877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184395894,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184405890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184405910,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184415882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184415900,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184425876,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184425886,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184448891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184448908,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184448920,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184448911,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184455130,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184455148,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184465135,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184465155,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184475885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184475896,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184485877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184485888,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184495877,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184495896,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184505122,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184505141,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184507642,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184507659,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184514326,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test1"}}
+{"t":1757184514463,"level":"action","msg":"auth_login","userId":2,"username":"test1"}
+{"t":1757184514471,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184514481,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184514491,"level":"ws","msg":"connected","userId":2}
+{"t":1757184515883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184515901,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184518852,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184518871,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184525758,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757184525901,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757184525905,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184525916,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184525919,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184525927,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184525937,"level":"ws","msg":"connected","userId":1}
+{"t":1757184533016,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184533025,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184533035,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184533045,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184533057,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184533047,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184534068,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184534079,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184534405,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184534414,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757184534434,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184534445,"level":"action","msg":"visit_floors","userId":2,"targetUserId":1,"count":1}
+{"t":1757184534446,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184534455,"level":"action","msg":"visit_floors","userId":2,"targetUserId":2,"count":1}
+{"t":1757184534592,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184534602,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757184534623,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184534634,"level":"action","msg":"visit_floors","userId":2,"targetUserId":2,"count":1}
+{"t":1757184534636,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184534645,"level":"action","msg":"visit_floors","userId":2,"targetUserId":1,"count":1}
+{"t":1757184535134,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184535127,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184536633,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184536651,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":30}
+{"t":1757184536653,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184536661,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184536666,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184536675,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184536680,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184536688,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184537163,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184537186,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184537174,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":30}
+{"t":1757184537175,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184537193,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184537203,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184537204,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184537213,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184538231,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757184538249,"level":"action","msg":"visit_floor_view","userId":1,"floorId":2,"owner":2,"plots":30}
+{"t":1757184538259,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757184538250,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757184538265,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184538274,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757184538275,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757184538283,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":1}
+{"t":1757184544881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184544890,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184545880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184545899,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184554886,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184554896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184555896,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184555887,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184564878,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184564896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184565885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184565894,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184574889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184574908,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184575883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184575895,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184584879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184584887,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184585895,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184585907,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184594891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184594912,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184595881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184595903,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184628893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184628914,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184628916,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184628927,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184688880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184688901,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184688905,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184688916,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184748023,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184748033,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757184748875,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757184748892,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184869983,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757184869979,"level":"http","msg":"GET /me/state","ip":"::ffff:127.0.0.1","body":{}}
+{"t":1757185035460,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185035957,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185036123,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185036276,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185036445,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185036622,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185036791,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185037653,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"t"}}
+{"t":1757185044443,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"tesy"}}
+{"t":1757185044473,"level":"action","msg":"auth_login","userId":1,"username":"tesy"}
+{"t":1757185044479,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185044481,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185044554,"level":"ws","msg":"connected","userId":1}
+{"t":1757185054068,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185054074,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185154881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185154895,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185529471,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757185529565,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757185529601,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185529597,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185529614,"level":"ws","msg":"connected","userId":1}
+{"t":1757185637974,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757185638033,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757185638050,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185638045,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185638077,"level":"ws","msg":"connected","userId":1}
+{"t":1757185642388,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757185642412,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757185642443,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185642449,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185643220,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"water","qty":1}}
+{"t":1757185643229,"level":"action","msg":"shop_buy_seed","userId":1,"class":"water","qty":1,"cost":100}
+{"t":1757185643253,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185643257,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185643670,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757185643680,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757185643703,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185643707,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185644340,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"earth","qty":1}}
+{"t":1757185644349,"level":"action","msg":"shop_buy_seed","userId":1,"class":"earth","qty":1,"cost":100}
+{"t":1757185644373,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185644378,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185645112,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185645120,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185645667,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"basic","qty":1}}
+{"t":1757185645687,"level":"action","msg":"shop_buy_pot","userId":1,"type":"basic","qty":1,"cost":100}
+{"t":1757185645712,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185645716,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185646094,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"gold","qty":1}}
+{"t":1757185646105,"level":"action","msg":"shop_buy_pot","userId":1,"type":"gold","qty":1,"cost":300}
+{"t":1757185646129,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185646134,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185646489,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757185646510,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757185646534,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185646538,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185647865,"level":"http","msg":"POST /shop/buy-trap","ip":"::1","body":{}}
+{"t":1757185647885,"level":"action","msg":"shop_buy_trap","userId":1,"floorId":1,"price":1000}
+{"t":1757185647903,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185647908,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185654493,"level":"http","msg":"POST /floors/buy","ip":"::1","body":{}}
+{"t":1757185654542,"level":"action","msg":"floor_buy","userId":1,"idx":2,"price":2000}
+{"t":1757185654547,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185654552,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185655114,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185655126,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185672771,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757185672813,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757185672840,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185672844,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185672856,"level":"ws","msg":"connected","userId":1}
+{"t":1757185673516,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757185673543,"level":"action","msg":"shop_buy_seed","userId":1,"class":"fire","qty":1,"cost":100}
+{"t":1757185673566,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185673569,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185674030,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"earth","qty":1}}
+{"t":1757185674045,"level":"action","msg":"shop_buy_seed","userId":1,"class":"earth","qty":1,"cost":100}
+{"t":1757185674070,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185674072,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185674462,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"water","qty":1}}
+{"t":1757185674477,"level":"action","msg":"shop_buy_seed","userId":1,"class":"water","qty":1,"cost":100}
+{"t":1757185674500,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185674503,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185675029,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757185675036,"level":"action","msg":"shop_buy_seed","userId":1,"class":"wind","qty":1,"cost":100}
+{"t":1757185675061,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185675063,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185676199,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"basic","qty":1}}
+{"t":1757185676206,"level":"action","msg":"shop_buy_pot","userId":1,"type":"basic","qty":1,"cost":100}
+{"t":1757185676231,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185676234,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185676553,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"gold","qty":1}}
+{"t":1757185676569,"level":"action","msg":"shop_buy_pot","userId":1,"type":"gold","qty":1,"cost":300}
+{"t":1757185676593,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185676596,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185676919,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"pot","classOrType":"timeskip","qty":1}}
+{"t":1757185676937,"level":"action","msg":"shop_buy_pot","userId":1,"type":"timeskip","qty":1,"cost":300}
+{"t":1757185676964,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185676968,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185678978,"level":"http","msg":"POST /shop/buy-trap","ip":"::1","body":{}}
+{"t":1757185678985,"level":"action","msg":"shop_buy_trap","userId":1,"floorId":1,"price":1000}
+{"t":1757185679010,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185679014,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185680606,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185680609,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185681527,"level":"http","msg":"POST /floors/buy","ip":"::1","body":{}}
+{"t":1757185681557,"level":"action","msg":"floor_buy","userId":1,"idx":2,"price":2000}
+{"t":1757185681565,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185681569,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185683473,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":1,"potId":1,"seedId":1}}
+{"t":1757185683491,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":1,"potId":1,"seedId":1,"class":"fire","mature_at":1757185983475}
+{"t":1757185683497,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185683500,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185690622,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185690630,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185692047,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":2,"slot":2,"potId":2,"seedId":2}}
+{"t":1757185692066,"level":"action","msg":"plant","userId":1,"floorId":2,"slot":2,"potId":2,"seedId":2,"class":"earth","mature_at":1757185992049}
+{"t":1757185692071,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185692073,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185695368,"level":"http","msg":"POST /plot/plant","ip":"::1","body":{"floorId":1,"slot":2,"potId":3,"seedId":3}}
+{"t":1757185695385,"level":"action","msg":"plant","userId":1,"floorId":1,"slot":2,"potId":3,"seedId":3,"class":"water","mature_at":1757185896369}
+{"t":1757185695389,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185695393,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185700890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185700894,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185707118,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test1"}}
+{"t":1757185707143,"level":"action","msg":"auth_login","userId":2,"username":"test1"}
+{"t":1757185707147,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185707152,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185707161,"level":"ws","msg":"connected","userId":2}
+{"t":1757185707904,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"fire","qty":1}}
+{"t":1757185707915,"level":"action","msg":"shop_buy_seed","userId":2,"class":"fire","qty":1,"cost":100}
+{"t":1757185707922,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185707919,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185708401,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"water","qty":1}}
+{"t":1757185708418,"level":"action","msg":"shop_buy_seed","userId":2,"class":"water","qty":1,"cost":100}
+{"t":1757185708423,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185708425,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185708787,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"wind","qty":1}}
+{"t":1757185708797,"level":"action","msg":"shop_buy_seed","userId":2,"class":"wind","qty":1,"cost":100}
+{"t":1757185708803,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185708806,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185709254,"level":"http","msg":"POST /shop/buy","ip":"::1","body":{"itemType":"seed","classOrType":"earth","qty":1}}
+{"t":1757185709271,"level":"action","msg":"shop_buy_seed","userId":2,"class":"earth","qty":1,"cost":100}
+{"t":1757185709278,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185709281,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185710884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185710897,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185714855,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185714868,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185715363,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185715376,"level":"action","msg":"online_list","userId":2,"count":2}
+{"t":1757185715384,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185715387,"level":"action","msg":"visit_floors","userId":2,"targetUserId":2,"count":1}
+{"t":1757185715391,"level":"action","msg":"visit_floors","userId":2,"targetUserId":1,"count":2}
+{"t":1757185715388,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185716936,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185716939,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185716966,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185716969,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185716973,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185716970,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185717106,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185717103,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185717129,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185717127,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185717130,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185717132,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185718109,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185718122,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185718147,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185718150,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185718151,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185718154,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185718719,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757185718724,"level":"action","msg":"visit_floor_view","userId":1,"floorId":3,"owner":2,"plots":10}
+{"t":1757185718725,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185718728,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185718756,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185718758,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185718759,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185718763,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185719292,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757185719306,"level":"action","msg":"visit_floor_view","userId":1,"floorId":3,"owner":2,"plots":10}
+{"t":1757185719308,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185719312,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185719340,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185719344,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185719349,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185719346,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185720607,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185720619,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185722972,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185722985,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185723007,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185723013,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185723013,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185723016,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185723923,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185723935,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185723963,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185723966,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185723967,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185723970,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185724399,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185724402,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185724421,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185724424,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185724425,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185724428,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185724741,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185724754,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185724778,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185724781,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185724783,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185724786,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185724889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185724893,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185725174,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185725169,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185725201,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185725205,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185725206,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185725210,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185725566,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185725577,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185725597,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185725600,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185725603,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185725607,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185725872,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185725884,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185725910,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185725914,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185725918,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185725915,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726177,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185726189,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185726210,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726213,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185726215,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726218,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185726557,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185726561,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185726593,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726597,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185726602,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185726598,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726949,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185726963,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185726991,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185726995,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185726992,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185726988,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185727795,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185727798,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185727822,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185727825,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185727831,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185727828,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185730397,"level":"http","msg":"GET /.well-known/appspecific/com.chrome.devtools.json","ip":"::1","body":{}}
+{"t":1757185730605,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185730610,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185732033,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185732037,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185732065,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185732070,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185732062,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185732066,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185732532,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185732536,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185732561,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185732564,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185732566,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185732571,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185733054,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185733068,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185733091,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185733092,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185733095,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185733088,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185733387,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185733391,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185733416,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185733420,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185733422,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185733425,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185734882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185734885,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185740621,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185740625,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185744879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185744893,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185748724,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185748728,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185748734,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185748736,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185748737,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185748740,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185748913,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185748916,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185748936,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185748940,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185748941,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185748944,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185749121,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185749126,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185749163,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185749167,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185749173,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185749169,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185749336,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185749340,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185749373,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185749369,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185749374,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185749378,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185750605,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185750609,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185752085,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185752089,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185752117,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185752119,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185752120,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185752123,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185752608,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185752620,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185752652,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185752655,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185752659,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185752656,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753074,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185753087,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185753112,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753116,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185753118,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753122,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185753329,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185753333,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185753355,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753358,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185753360,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753363,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185753750,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185753754,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185753787,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185753790,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185753797,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185753792,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754113,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185754126,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185754159,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185754164,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185754155,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754160,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754422,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185754409,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185754449,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185754445,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754453,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754457,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185754853,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185754859,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185754891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185754895,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185754896,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754900,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185754901,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185754904,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185755355,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185755342,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185755379,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185755382,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185755388,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185755384,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185755708,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185755720,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185755744,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185755747,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185755755,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185755751,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185755951,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185755955,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185755991,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185755994,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185755999,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185755996,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185756384,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185756371,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185756421,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185756426,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185756422,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185756417,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185756925,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185756929,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185756962,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185756964,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185756969,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185756965,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185757378,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185757391,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185757431,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185757434,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185757440,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185757435,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185757914,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185757918,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185757951,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185757954,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185757959,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185757955,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185758753,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185758765,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185758809,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185758804,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185758810,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185758814,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185759524,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185759537,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185759572,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185759575,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185759579,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185759576,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185760606,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185760620,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185762464,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185762468,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185762499,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185762502,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185762503,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185762505,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185762915,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185762919,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185762952,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185762957,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185762963,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185762958,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185763309,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185763312,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185763336,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185763339,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185763342,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185763346,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185763682,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185763695,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185763715,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185763718,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185763723,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185763719,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764048,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185764062,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185764085,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764088,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185764095,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185764091,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764358,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185764362,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185764393,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764397,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185764402,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185764398,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764856,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185764870,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185764893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185764896,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185764899,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764903,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185764904,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185764908,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185768305,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185768313,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185768339,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185768341,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185768347,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185768342,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185769605,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185769619,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185769651,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185769649,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185769656,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185769652,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185770612,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185770624,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185774870,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185774885,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185776157,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185776170,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185776200,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185776202,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185776203,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185776206,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185776576,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185776581,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185776603,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185776606,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185776610,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185776607,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185777089,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185777085,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185777120,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185777124,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185777126,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185777130,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185777622,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185777634,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185777663,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185777665,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185777666,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185777670,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185778122,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185778135,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185778156,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185778159,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185778160,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185778163,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185779020,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185779032,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185779052,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185779055,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185779056,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185779058,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185779640,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185779644,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185779668,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185779671,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185779672,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185779676,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185780104,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185780117,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185780145,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185780148,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185780149,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185780152,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185780363,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185780376,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185780398,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185780402,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185780405,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185780408,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185780611,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185780608,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185782396,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185782400,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185782427,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185782430,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185782433,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185782431,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185783014,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185783027,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185783050,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185783053,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185783054,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185783057,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185783488,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185783491,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185783517,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185783520,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185783524,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185783521,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784042,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185784053,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185784081,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784088,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185784083,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185784084,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784286,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185784289,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185784315,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784318,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185784323,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185784319,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784573,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185784586,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185784607,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784611,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185784617,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185784614,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185784859,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185784864,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185785109,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185785111,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185785133,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185785140,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185785137,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185785136,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185785679,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757185785693,"level":"action","msg":"online_list","userId":1,"count":2}
+{"t":1757185785722,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185785725,"level":"action","msg":"visit_floors","userId":1,"targetUserId":2,"count":1}
+{"t":1757185785726,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757185785729,"level":"action","msg":"visit_floors","userId":1,"targetUserId":1,"count":2}
+{"t":1757185790609,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185790612,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185794869,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185794873,"level":"action","msg":"state_fetch","userId":2}
+{"t":1757185800892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185800908,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757185804867,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757185804881,"level":"action","msg":"state_fetch","userId":2}

@@ -1,0 +1,332 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garden Bred Game — MVP</title>
+  <link rel="stylesheet" href="/public/style.css" />
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Garden Bred Game — MVP</h1>
+    <div id="auth">
+      <input id="username" placeholder="Enter username" />
+      <button id="btnLogin">Login</button>
+    </div>
+    <div id="hud" class="hidden">
+      <span>Hi, <b id="hudUser"></b></span>
+      <span>Coins: <b id="hudCoins">0</b></span>
+    </div>
+  </header>
+
+  <nav class="tabs hidden" id="tabs">
+    <button data-tab="shop" class="active">Shop</button>
+    <button data-tab="inventory">Kho</button>
+    <button data-tab="breed">Lai</button>
+    <button data-tab="online">Online</button>
+    <button data-tab="market">Chợ trời</button>
+    <button data-tab="farm">Khu trồng</button>
+  </nav>
+
+  <!-- SHOP -->
+  <section id="shop" class="tab">
+  <h2>Shop</h2>
+
+  <div class="subtabs" id="shopTabs">
+    <button data-sub="shopSeeds" class="active">Seeds</button>
+    <button data-sub="shopPots">Pots</button>
+    <button data-sub="shopTrap">Trap</button>
+  </div>
+
+  <div id="shopSeeds" class="subtab">
+    <div id="seedShopGrid" class="shop-grid"></div>
+  </div>
+
+  <div id="shopPots" class="subtab hidden">
+    <div id="potShopGrid" class="shop-grid"></div>
+  </div>
+
+  <div id="shopTrap" class="subtab hidden">
+    <div class="card">
+      <h3>Trap</h3>
+      <p>Giá hiện tại: <b id="trapPrice">-</b>; Tối đa: <b id="trapMax">-</b></p>
+      <button id="buyTrap">Buy Trap</button>
+    </div>
+  </div>
+</section>
+
+
+  <!-- INVENTORY -->
+  <section id="inventory" class="tab hidden">
+    <h2>Kho</h2>
+
+    <div class="subtabs">
+<button data-sub="inv-seeds" class="active">Seeds (Not Planted)</button>
+<button data-sub="inv-pots">Pots</button>
+<button data-sub="inv-mature">Mature</button>
+
+    </div>
+
+    <div id="inv-seeds" class="subtab">
+      <ul id="seedInv"></ul>
+      <h3>Sell to Shop</h3>
+      <div class="row">
+        <select id="sellSeedSelect"></select>
+        <button id="btnSellShop">Sell</button>
+      </div>
+    </div>
+
+    <div id="inv-pots" class="subtab hidden">
+      <ul id="potInv"></ul>
+    </div>
+
+    <div id="inv-mature" class="subtab hidden">
+      <ul id="matureByClass"></ul>
+    </div>
+  </section>
+
+  <!-- BREED -->
+  <section id="breed" class="tab hidden">
+    <h2>Lai</h2>
+    <div class="row">
+      <select id="breedSelectA"></select>
+      <select id="breedSelectB"></select>
+      <button id="btnBreed">Breed</button>
+    </div>
+    <p id="breedOut"></p>
+    <small>Recipes: {
+  "water+fire": "steam",
+  "fire+water": "steam",
+  "water+wind": "wave",
+  "wind+water": "wave",
+  "water+earth": "plant",
+  "earth+water": "plant",
+  "water+wave": "tsunami",
+  "wave+water": "tsunami",
+  "wind+earth": "dust",
+  "earth+wind": "dust",
+  "earth+fire": "lava",
+  "fire+earth": "lava",
+  "steam+water": "cloud",
+  "water+steam": "cloud",
+  "steam+plant": "tea",
+  "plant+steam": "tea",
+  "steam+wind": "cloud",
+  "wind+steam": "cloud",
+  "steam+fire": "engine",
+  "fire+steam": "engine",
+  "steam+earth": "mud",
+  "earth+steam": "mud",
+  "steam+cloud": "rain",
+  "cloud+steam": "rain",
+  "steam+tea": "teapot",
+  "tea+steam": "teapot",
+  "plant+fire": "smoke",
+  "fire+plant": "smoke",
+  "fire+wind": "smoke",
+  "wind+fire": "smoke",
+
+  "lava+water": "stone",
+  "water+lava": "stone",
+  "lava+wind": "ash",
+  "wind+lava": "ash",
+  "lava+plant": "charcoal",
+  "plant+lava": "charcoal",
+  "lava+cloud": "eruption",
+  "cloud+lava": "eruption",
+  "lava+rain": "obsidian",
+  "rain+lava": "obsidian",
+
+  "dust+water": "mud",
+  "water+dust": "mud",
+  "dust+fire": "sand",
+  "fire+dust": "sand",
+  "dust+wind": "sandstorm",
+  "wind+dust": "sandstorm",
+  "dust+plant": "pollen",
+  "plant+dust": "pollen",
+  "dust+cloud": "fog",
+  "cloud+dust": "fog",
+
+  "plant+earth": "tree",
+  "earth+plant": "tree",
+  "plant+wind": "spore",
+  "wind+plant": "spore",
+  "plant+cloud": "flower",
+  "cloud+plant": "flower",
+  "plant+rain": "rice",
+  "rain+plant": "rice",
+  "plant+mud": "mushroom",
+  "mud+plant": "mushroom",
+
+  "cloud+earth": "fog",
+  "earth+cloud": "fog",
+  "cloud+wind": "storm",
+  "wind+cloud": "storm",
+  "cloud+rain": "thunder",
+  "rain+cloud": "thunder",
+  "cloud+fire": "lightning",
+  "fire+cloud": "lightning",
+
+  "rain+earth": "river",
+  "earth+rain": "river",
+  "rain+wind": "hurricane",
+  "wind+rain": "hurricane",
+  "rain+plant": "fruit",
+  "plant+rain": "fruit",
+  "rain+fire": "acid",
+  "fire+rain": "acid",
+
+  "engine+plant": "factory",
+  "plant+engine": "factory",
+  "engine+wind": "turbine",
+  "wind+engine": "turbine",
+  "engine+water": "hydropower",
+  "water+engine": "hydropower",
+  "engine+earth": "drill",
+  "earth+engine": "drill",
+  "engine+cloud": "airplane",
+  "cloud+engine": "airplane",
+
+  "smoke+wind": "pollution",
+  "wind+smoke": "pollution",
+  "smoke+water": "mist",
+  "water+smoke": "mist",
+  "smoke+earth": "soot",
+  "earth+smoke": "soot",
+  "smoke+cloud": "smog",
+  "cloud+smoke": "smog",
+
+  "wave+earth": "shore",
+  "earth+wave": "shore",
+  "wave+plant": "kelp",
+  "plant+wave": "kelp",
+  "wave+lava": "island",
+  "lava+wave": "island",
+  "wave+cloud": "tide",
+  "cloud+wave": "tide",
+
+  "tsunami+earth": "flood",
+  "earth+tsunami": "flood",
+  "tsunami+plant": "driftwood",
+  "plant+tsunami": "driftwood",
+  "tsunami+fire": "evaporation",
+  "fire+tsunami": "evaporation",
+  "tsunami+wind": "mega-storm",
+  "wind+tsunami": "mega-storm",
+
+  "mud+plant": "swamp",
+  "plant+mud": "swamp",
+  "mud+fire": "brick",
+  "fire+mud": "brick",
+  "mud+wind": "erosion",
+  "wind+mud": "erosion",
+  "mud+rain": "quicksand",
+  "rain+mud": "quicksand",
+
+  "tea+fire": "chai",
+  "fire+tea": "chai",
+  "tea+plant": "garden",
+  "plant+tea": "garden",
+  "tea+earth": "herb",
+  "earth+tea": "herb",
+  "tea+wind": "aroma",
+  "wind+tea": "aroma",
+
+  "engine+lava": "geothermal",
+  "lava+engine": "geothermal",
+  "engine+steam": "train",
+  "steam+engine": "train",
+  "engine+smoke": "chimney",
+  "smoke+engine": "chimney",
+  "engine+rain": "dam",
+  "rain+engine": "dam",
+
+  "lightning+plant": "electric-fruit",
+  "plant+lightning": "electric-fruit",
+  "lightning+earth": "glass",
+  "earth+lightning": "glass",
+  "lightning+wind": "tornado",
+  "wind+lightning": "tornado",
+  "lightning+water": "plasma",
+  "water+lightning": "plasma",
+
+  "storm+earth": "canyon",
+  "earth+storm": "canyon",
+  "storm+plant": "fallen-tree",
+  "plant+storm": "fallen-tree",
+  "storm+lava": "ash-cloud",
+  "lava+storm": "ash-cloud",
+  "storm+wave": "rogue-wave",
+  "wave+storm": "rogue-wave",
+
+  "river+plant": "rice-field",
+  "plant+river": "rice-field",
+  "river+earth": "valley",
+  "earth+river": "valley",
+  "river+lava": "delta",
+  "lava+river": "delta",
+  "river+rain": "floodplain",
+  "rain+river": "floodplain",
+
+  "fruit+fire": "jam",
+  "fire+fruit": "jam",
+  "fruit+earth": "vineyard",
+  "earth+fruit": "vineyard",
+  "fruit+wind": "orchard",
+  "wind+fruit": "orchard",
+  "fruit+cloud": "nectar",
+  "cloud+fruit": "nectar"
+}</small>
+  </section>
+
+  <!-- ONLINE -->
+  <section id="online" class="tab hidden">
+    <h2>Online Players</h2>
+    <ul id="onlineList"></ul>
+  </section>
+
+  <!-- MARKET -->
+  <section id="market" class="tab hidden">
+    <h2>Chợ trời</h2>
+    <div class="row">
+      <select id="listSeedSelect"></select>
+      <input id="listPrice" placeholder="ask price" />
+      <button id="btnList">List</button>
+    </div>
+    <h3>Listings</h3>
+    <ul id="marketList"></ul>
+  </section>
+
+  <!-- FARM -->
+  <section id="farm" class="tab hidden">
+  <h2>Khu trồng</h2>
+
+ <div class="row" id="farmControls">
+  <button id="btnPrevFloor">↑ Floor</button>
+  <button id="btnNextFloor">↓ Floor</button>
+  <button id="btnHarvestAll">Harvest All Mature</button>
+  <span id="buyFloorPrice" style="margin-left:8px; display:none;"></span>
+  <button id="btnBuyFloor" style="display:none;">Buy Floor</button>
+</div>
+
+  <div id="floors"></div>
+
+<div>
+  <h3>Actions</h3>
+  <select id="plantFloor"></select>
+  <select id="plantSlot"></select>
+  <select id="plantPot"></select>     <!-- dùng cho Place Pot -->
+  <select id="plantSeed"></select>    <!-- seed chưa trồng -->
+  <button id="btnPlacePot">Place Pot</button>
+  <button id="btnPlant">Plant</button>
+</div>
+
+</section>
+
+
+</div>
+<script src="/public/client.js"></script>
+</body>
+</html>
