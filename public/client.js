@@ -129,6 +129,29 @@ function renderShop(){
   });
 }
 
+/* ---------- MARKET: render danh sách từ state.market ---------- */
+function renderMarketListings(){
+  const ul = document.getElementById('marketList');
+  if (!ul) return;
+
+  const listings = state?.market || [];
+  ul.innerHTML = '';
+
+  if (!listings.length){
+    ul.innerHTML = '<li><small>Chưa có món nào được rao.</small></li>';
+    return;
+  }
+
+  listings.forEach(L=>{
+    const li = document.createElement('li');
+    li.innerHTML = `
+      #${L.id} <b>${L.class}</b> — <b>${L.ask_price}</b> coins
+      <button class="buy-listing" data-id="${L.id}">Buy</button>
+    `;
+    ul.appendChild(li);
+  });
+}
+
 /* ---------- DATA HELPERS ---------- */
 function groupMatureByClass(){
   const by = {};
@@ -151,6 +174,7 @@ function populateSelects(){
       });
     });
   }
+
   // Market (mature only)
   const listSel = $('#listSeedSelect');
   if (listSel){
@@ -164,7 +188,7 @@ function populateSelects(){
     });
   }
 
-  // Mature by class (hiển thị text tóm tắt; ảnh đã có ở inv)
+  // Mature by class
   const matUl = $('#matureByClass'); 
   if (matUl){
     matUl.innerHTML='';
@@ -227,7 +251,7 @@ function renderBuyFloorPrice(){
   const el = $('#buyFloorPrice');
   if (!el || !state) return;
   const floors = state.floors||[];
-  const maxIdx = floors.reduce((m,f)=>Math.max(m, f.idx), 0);
+  const maxIdx = floors.reduce((m,f)=>Math.max(m,f.idx),0);
   const nextIdx = maxIdx + 1;
   el.textContent = `Giá mở tầng ${nextIdx}: ${nextFloorPrice()} coins`;
 }
@@ -237,11 +261,11 @@ function renderState(s){
   state=s;
   $('#hudUser').textContent=s.me.username;
   $('#hudCoins').textContent=s.me.coins;
-const priceEl = $('#trapPrice');
-if (priceEl) priceEl.textContent = (s.trapPrice ?? '-');
 
-const maxEl = $('#trapMax');
-if (maxEl) maxEl.textContent = (s.trapMax ?? '-');
+  const priceEl = $('#trapPrice');
+  if (priceEl) priceEl.textContent = (s.trapPrice ?? '-');
+  const maxEl = $('#trapMax');
+  if (maxEl) maxEl.textContent = (s.trapMax ?? '-');
 
   const floorsDiv=$('#floors');
   if(floorsDiv){
@@ -350,6 +374,7 @@ if (maxEl) maxEl.textContent = (s.trapMax ?? '-');
   populateSelects();
   renderShop();
   renderBuyFloorPrice();
+  renderMarketListings();   // <<< gọi để vẽ danh sách chợ trời
 }
 
 async function refresh(){ const data = await get('/me/state'); renderState(data); }
@@ -361,7 +386,11 @@ $('#btnLogin').addEventListener('click', async ()=>{
 });
 
 /* ---------- TABS ---------- */
-$$('.tabs button').forEach(b=>b.addEventListener('click', ()=> { setActive(b.dataset.tab); if (b.dataset.tab==='online') maybeLoadOnline(); }));
+$$('.tabs button').forEach(b=>b.addEventListener('click', ()=> {
+  setActive(b.dataset.tab);
+  if (b.dataset.tab==='online') maybeLoadOnline();
+}));
+
 let _lastOnlineLoad = 0;
 function maybeLoadOnline(){ const now = Date.now(); if (now - _lastOnlineLoad < 1500) return; _lastOnlineLoad = now; loadOnline(); }
 
@@ -401,10 +430,14 @@ $('#btnList')?.addEventListener('click', async ()=>{
   const id=parseInt($('#listSeedSelect').value,10);
   const price=parseInt($('#listPrice').value,10);
   if(!id||!price) return;
-  try{ await api('/market/list',{ seedId:id, askPrice:price }); await refresh(); }catch(e){ showError(e, 'market-list'); }
+  try{
+    await api('/market/list',{ seedId:id, askPrice:price });
+    await refresh(); // /me/state -> state.market mới -> renderMarketListings()
+  }catch(e){ showError(e, 'market-list'); }
 });
 $('#marketList')?.addEventListener('click', async (e)=>{
-  const b=e.target.closest('.buy-listing'); if(!b) return; const id=parseInt(b.dataset.id,10);
+  const b=e.target.closest('.buy-listing'); if(!b) return; 
+  const id=parseInt(b.dataset.id,10);
   try{ await api('/market/buy',{ listingId:id }); await refresh(); }catch(e){ showError(e, 'market-buy'); }
 });
 
