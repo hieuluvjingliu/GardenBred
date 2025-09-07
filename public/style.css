@@ -131,3 +131,9 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
 .inv-item img{width:78px;height:78px;object-fit:contain;margin:6px auto}
 /* đảm bảo dropdown chọn floor ở tab Online dễ bấm & thấy chữ */
 select.visit-floor { min-width: 220px; }
+#marketListings { display: grid; gap: 10px; margin-top: 10px; }
+.listing-row { display: grid; grid-template-columns: 1fr 120px 1fr 80px; align-items: center;
+  padding: 10px 12px; border:1px solid rgba(255,255,255,.15); border-radius:12px; background:rgba(0,0,0,.15); }
+.listing-row .l-col.price { text-align:right; }
+.listing-row .buy { justify-self:end; }
+.muted { opacity:.7; }
