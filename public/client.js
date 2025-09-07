@@ -151,6 +151,18 @@ function populateSelects(){
       });
     });
   }
+  // Market (mature only)
+  const listSel = $('#listSeedSelect');
+  if (listSel){
+    preserveSelectValue(listSel, ()=>{
+      listSel.innerHTML = '';
+      state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
+        const o = document.createElement('option');
+        o.value = s.id; o.textContent = `#${s.id} ${s.class}`;
+        listSel.appendChild(o);
+      });
+    });
+  }
 
   // Mature by class (hiển thị text tóm tắt; ảnh đã có ở inv)
   const matUl = $('#matureByClass'); 
