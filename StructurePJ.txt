@@ -8,5 +8,7 @@ garden-bred-mvp-full/
 │   └── client.js         # logic client, kết nối API & WebSocket
 │
 └── tools/                # quản lý database
+    │── breed_map.json
+    │
     │── schema.sql        # cấu trúc bảng SQLite
     └── migrate.js        # script tạo DB từ schema
