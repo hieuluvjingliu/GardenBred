@@ -6925,3 +6925,226 @@
 {"t":1757253664897,"level":"action","msg":"state_fetch","userId":1}
 {"t":1757253724895,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
 {"t":1757253724918,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264840884,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757264840980,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757264841002,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757264841011,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264841027,"level":"ws","msg":"connected","userId":1}
+{"t":1757264842961,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757264842977,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757264842998,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264843001,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264843002,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264847880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757264847889,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264857910,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264857893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757264867881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757264867900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264877885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757264877902,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757264884135,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757264884153,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757264884162,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264884163,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264884165,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757264888784,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757264888800,"level":"action","msg":"visit_floor_view","userId":1,"floorId":4,"owner":4,"plots":10}
+{"t":1757264889820,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757264889828,"level":"action","msg":"visit_floor_view","userId":1,"floorId":4,"owner":4,"plots":10}
+{"t":1757264890507,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757264890515,"level":"action","msg":"visit_floor_view","userId":1,"floorId":4,"owner":4,"plots":10}
+{"t":1757264893862,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757264893877,"level":"action","msg":"visit_floor_view","userId":1,"floorId":4,"owner":4,"plots":10}
+{"t":1757264898870,"level":"action","msg":"visit_floor_view","userId":1,"floorId":1,"owner":1,"plots":10}
+{"t":1757264898853,"level":"http","msg":"GET /visit/floor","ip":"::1","body":{}}
+{"t":1757264966313,"level":"http","msg":"POST /visit/steal-plot","ip":"::1","body":{"targetUserId":1,"floorId":1,"plotId":1}}
+{"t":1757265448822,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757265448916,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757265448939,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757265448949,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757265448966,"level":"ws","msg":"connected","userId":1}
+{"t":1757265456882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757265456896,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266334286,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757266334378,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757266334403,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266334413,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266334429,"level":"ws","msg":"connected","userId":1}
+{"t":1757266335537,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757266335546,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757266335567,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266335570,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266335568,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266340436,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":74,"askPrice":100}}
+{"t":1757266344503,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266344515,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266348374,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":74,"askPrice":200}}
+{"t":1757266348410,"level":"action","msg":"market_list","userId":1,"seedId":74,"class":"smoke","askPrice":200}
+{"t":1757266348418,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266348428,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266350919,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":75,"askPrice":200}}
+{"t":1757266350957,"level":"action","msg":"market_list","userId":1,"seedId":75,"class":"steam","askPrice":200}
+{"t":1757266350984,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266350996,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266351635,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":76,"askPrice":200}}
+{"t":1757266352571,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266352583,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266355803,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757266355813,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757266355822,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266355826,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266355823,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266383620,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757266383738,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757266383763,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266383776,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266383788,"level":"ws","msg":"connected","userId":1}
+{"t":1757266384608,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266384625,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266394891,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266394880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266404914,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266404893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266414884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266414905,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266424884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266424904,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266434882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266434900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266444882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266444903,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266454889,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266454900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266464894,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266464914,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266504888,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266504909,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266564886,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266564897,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266624881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266624893,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266684880,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266684898,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266744886,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266744907,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266790166,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266790187,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266792376,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757266792386,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757266792397,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266792400,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266792398,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757266904883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266904903,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266914885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266914895,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266924893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266924904,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266934878,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266934898,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266944896,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266944916,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266954896,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266954915,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266964890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266964901,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757266984881,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757266984891,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267015330,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267015340,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267024883,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267024893,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267034885,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267034895,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267044882,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267044899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267054906,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267054914,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267064893,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267064905,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267074890,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267074902,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267104884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267104906,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267154892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267154909,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267159542,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757267159635,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757267159656,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267159665,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267159687,"level":"ws","msg":"connected","userId":1}
+{"t":1757267167602,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267167613,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267173160,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":80,"askPrice":200}}
+{"t":1757267176352,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":80,"askPrice":150}}
+{"t":1757267176377,"level":"action","msg":"market_list","userId":1,"seedId":80,"class":"fire","askPrice":150}
+{"t":1757267176384,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267176395,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267177599,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267177609,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267187892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267187909,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267247536,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test"}}
+{"t":1757267247638,"level":"action","msg":"auth_login","userId":1,"username":"test"}
+{"t":1757267247675,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267247663,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267247689,"level":"ws","msg":"connected","userId":1}
+{"t":1757267248250,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757267248269,"level":"action","msg":"online_list","userId":1,"count":3}
+{"t":1757267248292,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267248294,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267248290,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267249203,"level":"http","msg":"POST /market/buy","ip":"::1","body":{"listingId":3}}
+{"t":1757267249241,"level":"action","msg":"market_buy","userId":1,"listingId":3,"class":"fire","base":100,"paid":150,"seller":1}
+{"t":1757267249260,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267249269,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267250443,"level":"http","msg":"POST /market/buy","ip":"::1","body":{"listingId":2}}
+{"t":1757267250473,"level":"action","msg":"market_buy","userId":1,"listingId":2,"class":"steam","base":160,"paid":200,"seller":1}
+{"t":1757267250490,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267250499,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267252219,"level":"http","msg":"POST /market/buy","ip":"::1","body":{"listingId":1}}
+{"t":1757267252257,"level":"action","msg":"market_buy","userId":1,"listingId":1,"class":"smoke","base":160,"paid":200,"seller":1}
+{"t":1757267252275,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267252282,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267254900,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267254914,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267265879,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267265895,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267267490,"level":"http","msg":"POST /auth/login","ip":"::1","body":{"username":"test2"}}
+{"t":1757267267583,"level":"action","msg":"auth_login","userId":23,"username":"test2"}
+{"t":1757267267590,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267267601,"level":"action","msg":"state_fetch","userId":23}
+{"t":1757267267611,"level":"ws","msg":"connected","userId":23}
+{"t":1757267273600,"level":"http","msg":"POST /market/list","ip":"::1","body":{"seedId":76,"askPrice":150}}
+{"t":1757267273626,"level":"action","msg":"market_list","userId":1,"seedId":76,"class":"fire","askPrice":150}
+{"t":1757267273631,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267273638,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267275031,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267275042,"level":"action","msg":"state_fetch","userId":23}
+{"t":1757267275891,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267275899,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267276101,"level":"http","msg":"POST /market/buy","ip":"::1","body":{"listingId":4}}
+{"t":1757267276131,"level":"action","msg":"market_buy","userId":23,"listingId":4,"class":"fire","base":100,"paid":150,"seller":1}
+{"t":1757267276135,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267276142,"level":"action","msg":"state_fetch","userId":23}
+{"t":1757267280518,"level":"http","msg":"GET /online","ip":"::1","body":{}}
+{"t":1757267280537,"level":"action","msg":"online_list","userId":23,"count":4}
+{"t":1757267280544,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267280545,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267280546,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267280547,"level":"http","msg":"GET /visit/floors","ip":"::1","body":{}}
+{"t":1757267284919,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267284935,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267294915,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267294921,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267304903,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267304921,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267314913,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267314930,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267325892,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267325900,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267335903,"level":"action","msg":"state_fetch","userId":1}
+{"t":1757267335884,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267345894,"level":"http","msg":"GET /me/state","ip":"::1","body":{}}
+{"t":1757267345912,"level":"action","msg":"state_fetch","userId":1}
