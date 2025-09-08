@@ -1,5 +1,4 @@
-// server.js (ESM)
-
+// server.js (ESM) — GardenBred: Express + WS + SQLite + backup/restore
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -9,10 +8,12 @@ import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
 
-// ---- Paths / constants ----
+// ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const BREED_PATH = path.join(__dirname, 'tools', 'breed_map.json');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'game.db');
 
 const app = express();
 const server = http.createServer(app);
@@ -23,17 +24,52 @@ app.use(cookieParser());
 app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ---- DB & migrations ----
-//const db = new Database(path.join(__dirname, 'game.db'));
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'game.db');
-const db = new Database(DB_PATH);
+// ==== BACKUP (download) — không cần đóng DB ====
+app.get('/admin/download-db', (req, res) => {
+  if ((req.query.token || '') !== (process.env.ADMIN_TOKEN || '')) {
+    return res.sendStatus(403);
+  }
+  res.download(DB_PATH, 'game.db');
+});
+
+// ==== DB open + migrations ====
+let db;
+function openDb() {
+  db = new Database(DB_PATH);
+}
 function runMigrations() {
   const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
   db.exec(sql);
 }
+openDb();
 runMigrations();
 
-// ---- Logging ----
+// ==== RESTORE (upload) — an toàn: ghi file tạm -> close DB -> swap -> restart ====
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/admin/upload-db', upload.single('db'), (req, res) => {
+  if ((req.headers['x-admin-token'] || '') !== (process.env.ADMIN_TOKEN || '')) {
+    return res.sendStatus(403);
+  }
+  if (!req.file) return res.status(400).json({ error: 'missing file' });
+
+  const TMP = DB_PATH + '.restore';
+  fs.writeFile(TMP, req.file.buffer, err => {
+    if (err) return res.status(500).json({ error: 'write failed' });
+
+    try {
+      try { db.close(); } catch (_) {}
+      fs.renameSync(TMP, DB_PATH);
+
+      // trả lời trước rồi restart để app mở DB mới
+      res.json({ ok: true, restarting: true });
+      setTimeout(() => process.exit(0), 200);
+    } catch (e) {
+      return res.status(500).json({ error: 'swap failed', detail: String(e) });
+    }
+  });
+});
+
+// ==== Logging ====
 const LOG_DIR = path.join(__dirname, 'log');
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 
@@ -43,9 +79,8 @@ function logLine(level, msg, extra = {}) {
   const f = path.join(LOG_DIR, new Date().toISOString().slice(0, 10) + '.log');
   fs.appendFile(f, line + '\n', () => {});
 }
-const logStmt = db.prepare(
-  `INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`
-);
+const logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
+
 function logAction(userId, action, payloadObj) {
   const payload = JSON.stringify(payloadObj ?? {});
   logStmt.run(userId ?? null, action, payload, Date.now());
@@ -56,7 +91,7 @@ app.use((req, _res, next) => {
   next();
 });
 
-// ---- Helpers ----
+// ==== Helpers ====
 function now() { return Date.now(); }
 function floorPriceBase(className) {
   const basics = ['fire', 'water', 'wind', 'earth'];
@@ -72,7 +107,7 @@ function userFloorsCount(userId) { return getFloorsCountStmt.get(userId).cnt; }
 function trapPriceForUser(userId) { return 1000 * userFloorsCount(userId); }
 function trapMaxForUser(userId) { return userFloorsCount(userId) * 5; }
 
-// ---- Prepared statements ----
+// ==== Prepared statements ====
 const upsertUserStmt = db.prepare(
   `INSERT INTO users (username, coins, created_at) VALUES (?, 10000, ?)
    ON CONFLICT(username) DO NOTHING`
@@ -114,44 +149,28 @@ const upsertSeedCatalogStmt = db.prepare(
 
 // coins
 const addCoinsStmt = db.prepare(`UPDATE users SET coins = coins + ? WHERE id = ?`);
-const subCoinsStmt = db.prepare(
-  `UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`
-);
+const subCoinsStmt = db.prepare(`UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`);
 
-// inventory seeds (is_mature: 0=chưa trồng, 1=mature)
+// inventory seeds
 const invAddSeedStmt = db.prepare(
   `INSERT INTO inventory_seeds (user_id, class, base_price, is_mature)
    VALUES (?, ?, ?, ?)`
 );
-const invListSeedsStmt = db.prepare(
-  `SELECT * FROM inventory_seeds WHERE user_id = ?`
-);
-const invGetSeedStmt = db.prepare(
-  `SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`
-);
-const invDelSeedStmt = db.prepare(
-  `DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`
-);
+const invListSeedsStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE user_id = ?`);
+const invGetSeedStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
+const invDelSeedStmt = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
 
 // inventory pots
 const invAddPotStmt = db.prepare(
   `INSERT INTO inventory_pots (user_id, type, speed_mult, yield_mult)
    VALUES (?, ?, ?, ?)`
 );
-const invListPotsStmt = db.prepare(
-  `SELECT * FROM inventory_pots WHERE user_id = ?`
-);
-const invGetPotStmt = db.prepare(
-  `SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`
-);
-const invDelPotStmt = db.prepare(
-  `DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`
-);
+const invListPotsStmt = db.prepare(`SELECT * FROM inventory_pots WHERE user_id = ?`);
+const invGetPotStmt = db.prepare(`SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`);
+const invDelPotStmt = db.prepare(`DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`);
 
 // plots update
-const setPlotPotStmt = db.prepare(
-  `UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`
-);
+const setPlotPotStmt = db.prepare(`UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`);
 const setPlotAfterPlantStmt = db.prepare(
   `UPDATE plots
    SET seed_id=?, class=?, stage='planted', planted_at=?, mature_at=?
@@ -174,9 +193,7 @@ const clearPlotAllStmt = db.prepare(
 const listUsersOnlineStmt = db.prepare(
   `SELECT id, username FROM users ORDER BY id DESC LIMIT 50`
 );
-const addTrapToFloorStmt = db.prepare(
-  `UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`
-);
+const addTrapToFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`);
 const useTrapOnFloorStmt = db.prepare(
   `UPDATE floors SET trap_count = trap_count - 1 WHERE id = ? AND trap_count > 0`
 );
@@ -196,9 +213,7 @@ const marketOpenStmt = db.prepare(
    ORDER BY created_at DESC LIMIT 100`
 );
 const marketGetStmt = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
-const marketCloseStmt = db.prepare(
-  `UPDATE market_listings SET status='sold' WHERE id = ?`
-);
+const marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHERE id = ?`);
 
 // seed catalog mặc định
 upsertSeedCatalogStmt.run('fire', 100);
@@ -206,7 +221,7 @@ upsertSeedCatalogStmt.run('water', 100);
 upsertSeedCatalogStmt.run('wind', 100);
 upsertSeedCatalogStmt.run('earth', 100);
 
-// ---- Breed map from JSON ----
+// ==== Breed map from JSON ====
 const DEFAULT_BREED_MAP = {
   'water+fire': 'steam',
   'water+wind': 'wave',
@@ -234,9 +249,7 @@ function loadBreedMap() {
     const raw = fs.readFileSync(BREED_PATH, 'utf-8');
     const obj = JSON.parse(raw);
     const out = {};
-    for (const [k, v] of Object.entries(obj)) {
-      out[String(k).toLowerCase()] = v;
-    }
+    for (const [k, v] of Object.entries(obj)) out[String(k).toLowerCase()] = v;
     return out;
   } catch (e) {
     console.error('loadBreedMap failed, fallback:', e);
@@ -245,12 +258,8 @@ function loadBreedMap() {
 }
 let BREED_MAP = loadBreedMap();
 fs.watchFile(BREED_PATH, { interval: 1000 }, () => {
-  try {
-    BREED_MAP = loadBreedMap();
-    console.log('[BREED_MAP] reloaded from file');
-  } catch (e) {
-    console.error('[BREED_MAP] reload failed:', e);
-  }
+  try { BREED_MAP = loadBreedMap(); console.log('[BREED_MAP] reloaded from file'); }
+  catch (e) { console.error('[BREED_MAP] reload failed:', e); }
 });
 function combineClass(a, b) {
   if (!a || !b) return null;
@@ -259,7 +268,7 @@ function combineClass(a, b) {
   return BREED_MAP[k1] || BREED_MAP[k2] || null;
 }
 
-// ---- Auth ----
+// ==== Auth ====
 app.post('/auth/login', (req, res) => {
   const { username } = req.body;
   if (!username || username.length < 2) return res.status(400).json({ error: 'Invalid username' });
@@ -267,12 +276,10 @@ app.post('/auth/login', (req, res) => {
   upsertUserStmt.run(username, now());
   const user = getUserStmt.get(username);
 
-  // tạo floor1 + 10 plots (unique index sẽ tránh trùng)
   ensureFloorStmt.run(user.id, 1);
   const floor = db.prepare(`SELECT * FROM floors WHERE user_id = ? AND idx = 1`).get(user.id);
   for (let i = 1; i <= 10; i++) ensurePlotStmt.run(floor.id, i);
 
-  // session
   const sid = uuidv4();
   insertSessionStmt.run(sid, user.id, now());
   res.cookie('sid', sid, { httpOnly: true });
@@ -290,7 +297,7 @@ function auth(req, res, next) {
   next();
 }
 
-// ---- State ----
+// ==== State ====
 app.get('/me/state', auth, (req, res) => {
   const me = getStateStmt.get(req.userId);
   const floors = getFloorsStmt.all(req.userId);
@@ -311,7 +318,7 @@ app.get('/me/state', auth, (req, res) => {
   });
 });
 
-// ---- Shop ----
+// ==== Shop ====
 app.post('/shop/buy', auth, (req, res) => {
   const { itemType, classOrType, qty = 1 } = req.body;
   if (qty < 1 || qty > 50) return res.status(400).json({ error: 'qty out of range' });
@@ -331,7 +338,7 @@ app.post('/shop/buy', auth, (req, res) => {
   if (itemType === 'pot') {
     const TYPE_MAP = {
       basic: { price: 100, speed_mult: 1.0, yield_mult: 1.0 },
-      gold: { price: 300, speed_mult: 1.0, yield_mult: 1.5 },
+      gold:  { price: 300, speed_mult: 1.0, yield_mult: 1.5 },
       timeskip: { price: 300, speed_mult: 0.67, yield_mult: 1.0 }
     };
     const cfg = TYPE_MAP[classOrType];
@@ -365,7 +372,7 @@ app.post('/shop/buy-trap', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Plot actions ----
+// ==== Plot actions ====
 app.post('/plot/place-pot', auth, (req, res) => {
   try {
     const { floorId, slot, potId } = req.body || {};
@@ -475,7 +482,7 @@ app.post('/plot/remove', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Breed (mature only) ----
+// ==== Breed (mature only) ====
 app.post('/breed', auth, (req, res) => {
   const { seedAId, seedBId } = req.body;
   const A = invGetSeedStmt.get(seedAId, req.userId);
@@ -497,7 +504,7 @@ app.post('/breed', auth, (req, res) => {
   res.json({ ok: true, outClass, base: baseOut });
 });
 
-// ---- Sell to shop (mature only) ----
+// ==== Sell to shop (mature only) ====
 app.post('/sell/shop', auth, (req, res) => {
   const { seedId } = req.body;
   const S = invGetSeedStmt.get(seedId, req.userId);
@@ -510,7 +517,7 @@ app.post('/sell/shop', auth, (req, res) => {
   res.json({ ok: true, paid: pay });
 });
 
-// ---- Market (mature only) ----
+// ==== Market (mature only) ====
 app.post('/market/list', auth, (req, res) => {
   const { seedId, askPrice } = req.body;
   const S = invGetSeedStmt.get(seedId, req.userId);
@@ -542,7 +549,7 @@ app.post('/market/buy', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---- Online / Visit ----
+// ==== Online / Visit ====
 app.get('/online', auth, (req, res) => {
   const rows = listUsersOnlineStmt.all();
   logAction(req.userId, 'online_list', { count: rows.length });
@@ -574,7 +581,7 @@ app.get('/visit/floor', auth, (req, res) => {
   });
 });
 
-// ---- Visit: steal ----
+// ==== Visit: steal ====
 app.post('/visit/steal-plot', auth, (req, res) => {
   const { targetUserId, floorId, plotId } = req.body;
   if (!targetUserId || !floorId || !plotId) return res.status(400).json({ error: 'missing params' });
@@ -606,7 +613,7 @@ app.post('/visit/steal-plot', auth, (req, res) => {
   res.json({ ok: true, class: p.class });
 });
 
-// ---- Floors ----
+// ==== Floors ====
 app.post('/floors/buy', auth, (req, res) => {
   const floors = listFloorsByUserStmt.all(req.userId);
   const maxIdx = floors.reduce((m, f) => Math.max(m, f.idx), 0);
@@ -625,7 +632,7 @@ app.post('/floors/buy', auth, (req, res) => {
   res.json({ ok: true, floorId: newFloor.id, idx: nextIdx, price });
 });
 
-// ---- WebSocket push state ----
+// ==== WebSocket push state ====
 const sockets = new Map(); // userId -> ws
 wss.on('connection', (ws, req) => {
   const cookies = (req.headers.cookie || '').split(';').map(v => v.trim());
@@ -664,9 +671,8 @@ function pushState(userId) {
 }
 setInterval(() => { for (const uid of sockets.keys()) pushState(uid); }, 3000);
 
-// ---- Start ----
+// ==== Start ====
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('Game running on port ' + PORT);
 });
-
