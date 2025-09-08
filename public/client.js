@@ -145,12 +145,16 @@ function renderMarketListings(){
   listings.forEach(L=>{
     const li = document.createElement('li');
     li.innerHTML = `
-      #${L.id} <b>${L.class}</b> — <b>${L.ask_price}</b> coins
-      <button class="buy-listing" data-id="${L.id}">Buy</button>
-    `;
+      <div class="listing-row">
+        <div class="l-col"><span class="muted">#${L.id}</span> <b>${L.class}</b></div>
+        <div class="l-col price"><span class="coin-ico"></span> <b>${L.ask_price}</b></div>
+        <div class="l-col muted">base ${L.base_price}</div>
+        <button class="buy buy-listing" data-id="${L.id}">Buy</button>
+      </div>`;
     ul.appendChild(li);
   });
 }
+
 
 /* ---------- DATA HELPERS ---------- */
 function groupMatureByClass(){
@@ -500,20 +504,28 @@ function clearAllVisitViews(){ $$('.visit-view').forEach(v=>v.innerHTML=''); }
 async function renderVisitedFloor(uid, floorId){
   const container = document.querySelector('#visit-'+uid);
   if (!container) return;
-  try{
+
+  // SKELETON
+  container.innerHTML = '<div class="skeleton"></div>';
+
+  try {
     const data = await get('/visit/floor?floorId='+floorId);
-    container.innerHTML='';
-    const wrap = document.createElement('div'); wrap.className='plots';
+    container.innerHTML = '';
+
+    const wrap = document.createElement('div');
+    wrap.className = 'plots';
 
     data.plots.forEach(p=>{
       const el = document.createElement('div');
       el.className = 'plot';
       el.dataset.plotId = p.id;
-      el.dataset.stage = p.stage || 'empty';
-      el.dataset.class = p.class || '';
+      el.dataset.stage  = p.stage || 'empty';
+      el.dataset.class  = p.class  || '';
       if (p.mature_at) el.dataset.matureAt = p.mature_at;
 
-      const stats = document.createElement('div'); stats.className = 'stats';
+      const stats = document.createElement('div');
+      stats.className = 'stats';
+
       const statClass = document.createElement('div');
       statClass.className = 'stat cls';
       statClass.innerHTML = `<div class="label">Class</div><div class="value">${p.class || 'empty'}</div>`;
@@ -524,36 +536,45 @@ async function renderVisitedFloor(uid, floorId){
       statTime.innerHTML = `<div class="label">Time left</div><div class="value"></div>`;
       stats.appendChild(statTime);
 
-      const visual = document.createElement('div'); visual.className = 'visual';
+      const visual = document.createElement('div');
+      visual.className = 'visual';
 
       if (p.pot_type){
         const potImg = document.createElement('img');
-        potImg.className='pot';
+        potImg.className = 'pot';
         potImg.src = `/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
         visual.appendChild(potImg);
       }
+
       if (p.class && p.stage){
         const stageFolder = p.stage==='planted' ? 'Seed_Planted'
-                          : p.stage==='growing' ? 'Seed_Growing'
-                          : p.stage==='mature'  ? 'Seed_Mature' : null;
+                         : p.stage==='growing' ? 'Seed_Growing'
+                         : p.stage==='mature'  ? 'Seed_Mature' : null;
         if (stageFolder){
           const plantImg = document.createElement('img');
-          plantImg.className='plant';
+          plantImg.className = 'plant';
           plantImg.src = `/assets/${stageFolder}/seed_${p.stage}_${p.class}.png`;
           visual.appendChild(plantImg);
         }
       }
 
       el.append(stats, visual);
-      if (p.stage==='mature') el.classList.add('mature');
+      if (p.stage==='mature') {
+        el.classList.add('mature');
+        el.title = 'Click để ăn trộm';
+      }
 
       el.addEventListener('click', async ()=>{
         if (p.stage!=='mature') return;
         try{
-          const r = await api('/visit/steal-plot',{ targetUserId: data.floor.user_id, floorId: data.floor.id, plotId: p.id });
-          if (r.trap) alert('Trap! penalty '+r.penalty);
-          else if (r.ok) alert('Stolen seed class '+r.class);
-          else alert(r.reason||'fail');
+          const r = await api('/visit/steal-plot', {
+            targetUserId: data.floor.user_id,
+            floorId: data.floor.id,
+            plotId: p.id
+          });
+          if (r.trap) alert('Trap! penalty ' + r.penalty);
+          else if (r.ok) alert('Stolen seed class ' + r.class);
+          else alert(r.reason || 'fail');
           await refresh();
           await renderVisitedFloor(uid, data.floor.id);
         }catch(err){ showError(err,'visit-steal'); }
@@ -563,9 +584,12 @@ async function renderVisitedFloor(uid, floorId){
     });
 
     container.appendChild(wrap);
-  }catch(e){ console.log(e); }
+  } catch(e) {
+    console.log(e);
+  }
 }
-// click nút Visit trong danh sách Online
+
+// Click nút Visit trong danh sách Online
 $('#onlineList')?.addEventListener('click', async (e)=>{
   const btn = e.target.closest('.visit');
   if (!btn) return;
