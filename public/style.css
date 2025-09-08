@@ -160,3 +160,148 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
 .skeleton{height:140px;border-radius:12px;background:linear-gradient(90deg,#0c1430,#0f1938,#0c1430);
   background-size:200% 100%; animation:sk 1.2s infinite}
 @keyframes sk{0%{background-position:0% 0}100%{background-position:200% 0}}
+/* --- UI polish add-ons (append to end) --- */
+
+/* 1) Plot hover mạnh hơn, nổi khối nhẹ */
+.plot:hover{
+  transform: translateY(-3px) scale(1.02);
+  border-color: #6ee7ff;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.6),
+    0 0 18px #6ee7ff44;
+}
+
+/* 2) Neon theo class khi hover */
+.plot[data-class="fire"]:hover  { box-shadow: 0 0 20px #ef444488, 0 14px 30px rgba(0,0,0,.6); }
+.plot[data-class="water"]:hover { box-shadow: 0 0 20px #3b82f688, 0 14px 30px rgba(0,0,0,.6); }
+.plot[data-class="wind"]:hover  { box-shadow: 0 0 20px #22c55e88, 0 14px 30px rgba(0,0,0,.6); }
+.plot[data-class="earth"]:hover { box-shadow: 0 0 20px #ca8a0488, 0 14px 30px rgba(0,0,0,.6); }
+
+/* 3) Growing animation — nhịp nhẹ cho cây đang lớn */
+.plot[data-stage="growing"] img.plant {
+  animation: growPulse 2s ease-in-out infinite;
+}
+@keyframes growPulse{
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.05); }
+}
+
+/* 4) HUD pill bóng bẩy hơn nhưng vẫn cùng tông */
+#hud .pill{
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border: 1px solid #334155;
+  box-shadow: inset 0 0 10px #6ee7ff33, 0 4px 14px rgba(0,0,0,.35);
+}
+
+/* 5) Nút bấm cảm giác nhấn rõ hơn */
+button:active{
+  transform: scale(0.96);
+  box-shadow: 0 0 18px #6ee7ff55 inset, 0 6px 16px rgba(0,0,0,.55);
+}
+
+/* 6) Giá tiền trong Market nổi bật */
+.listing-row .price b{
+  color: #ffd369;
+  text-shadow: 0 0 6px rgba(255,211,105,.35);
+  letter-spacing: .2px;
+}
+/* 7) Card & panel subtle glow */
+.card, .floor-actions, .buy-floor-card, .visit-view {
+  transition: box-shadow .3s, transform .2s;
+}
+.card:hover, .floor-actions:hover, .buy-floor-card:hover, .visit-view:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,.5), 0 0 14px #6ee7ff22;
+}
+
+/* 8) Title gradient text */
+h1, h2, h3 {
+  background: linear-gradient(90deg,#6ee7ff,#8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 9) Inventory item hover highlight */
+.inv-grid li:hover {
+  border-color:#53b7ff;
+  box-shadow:0 0 12px #53b7ff33;
+  transform: translateY(-2px);
+}
+
+/* 10) Animate coin counter glow when value changes */
+#hudCoins {
+  transition: color .3s, text-shadow .3s;
+}
+#hudCoins.updated {
+  color:#ffd369;
+  text-shadow:0 0 8px #ffd369aa;
+}
+
+/* 11) Shop buttons neon pulse */
+.shop-grid .item button {
+  position: relative;
+  overflow: hidden;
+}
+.shop-grid .item button::after {
+  content:"";
+  position:absolute;top:0;left:-50%;width:200%;height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.2),transparent);
+  transform:skewX(-20deg);
+  animation: shine 3s infinite;
+}
+@keyframes shine {
+  0% { left:-50% }
+  100% { left:100% }
+}
+
+/* 12) Online players row hover */
+#onlineList li:hover {
+  background:#111c33;
+  border-radius:12px;
+}
+
+/* 13) Smooth tab switch fade-in */
+.tab {
+  opacity:0; transform:translateY(8px);
+  transition:opacity .3s, transform .3s;
+}
+.tab:not(.hidden) {
+  opacity:1; transform:translateY(0);
+}
+
+/* 14) Add rarity glow around mature seeds in inventory */
+.inv-grid li[data-mature="1"] {
+  border-color:#53e6ff;
+  box-shadow:0 0 12px #53e6ff55;
+}
+/* Auto buttons look */
+#farmControls .btnAutoPot,
+#farmControls .btnAutoPlant{
+  min-width: 140px;
+}
+#farmControls .btnAutoPot.active,
+#farmControls .btnAutoPlant.active{
+  border-color:#53e6ff;
+  box-shadow: 0 0 16px #53e6ff44, inset 0 0 0 1px #53e6ff22;
+}
+/* Auto filters */
+.auto-filters{
+  display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  padding:8px 10px; border:1px solid var(--border);
+  border-radius:12px; background:#0d1630;
+}
+.auto-filters .filter-group{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.auto-filters .label{ color:#cfe1ff; opacity:.8; margin-right:2px; font-size:13px; }
+.auto-filters .chip{
+  display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  background:#0b1320; border:1px solid #2a3a60; border-radius:999px; padding:6px 10px;
+  user-select:none; transition:.15s;
+}
+.auto-filters .chip:hover{ border-color:#4b7fff; box-shadow:0 0 10px #4b7fff22; }
+.auto-filters .chip input{ appearance:none; width:14px; height:14px; border-radius:3px;
+  border:1px solid #335; display:inline-block; position:relative; background:#091229; }
+.auto-filters .chip input:checked{ background:#1a5cff; border-color:#4b7fff; }
+.auto-filters .chip input:checked::after{
+  content:""; position:absolute; inset:3px; background:#fff; border-radius:2px;
+}
+.auto-filters .chip span{ color:#dbe8ff; font-size:13px; }

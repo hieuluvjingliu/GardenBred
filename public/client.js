@@ -199,6 +199,7 @@ function populateSelects(){
     const by = groupMatureByClass();
     Object.keys(by).sort().forEach(cls=>{
       const li = document.createElement('li');
+      li.dataset.mature = "1";   // highlight bằng CSS
       li.textContent = `${cls}: ${by[cls]}`;
       matUl.appendChild(li);
     });
@@ -263,8 +264,15 @@ function renderBuyFloorPrice(){
 /* ---------- RENDER STATE ---------- */
 function renderState(s){
   state=s;
-  $('#hudUser').textContent=s.me.username;
-  $('#hudCoins').textContent=s.me.coins;
+  ensureFarmAutoControls();
+
+  $('#hudUser').textContent = s.me.username;
+  const coinsEl = $('#hudCoins');
+  if (coinsEl.textContent !== String(s.me.coins)) {
+    coinsEl.textContent = s.me.coins;
+    coinsEl.classList.add('updated');
+    setTimeout(()=>coinsEl.classList.remove('updated'), 600);
+  }
 
   const priceEl = $('#trapPrice');
   if (priceEl) priceEl.textContent = (s.trapPrice ?? '-');
@@ -378,7 +386,7 @@ function renderState(s){
   populateSelects();
   renderShop();
   renderBuyFloorPrice();
-  renderMarketListings();   // <<< gọi để vẽ danh sách chợ trời
+  renderMarketListings();   // <<< vẽ danh sách chợ trời
 }
 
 async function refresh(){ const data = await get('/me/state'); renderState(data); }
@@ -459,17 +467,6 @@ $('#btnPlant')?.addEventListener('click', async ()=>{
   const seedId=parseInt($('#plantSeed').value,10);
   if(!floorId||!slot||!seedId) return;
   try{ await api('/plot/plant',{ floorId, slot, seedId }); await refresh(); }catch(e){ showError(e, 'plant'); }
-});
-
-/* ---------- HARVEST ALL ---------- */
-$('#btnHarvestAll')?.addEventListener('click', async ()=>{
-  try{ const r = await api('/plot/harvest-all',{}); alert('Harvested '+r.harvested+' plots'); await refresh(); }catch(e){ showError(e, 'harvest-all'); }
-});
-$('#btnBuyFloor')?.addEventListener('click', async ()=>{
-  try{ const price = nextFloorPrice();
-    if (!confirm(`Mở tầng mới với giá ${price} coins?`)) return;
-    await api('/floors/buy', {}); await refresh();
-  }catch(e){ showError(e, 'buy-floor'); }
 });
 
 /* ---------- ONLINE (Visit & Steal) ---------- */
@@ -633,6 +630,272 @@ function tickTimers(){
   });
 }
 setInterval(tickTimers, 1000);
+
+/* ===== Auto Pot / Auto Plant (+ Dynamic Class Filter) ===== */
+const Auto = {
+  pot: false,
+  plant: false,
+  _busy: false,      // khóa tránh spam request
+  _timerId: null,
+  filters: {
+    useAllClasses: true,                   // BẬT để trồng mọi class
+    classes: { /* dynamic: 'fire':true, ... */ },
+    pots: { timeskip:true, gold:true, basic:true }
+  }
+};
+function autoSave(){
+  try {
+    localStorage.setItem('auto_settings', JSON.stringify({
+      pot: Auto.pot,
+      plant: Auto.plant,
+      filters: Auto.filters
+    }));
+  } catch {}
+}
+function autoLoad(){
+  try{
+    const raw = localStorage.getItem('auto_settings');
+    if(!raw) return;
+    const obj = JSON.parse(raw);
+    if (typeof obj.pot === 'boolean')   Auto.pot   = obj.pot;
+    if (typeof obj.plant === 'boolean') Auto.plant = obj.plant;
+    if (obj.filters){
+      Auto.filters.useAllClasses = (obj.filters.useAllClasses !== undefined) ? !!obj.filters.useAllClasses : true;
+      if (obj.filters.classes && typeof obj.filters.classes === 'object') {
+        Auto.filters.classes = { ...obj.filters.classes };
+      }
+      if (obj.filters.pots && typeof obj.filters.pots === 'object') {
+        Auto.filters.pots = { timeskip:true, gold:true, basic:true, ...obj.filters.pots };
+      }
+    }
+  }catch{}
+}
+autoLoad();
+
+function getAvailableClassesFromState(){
+  const set = new Set();
+  (state?.seedInv||[]).forEach(s=>{
+    if (s && s.class) set.add(s.class);
+  });
+  return Array.from(set).sort();
+}
+
+// Tạo nút toggle + bộ lọc checkbox trong khu Farm Controls (render lại mỗi lần để sync động)
+function ensureFarmAutoControls(){
+  const bar = document.getElementById('farmControls');
+  if (!bar) return;
+
+  // Toggle buttons (tạo một lần, sau đó chỉ sync)
+  let btnPot = bar.querySelector('.btnAutoPot');
+  let btnPlant = bar.querySelector('.btnAutoPlant');
+
+  if (!btnPot) {
+    btnPot = document.createElement('button');
+    btnPot.className = 'btnAutoPot';
+    const syncBtnPot = ()=> {
+      btnPot.classList.toggle('active', Auto.pot);
+      btnPot.textContent = 'Auto Pot: ' + (Auto.pot ? 'ON' : 'OFF');
+    };
+    btnPot.addEventListener('click', ()=>{
+      Auto.pot = !Auto.pot; syncBtnPot(); autoSave();
+    });
+    syncBtnPot();
+    bar.appendChild(btnPot);
+  } else {
+    btnPot.classList.toggle('active', Auto.pot);
+    btnPot.textContent = 'Auto Pot: ' + (Auto.pot ? 'ON' : 'OFF');
+  }
+
+  if (!btnPlant) {
+    btnPlant = document.createElement('button');
+    btnPlant.className = 'btnAutoPlant';
+    const syncBtnPlant = ()=> {
+      btnPlant.classList.toggle('active', Auto.plant);
+      btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
+    };
+    btnPlant.addEventListener('click', ()=>{
+      Auto.plant = !Auto.plant; syncBtnPlant(); autoSave();
+    });
+    syncBtnPlant();
+    bar.appendChild(btnPlant);
+  } else {
+    btnPlant.classList.toggle('active', Auto.plant);
+    btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
+  }
+
+  // ---- Filters container (rebuild mỗi lần để sync class động)
+  let box = bar.querySelector('.auto-filters');
+  if (!box){
+    box = document.createElement('div');
+    box.className = 'auto-filters';
+    bar.appendChild(box);
+  }
+  box.innerHTML = '';
+
+  // --- Class filter group (All + dynamic classes)
+  const clsGroup = document.createElement('div');
+  clsGroup.className = 'filter-group';
+  const clsLabel = document.createElement('span');
+  clsLabel.className = 'label';
+  clsLabel.textContent = 'Class:';
+  clsGroup.appendChild(clsLabel);
+
+  // All classes master checkbox
+  const allWrap = document.createElement('label');
+  allWrap.className = 'chip';
+  allWrap.title = 'Allow all classes';
+  const allId = 'flt-cls-all';
+  allWrap.innerHTML = `
+    <input type="checkbox" id="${allId}" ${Auto.filters.useAllClasses ? 'checked':''}>
+    <span>All</span>
+  `;
+  allWrap.querySelector('input').addEventListener('change', (e)=>{
+    Auto.filters.useAllClasses = !!e.target.checked;
+    autoSave();
+    ensureFarmAutoControls(); // re-render để enable/disable các checkbox class
+  });
+  clsGroup.appendChild(allWrap);
+
+  // Dynamic classes from current inventory
+  const classes = getAvailableClassesFromState();
+  classes.forEach(cls=>{
+    if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true; // mặc định bật
+
+    const id = 'flt-cls-'+cls;
+    const wrap = document.createElement('label');
+    wrap.className = 'chip';
+    wrap.title = `Allow ${cls}`;
+    wrap.innerHTML = `
+      <input type="checkbox" id="${id}" ${Auto.filters.classes[cls] ? 'checked':''} ${Auto.filters.useAllClasses ? 'disabled':''}>
+      <span>${cls}</span>
+    `;
+    wrap.querySelector('input').addEventListener('change', (e)=>{
+      Auto.filters.classes[cls] = !!e.target.checked;
+      autoSave();
+    });
+    clsGroup.appendChild(wrap);
+  });
+
+  // --- Pot filter group
+  const potGroup = document.createElement('div');
+  potGroup.className = 'filter-group';
+  const potLabel = document.createElement('span');
+  potLabel.className = 'label';
+  potLabel.textContent = 'Pot:';
+  potGroup.appendChild(potLabel);
+
+  ['timeskip','gold','basic'].forEach(pt=>{
+    const id = 'flt-pot-'+pt;
+    const wrap = document.createElement('label');
+    wrap.className = 'chip';
+    wrap.title = `Allow ${pt}`;
+    wrap.innerHTML = `
+      <input type="checkbox" id="${id}" ${Auto.filters.pots[pt]?'checked':''}>
+      <span>${pt}</span>
+    `;
+    wrap.querySelector('input').addEventListener('change', (e)=>{
+      Auto.filters.pots[pt] = !!e.target.checked;
+      autoSave();
+    });
+    potGroup.appendChild(wrap);
+  });
+
+  box.appendChild(clsGroup);
+  box.appendChild(potGroup);
+}
+
+// Tìm một ô trống chưa có pot
+function findEmptyNoPotPlot() {
+  if (!state) return null;
+  for (const fp of state.plots) {
+    for (const p of fp.plots) {
+      if (!p.pot_id && (p.stage === 'empty' || !p.stage)) {
+        return { floorId: fp.floor.id, slot: p.slot, floorIdx: fp.floor.idx };
+      }
+    }
+  }
+  return null;
+}
+
+// Lấy 1 pot từ inventory theo filter (ưu tiên timeskip -> gold -> basic)
+function pickPotFromInv(){
+  const inv = Array.isArray(state?.potInv) ? state.potInv.slice() : [];
+  const order = { timeskip: 0, gold: 1, basic: 2 };
+  const allowed = inv.filter(p => Auto.filters.pots[p.type]);
+  allowed.sort((a,b)=> (order[a.type]??9) - (order[b.type]??9));
+  return allowed[0] || null;
+}
+
+// Tìm ô đã có pot nhưng đang trống để trồng
+function findEmptyWithPotPlot(){
+  if (!state) return null;
+  for (const fp of state.plots) {
+    for (const p of fp.plots) {
+      if (p.pot_id && p.stage === 'empty') {
+        return { floorId: fp.floor.id, slot: p.slot, floorIdx: fp.floor.idx };
+      }
+    }
+  }
+  return null;
+}
+
+// Lấy 1 seed chưa mature theo filter class (All hoặc theo từng class)
+function pickSeedForPlant(){
+  const seeds = Array.isArray(state?.seedInv) ? state.seedInv : [];
+  const pool = seeds.filter(s => s.is_mature === 0);
+
+  if (Auto.filters.useAllClasses) return pool[0] || null;
+
+  return pool.find(s => Auto.filters.classes[s.class] !== false) || null;
+}
+
+// Thực hiện 1 hành động / tick (đặt pot trước, rồi mới trồng)
+async function autoTickOnce(){
+  if (Auto._busy || (!Auto.pot && !Auto.plant)) return;
+  Auto._busy = true;
+
+  try{
+    // 1) Auto Pot
+    if (Auto.pot){
+      const target = findEmptyNoPotPlot();
+      const pot = pickPotFromInv();
+      if (target && pot){
+        await api('/plot/place-pot', { floorId: target.floorId, slot: target.slot, potId: pot.id });
+        await refresh();
+        return; // làm 1 việc/tick
+      }
+    }
+
+    // 2) Auto Plant
+    if (Auto.plant){
+      const target = findEmptyWithPotPlot();
+      const seed = pickSeedForPlant();
+      if (target && seed){
+        await api('/plot/plant', { floorId: target.floorId, slot: target.slot, seedId: seed.id });
+        await refresh();
+        return; // làm 1 việc/tick
+      }
+    }
+  } catch(e){
+    showError(e, 'auto');
+  } finally {
+    Auto._busy = false;
+  }
+}
+
+// Khởi động vòng lặp nhẹ nhàng, mỗi 1.2s thử 1 action
+function startAutoLoop(){
+  if (Auto._timerId) return;
+  Auto._timerId = setInterval(autoTickOnce, 1200);
+}
+
+// Gọi khi app vào được và mỗi lần render state để chắc UI có sẵn
+(function initAutoFeatures(){
+  document.addEventListener('DOMContentLoaded', ()=>{
+    ensureFarmAutoControls();
+    startAutoLoop();
+  });
+})();
 
 // auto-refresh (trừ khi đang ở Online)
 setInterval(()=>{ if($('#tabs').classList.contains('hidden')) return;
