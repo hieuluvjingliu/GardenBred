@@ -324,19 +324,38 @@ app.post('/shop/buy', auth, (req, res) => {
 });
 
 app.post('/shop/buy-trap', auth, (req, res) => {
-  const price = trapPriceForUser(req.userId);
-  const max = trapMaxForUser(req.userId);
+  const qtyRaw = parseInt(req.body?.qty, 10);
+  const qty = Number.isFinite(qtyRaw) ? Math.min(50, Math.max(1, qtyRaw)) : 1;
+
+  const priceEach = trapPriceForUser(req.userId);
   const floors = listFloorsByUserStmt.all(req.userId);
-  const totalTrapsOwned = floors.reduce((a, f) => a + f.trap_count, 0);
-  if (totalTrapsOwned >= max) return res.status(400).json({ error: 'Trap capacity reached' });
+  const capacityLeft = floors.reduce((sum, f) => sum + Math.max(0, 5 - (f.trap_count || 0)), 0);
+
+  if (capacityLeft <= 0) return res.status(400).json({ error: 'Trap capacity reached' });
+  if (qty > capacityLeft) return res.status(400).json({ error: 'Not enough capacity', capacityLeft });
+
+  const totalCost = priceEach * qty;
   const coins = getUserByIdStmt.get(req.userId).coins;
-  if (coins < price) return res.status(400).json({ error: 'Not enough coins' });
-  const target = floors.find(f => f.trap_count < 5);
-  if (!target) return res.status(400).json({ error: 'No floor can hold more traps' });
-  subCoinsStmt.run(price, req.userId);
-  addTrapToFloorStmt.run(target.id);
-  logAction(req.userId, 'shop_buy_trap', { floorId: target.id, price });
-  res.json({ ok: true });
+  if (coins < totalCost) return res.status(400).json({ error: 'Not enough coins', need: totalCost, have: coins });
+
+  // Phân bổ bẫy vào các tầng còn chỗ
+  const tx = db.transaction(() => {
+    subCoinsStmt.run(totalCost, req.userId);
+    let remaining = qty;
+    for (const f of floors) {
+      if (remaining <= 0) break;
+      const room = Math.max(0, 5 - (f.trap_count || 0));
+      if (room > 0) {
+        const add = Math.min(room, remaining);
+        db.prepare(`UPDATE floors SET trap_count = trap_count + ? WHERE id = ?`).run(add, f.id);
+        remaining -= add;
+      }
+    }
+  });
+  tx();
+
+  logAction(req.userId, 'shop_buy_trap', { qty, priceEach, totalCost });
+  res.json({ ok: true, qty, paid: totalCost });
 });
 
 // ==== Plot actions ====
@@ -520,6 +539,48 @@ app.post('/market/buy', auth, (req, res) => {
   });
   res.json({ ok: true });
 });
+
+// ----- BUY FLOOR (fixed) -----
+app.post('/floors/buy', auth, (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const { maxIdx } = db.prepare(
+      `SELECT COALESCE(MAX(idx), 0) AS maxIdx FROM floors WHERE user_id = ?`
+    ).get(userId);
+    const nextIdx = (maxIdx || 0) + 1;
+
+    // Giá: tầng 1 miễn phí, các tầng sau = idx * 1000
+    const price = (nextIdx === 1) ? 0 : nextIdx * 1000;
+
+    const me = getUserByIdStmt.get(userId);
+    if (!me) return res.status(404).json({ error: 'USER_NOT_FOUND' });
+    if (me.coins < price) {
+      return res.status(400).json({ error: 'NOT_ENOUGH_COINS', need: price, have: me.coins });
+    }
+
+    const tx = db.transaction(() => {
+      subCoinsStmt.run(price, userId);
+      const info = db.prepare(
+        `INSERT INTO floors (user_id, idx, unlocked, trap_count) VALUES (?, ?, 1, 0)`
+      ).run(userId, nextIdx);
+      const floorId = info.lastInsertRowid;
+      for (let slot = 1; slot <= 10; slot++) {
+        ensurePlotStmt.run(floorId, slot);
+      }
+    });
+    tx();
+
+    logAction(userId, 'buy_floor', { nextIdx, paid: price });
+    return res.json({ ok: true, nextIdx, paid: price });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({ error: 'BUY_FLOOR_FAILED' });
+  }
+});
+
+// (optional) nếu ai đó thử GET:
+app.get('/floors/buy', (_req, res) => res.status(405).json({ error: 'USE_POST' }));
 
 // ==== Online / Visit ====
 app.get('/online', auth, (req, res) => {

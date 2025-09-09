@@ -4,6 +4,14 @@ let state = null;
 let currentFloorIdx = 0;
 let floorActionSel = {}; // { [floorId]: {slot, potId, seedId} }
 
+// === Caches để không reset số lượng khi refresh ===
+const seedQtyCache = {}; // { [class]: "value-as-string" }
+const potQtyCache  = {}; // { [type]:  "value-as-string" }
+function getCachedQty(cache, key, fallback=1){
+  const v = parseInt(cache[key], 10);
+  return Number.isFinite(v) && v > 0 ? v : fallback;
+}
+
 function setActive(tab){
   $$('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   $$('.tab').forEach(sec=>sec.classList.toggle('hidden', sec.id!==tab));
@@ -101,31 +109,101 @@ function restoreFloorActionSelections(){
 }
 
 /* ---------- SHOP (ảnh) ---------- */
+function buildQtyControl({cache, key, onChange}){
+  const wrap = document.createElement('div');
+  wrap.className = 'qty';
+  const minus = document.createElement('button'); minus.type='button'; minus.textContent='–';
+  const input = document.createElement('input');
+  input.type = 'number'; input.min = '1'; input.inputMode = 'numeric';
+  input.value = getCachedQty(cache, key, 1);
+  const plus = document.createElement('button'); plus.type='button'; plus.textContent='+';
+
+  const syncCache = ()=>{
+    const v = parseInt(input.value,10);
+    cache[key] = (Number.isFinite(v) && v>0) ? String(v) : '1';
+    if (typeof onChange === 'function') onChange(cache[key]);
+  };
+  input.addEventListener('input', syncCache);
+  input.addEventListener('focus', ()=>{ wrap.dataset.focused='1'; });
+  input.addEventListener('blur', ()=>{ delete wrap.dataset.focused; });
+
+  minus.addEventListener('click', ()=>{
+    const v = Math.max(1, (parseInt(input.value,10)||1)-1);
+    input.value = v; syncCache();
+  });
+  plus.addEventListener('click', ()=>{
+    const v = Math.max(1, (parseInt(input.value,10)||1)+1);
+    input.value = v; syncCache();
+  });
+
+  wrap.append(minus, input, plus);
+  return { wrap, input };
+}
+
 function renderShop(){
   const seedGrid = $('#seedShopGrid'); if (!seedGrid) return;
   seedGrid.innerHTML='';
   ['fire','water','wind','earth'].forEach(cls=>{
     const el = document.createElement('div');
     el.className='item';
+
     const img = document.createElement('img');
     img.src = `/assets/Seed_Planted/seed_planted_${cls}.png`;
     img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:cls.toUpperCase(),style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
-    const btn = document.createElement('button'); btn.textContent = `Buy ${cls} (100)`;
-    btn.addEventListener('click', async ()=>{ try{ await api('/shop/buy',{ itemType:'seed', classOrType: cls, qty:1}); await refresh(); }catch(e){ showError(e,'buy-seed'); } });
+
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = cls;
-    el.append(img, lbl, btn); seedGrid.appendChild(el);
+
+    // qty control (persist by cache)
+    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
+      cache: seedQtyCache, key: cls
+    });
+
+    const btn = document.createElement('button');
+    btn.textContent = `Buy ${cls} (100)`;
+    btn.addEventListener('click', async ()=>{
+      const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
+      seedQtyCache[cls] = String(qty);
+      try{
+        await api('/shop/buy',{ itemType:'seed', classOrType: cls, qty });
+        await refresh();
+      }catch(e){ showError(e,'buy-seed'); }
+    });
+
+    el.append(img, lbl, qtyWrap, btn);
+    seedGrid.appendChild(el);
   });
 
   const potGrid = $('#potShopGrid'); if (!potGrid) return; potGrid.innerHTML='';
-  [{type:'basic', img:'pot1.png', label:'Basic (100)'},{type:'gold', img:'pot2.png', label:'Gold +50% (300)'},{type:'timeskip', img:'pot3.png', label:'Time Skip +50% (300)'}]
-  .forEach(p=>{
+  const potDefs = [
+    {type:'basic', img:'pot1.png', label:'Basic (100)'},
+    {type:'gold', img:'pot2.png', label:'Gold +50% (300)'},
+    {type:'timeskip', img:'pot3.png', label:'Time Skip +50% (300)'}
+  ];
+  potDefs.forEach(p=>{
     const el=document.createElement('div'); el.className='item';
+
     const img = document.createElement('img'); img.src = `/assets/Pots_Image/${p.img}`;
     img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:p.type,style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
-    const btn = document.createElement('button'); btn.textContent = p.label;
-    btn.addEventListener('click', async ()=>{ try{ await api('/shop/buy',{ itemType:'pot', classOrType:p.type, qty:1}); await refresh(); }catch(e){ showError(e,'buy-pot'); } });
+
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = p.type;
-    el.append(img,lbl,btn); potGrid.appendChild(el);
+
+    // qty control (persist by cache)
+    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
+      cache: potQtyCache, key: p.type
+    });
+
+    const btn = document.createElement('button'); btn.textContent = p.label;
+    btn.addEventListener('click', async ()=>{
+      const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
+      potQtyCache[p.type] = String(qty);
+      try{
+        await api('/shop/buy',{ itemType:'pot', classOrType:p.type, qty });
+        await refresh();
+      }catch(e){ showError(e,'buy-pot'); }
+    });
+
+    el.append(img,lbl,qtyWrap,btn);
+    potGrid.appendChild(el);
   });
 }
 
@@ -609,6 +687,22 @@ function ensureFloorVisible(){
 }
 $('#btnPrevFloor')?.addEventListener('click', ()=>{ currentFloorIdx = Math.max(0, currentFloorIdx-1); ensureFloorVisible(); });
 $('#btnNextFloor')?.addEventListener('click', ()=>{ const n = $$('#floors .floor').length; currentFloorIdx = Math.min(n-1, currentFloorIdx+1); ensureFloorVisible(); });
+
+/* ---------- HARVEST ALL (NEW) ---------- */
+async function harvestAllMature() {
+  const btn = document.getElementById('btnHarvestAll');
+  if (btn) btn.disabled = true;
+  try {
+    const r = await api('/plot/harvest-all', {});
+    alert(`Đã thu hoạch ${r.harvested} plot mature`);
+    await refresh();
+  } catch (e) {
+    showError(e, 'harvest-all');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+document.getElementById('btnHarvestAll')?.addEventListener('click', harvestAllMature);
 
 /* ---------- WS & timers ---------- */
 let ws;

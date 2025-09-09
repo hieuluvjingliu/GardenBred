@@ -305,3 +305,6 @@ h1, h2, h3 {
   content:""; position:absolute; inset:3px; background:#fff; border-radius:2px;
 }
 .auto-filters .chip span{ color:#dbe8ff; font-size:13px; }
+.item .qty-wrap{margin:6px 0}
+.item .qty-wrap input.qty{width:72px;padding:4px}
+#shopTrapBox .qty-wrap{margin:8px 0}
