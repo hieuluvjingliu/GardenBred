@@ -52,10 +52,99 @@ function integrityOk(dbFilePath) {
   } finally { t.close(); }
 }
 
+// ==== Prepared statements (khai báo biến, sẽ gán trong prepareAll) ====
+let upsertUserStmt, getUserStmt, getUserByIdStmt, insertSessionStmt, getSessionStmt;
+let getStateStmt, getFloorsStmt, getFloorsCountStmt, ensureFloorStmt;
+let getPlotsByFloorStmt, ensurePlotStmt;
+let seedBasePriceStmt, upsertSeedCatalogStmt;
+let addCoinsStmt, subCoinsStmt;
+let invAddSeedStmt, invListSeedsStmt, invGetSeedStmt, invDelSeedStmt;
+let invAddPotStmt, invListPotsStmt, invGetPotStmt, invDelPotStmt;
+let setPlotPotStmt, setPlotAfterPlantStmt, setPlotStageStmt, clearPlotSeedOnlyStmt, clearPlotAllStmt;
+let listUsersOnlineStmt, addTrapToFloorStmt, useTrapOnFloorStmt, listFloorsByUserStmt, getFloorByIdStmt;
+let marketCreateStmt, marketOpenStmt, marketGetStmt, marketCloseStmt;
+let logStmt;
+
+function prepareAll() {
+  // users/sessions
+  upsertUserStmt = db.prepare(
+    `INSERT INTO users (username, coins, created_at) VALUES (?, 10000, ?)
+     ON CONFLICT(username) DO NOTHING`
+  );
+  getUserStmt = db.prepare(`SELECT * FROM users WHERE username = ?`);
+  getUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+  insertSessionStmt = db.prepare(`INSERT INTO sessions (id, user_id, created_at) VALUES (?, ?, ?)`);
+  getSessionStmt = db.prepare(`SELECT * FROM sessions WHERE id = ?`);
+
+  // state/floors/plots
+  getStateStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
+  getFloorsStmt = db.prepare(`SELECT * FROM floors WHERE user_id = ? ORDER BY idx ASC`);
+  getFloorsCountStmt = db.prepare(`SELECT COUNT(*) as cnt FROM floors WHERE user_id = ? AND unlocked = 1`);
+  ensureFloorStmt = db.prepare(`INSERT OR IGNORE INTO floors (user_id, idx, unlocked, trap_count) VALUES (?, ?, 1, 0)`);
+  getPlotsByFloorStmt = db.prepare(`SELECT * FROM plots WHERE floor_id = ? ORDER BY slot ASC`);
+  ensurePlotStmt = db.prepare(`INSERT OR IGNORE INTO plots (floor_id, slot, stage) VALUES (?, ?, 'empty')`);
+
+  // seed catalog
+  seedBasePriceStmt = db.prepare(`SELECT class as class_name, base_price FROM seed_catalog WHERE class = ?`);
+  upsertSeedCatalogStmt = db.prepare(
+    `INSERT INTO seed_catalog(class, base_price) VALUES (?, ?)
+     ON CONFLICT(class) DO UPDATE SET base_price = excluded.base_price`
+  );
+
+  // coins
+  addCoinsStmt = db.prepare(`UPDATE users SET coins = coins + ? WHERE id = ?`);
+  subCoinsStmt = db.prepare(`UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`);
+
+  // inventory seeds
+  invAddSeedStmt = db.prepare(`INSERT INTO inventory_seeds (user_id, class, base_price, is_mature) VALUES (?, ?, ?, ?)`);
+  invListSeedsStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE user_id = ?`);
+  invGetSeedStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
+  invDelSeedStmt = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
+
+  // inventory pots
+  invAddPotStmt = db.prepare(`INSERT INTO inventory_pots (user_id, type, speed_mult, yield_mult) VALUES (?, ?, ?, ?)`);
+  invListPotsStmt = db.prepare(`SELECT * FROM inventory_pots WHERE user_id = ?`);
+  invGetPotStmt = db.prepare(`SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`);
+  invDelPotStmt = db.prepare(`DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`);
+
+  // plots update
+  setPlotPotStmt = db.prepare(`UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`);
+  setPlotAfterPlantStmt = db.prepare(
+    `UPDATE plots SET seed_id=?, class=?, stage='planted', planted_at=?, mature_at=? WHERE id=?`
+  );
+  setPlotStageStmt = db.prepare(`UPDATE plots SET stage=? WHERE id=?`);
+  clearPlotSeedOnlyStmt = db.prepare(
+    `UPDATE plots SET seed_id=NULL, class=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
+  );
+  clearPlotAllStmt = db.prepare(
+    `UPDATE plots SET pot_id=NULL, pot_type=NULL, seed_id=NULL, class=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
+  );
+
+  // online / floors helpers
+  listUsersOnlineStmt = db.prepare(`SELECT id, username FROM users ORDER BY id DESC LIMIT 50`);
+  addTrapToFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`);
+  useTrapOnFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count - 1 WHERE id = ? AND trap_count > 0`);
+  listFloorsByUserStmt = db.prepare(`SELECT * FROM floors WHERE user_id = ? ORDER BY idx ASC`);
+  getFloorByIdStmt = db.prepare(`SELECT * FROM floors WHERE id = ?`);
+
+  // market
+  marketCreateStmt = db.prepare(
+    `INSERT INTO market_listings (seller_id, item_type, item_id, class, base_price, ask_price, status, created_at)
+     VALUES (?, 'seed', ?, ?, ?, ?, 'open', ?)`
+  );
+  marketOpenStmt = db.prepare(`SELECT * FROM market_listings WHERE status = 'open' ORDER BY created_at DESC LIMIT 100`);
+  marketGetStmt = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
+  marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHERE id = ?`);
+
+  // logs
+  logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
+}
+
 try {
   openDb();
   if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
   runMigrations();
+  prepareAll();                              // <== tạo toàn bộ statements
   console.log('[DB] ready');
 } catch (e) {
   console.error('[DB] startup failed:', e);
@@ -73,118 +162,7 @@ function logLine(level, msg, extra = {}) {
   fs.appendFile(f, line + '\n', () => {});
 }
 
-// ==== Prepared statements ====
-const upsertUserStmt = db.prepare(
-  `INSERT INTO users (username, coins, created_at) VALUES (?, 10000, ?)
-   ON CONFLICT(username) DO NOTHING`
-);
-const getUserStmt = db.prepare(`SELECT * FROM users WHERE username = ?`);
-const getUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
-const insertSessionStmt = db.prepare(
-  `INSERT INTO sessions (id, user_id, created_at) VALUES (?, ?, ?)`
-);
-const getSessionStmt = db.prepare(`SELECT * FROM sessions WHERE id = ?`);
-
-const getStateStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
-const getFloorsStmt = db.prepare(
-  `SELECT * FROM floors WHERE user_id = ? ORDER BY idx ASC`
-);
-const getFloorsCountStmt = db.prepare(
-  `SELECT COUNT(*) as cnt FROM floors WHERE user_id = ? AND unlocked = 1`
-);
-const ensureFloorStmt = db.prepare(
-  `INSERT OR IGNORE INTO floors (user_id, idx, unlocked, trap_count)
-   VALUES (?, ?, 1, 0)`
-);
-
-const getPlotsByFloorStmt = db.prepare(
-  `SELECT * FROM plots WHERE floor_id = ? ORDER BY slot ASC`
-);
-const ensurePlotStmt = db.prepare(
-  `INSERT OR IGNORE INTO plots (floor_id, slot, stage) VALUES (?, ?, 'empty')`
-);
-
-// seed catalog
-const seedBasePriceStmt = db.prepare(
-  `SELECT class as class_name, base_price FROM seed_catalog WHERE class = ?`
-);
-const upsertSeedCatalogStmt = db.prepare(
-  `INSERT INTO seed_catalog(class, base_price) VALUES (?, ?)
-   ON CONFLICT(class) DO UPDATE SET base_price = excluded.base_price`
-);
-
-// coins
-const addCoinsStmt = db.prepare(`UPDATE users SET coins = coins + ? WHERE id = ?`);
-const subCoinsStmt = db.prepare(`UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`);
-
-// inventory seeds
-const invAddSeedStmt = db.prepare(
-  `INSERT INTO inventory_seeds (user_id, class, base_price, is_mature)
-   VALUES (?, ?, ?, ?)`
-);
-const invListSeedsStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE user_id = ?`);
-const invGetSeedStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
-const invDelSeedStmt = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
-
-// inventory pots
-const invAddPotStmt = db.prepare(
-  `INSERT INTO inventory_pots (user_id, type, speed_mult, yield_mult)
-   VALUES (?, ?, ?, ?)`
-);
-const invListPotsStmt = db.prepare(`SELECT * FROM inventory_pots WHERE user_id = ?`);
-const invGetPotStmt = db.prepare(`SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`);
-const invDelPotStmt = db.prepare(`DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`);
-
-// plots update
-const setPlotPotStmt = db.prepare(`UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`);
-const setPlotAfterPlantStmt = db.prepare(
-  `UPDATE plots
-   SET seed_id=?, class=?, stage='planted', planted_at=?, mature_at=?
-   WHERE id=?`
-);
-const setPlotStageStmt = db.prepare(`UPDATE plots SET stage=? WHERE id=?`);
-const clearPlotSeedOnlyStmt = db.prepare(
-  `UPDATE plots
-   SET seed_id=NULL, class=NULL, stage='empty', planted_at=NULL, mature_at=NULL
-   WHERE id=?`
-);
-const clearPlotAllStmt = db.prepare(
-  `UPDATE plots
-   SET pot_id=NULL, pot_type=NULL, seed_id=NULL, class=NULL,
-       stage='empty', planted_at=NULL, mature_at=NULL
-   WHERE id=?`
-);
-
-// online / floors
-const listUsersOnlineStmt = db.prepare(
-  `SELECT id, username FROM users ORDER BY id DESC LIMIT 50`
-);
-const addTrapToFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`);
-const useTrapOnFloorStmt = db.prepare(
-  `UPDATE floors SET trap_count = trap_count - 1 WHERE id = ? AND trap_count > 0`
-);
-const listFloorsByUserStmt = db.prepare(
-  `SELECT * FROM floors WHERE user_id = ? ORDER BY idx ASC`
-);
-const getFloorByIdStmt = db.prepare(`SELECT * FROM floors WHERE id = ?`);
-
-// market
-const marketCreateStmt = db.prepare(
-  `INSERT INTO market_listings
-   (seller_id, item_type, item_id, class, base_price, ask_price, status, created_at)
-   VALUES (?, 'seed', ?, ?, ?, ?, 'open', ?)`
-);
-const marketOpenStmt = db.prepare(
-  `SELECT * FROM market_listings WHERE status = 'open'
-   ORDER BY created_at DESC LIMIT 100`
-);
-const marketGetStmt = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
-const marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHERE id = ?`);
-
-// logs
-const logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
-
-// === log helpers ===
+// === log helpers (dùng sau khi đã có logStmt) ===
 function logAction(userId, action, payloadObj) {
   const payload = JSON.stringify(payloadObj ?? {});
   try { logStmt.run(userId ?? null, action, payload, Date.now()); } catch {}
@@ -653,6 +631,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
     // mở lại DB chính
     openDb();
     runMigrations();
+    prepareAll();                              // <== re-create toàn bộ statements
 
     try { fs.unlinkSync(BAK); } catch {}
     logLine('restore', 'success');
@@ -666,7 +645,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
         try { if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH); } catch {}
         fs.renameSync(BAK, DB_PATH);
       }
-      openDb(); runMigrations();
+      openDb(); runMigrations(); prepareAll();
     } catch {}
     try { if (fs.existsSync(TMP)) fs.unlinkSync(TMP); } catch {}
     restoring = false;
