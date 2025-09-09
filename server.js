@@ -1,4 +1,4 @@
-// server.js (ESM) — GardenBred: Express + WS + SQLite + backup/restore
+// server.js (ESM) — GardenBred: Express + WS + SQLite + safe backup/restore
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -12,8 +12,8 @@ import multer from 'multer';
 
 // ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BREED_PATH = path.join(__dirname, 'tools', 'breed_map.json');
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'game.db');
+const BREED_PATH = path.join(__dirname, 'tools', 'breed_map.json');       // <- root
+const DB_PATH    = process.env.DB_PATH || path.join(__dirname, 'game.db');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,10 +21,11 @@ const wss = new WebSocketServer({ server });
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(__dirname));
+// ⚠️ ĐỪNG serve cả project root để tránh lộ game.db
+// app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ==== BACKUP (download) — không cần đóng DB ====
+// ==== BACKUP (download) ====
 app.get('/admin/download-db', (req, res) => {
   if ((req.query.token || '') !== (process.env.ADMIN_TOKEN || '')) {
     return res.sendStatus(403);
@@ -32,29 +33,23 @@ app.get('/admin/download-db', (req, res) => {
   res.download(DB_PATH, 'game.db');
 });
 
-// ==== DB open + migrations ====
 // ==== DB open + migrations (safe) ====
 let db;
-function openDb() {
-  db = new Database(DB_PATH);
-}
+function openDb() { db = new Database(DB_PATH); }
 function runMigrations() {
   const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
   db.exec(sql);
 }
-
-// Integrity helper
 function integrityOk(dbFilePath) {
   const t = new Database(dbFilePath);
   try {
     const r = t.prepare('PRAGMA integrity_check').get();
-    return r && (r.integrity_check === 'ok' || r['integrity_check'] === 'ok');
+    return r?.integrity_check === 'ok';
   } finally { t.close(); }
 }
 
 try {
   openDb();
-  // Kiểm tra tính toàn vẹn trước khi chạy migrations
   if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
   runMigrations();
   console.log('[DB] ready');
@@ -62,40 +57,8 @@ try {
   console.error('[DB] startup failed:', e);
   process.exit(1);
 }
-// đảm bảo chạy migrations mỗi lần khởi động
-runMigrations();
 
-// ==== DB open + migrations (safe) ====
-let db;
-function openDb() {
-  db = new Database(DB_PATH);
-}
-function runMigrations() {
-  const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
-  db.exec(sql);
-}
-
-// Integrity helper
-function integrityOk(dbFilePath) {
-  const t = new Database(dbFilePath);
-  try {
-    const r = t.prepare('PRAGMA integrity_check').get();
-    return r && (r.integrity_check === 'ok' || r['integrity_check'] === 'ok');
-  } finally { t.close(); }
-}
-
-try {
-  openDb();
-  // Kiểm tra tính toàn vẹn trước khi chạy migrations
-  if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
-  runMigrations();
-  console.log('[DB] ready');
-} catch (e) {
-  console.error('[DB] startup failed:', e);
-  process.exit(1);
-}
-// ==== RESTORE (upload) — cần đóng DB ====
-// ==== Logging ====
+// ==== Logging (file + table) ====
 const LOG_DIR = path.join(__dirname, 'log');
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 
@@ -105,33 +68,6 @@ function logLine(level, msg, extra = {}) {
   const f = path.join(LOG_DIR, new Date().toISOString().slice(0, 10) + '.log');
   fs.appendFile(f, line + '\n', () => {});
 }
-const logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
-
-function logAction(userId, action, payloadObj) {
-  const payload = JSON.stringify(payloadObj ?? {});
-  logStmt.run(userId ?? null, action, payload, Date.now());
-  logLine('action', action, { userId, ...payloadObj });
-}
-app.use((req, _res, next) => {
-  logLine('http', `${req.method} ${req.path}`, { ip: req.ip, body: req.body || null });
-  next();
-});
-
-// ==== Helpers ====
-function now() { return Date.now(); }
-function floorPriceBase(className) {
-  const basics = ['fire', 'water', 'wind', 'earth'];
-  return basics.includes(className)
-    ? 100
-    : (seedBasePriceStmt.get(className)?.base_price ?? 100);
-}
-function calcBreedBase(aPrice, bPrice) { return Math.floor((aPrice + bPrice) * 0.8); }
-function sellToShopAmount(base) { return Math.floor(base * 1.1); }
-function marketMin(base) { return Math.floor(base * 0.9); }
-function marketMax(base) { return Math.floor(base * 1.5); }
-function userFloorsCount(userId) { return getFloorsCountStmt.get(userId).cnt; }
-function trapPriceForUser(userId) { return 1000 * userFloorsCount(userId); }
-function trapMaxForUser(userId) { return userFloorsCount(userId) * 5; }
 
 // ==== Prepared statements ====
 const upsertUserStmt = db.prepare(
@@ -241,13 +177,33 @@ const marketOpenStmt = db.prepare(
 const marketGetStmt = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
 const marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHERE id = ?`);
 
-// seed catalog mặc định
-upsertSeedCatalogStmt.run('fire', 100);
-upsertSeedCatalogStmt.run('water', 100);
-upsertSeedCatalogStmt.run('wind', 100);
-upsertSeedCatalogStmt.run('earth', 100);
+// logs
+const logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
 
-// ==== Breed map from JSON ====
+// === log helpers (dùng sau khi đã có logStmt) ===
+function logAction(userId, action, payloadObj) {
+  const payload = JSON.stringify(payloadObj ?? {});
+  try { logStmt.run(userId ?? null, action, payload, Date.now()); } catch {}
+  logLine('action', action, { userId, ...payloadObj });
+}
+
+// ==== Helpers ====
+function now() { return Date.now(); }
+function floorPriceBase(className) {
+  const basics = ['fire', 'water', 'wind', 'earth'];
+  return basics.includes(className)
+    ? 100
+    : (seedBasePriceStmt.get(className)?.base_price ?? 100);
+}
+function calcBreedBase(aPrice, bPrice) { return Math.floor((aPrice + bPrice) * 0.8); }
+function sellToShopAmount(base) { return Math.floor(base * 1.1); }
+function marketMin(base) { return Math.floor(base * 0.9); }
+function marketMax(base) { return Math.floor(base * 1.5); }
+function userFloorsCount(userId) { return getFloorsCountStmt.get(userId).cnt; }
+function trapPriceForUser(userId) { return 1000 * userFloorsCount(userId); }
+function trapMaxForUser(userId) { return userFloorsCount(userId) * 5; }
+
+// ==== Breed map from JSON (root) ====
 const DEFAULT_BREED_MAP = {
   'water+fire': 'steam',
   'water+wind': 'wave',
@@ -257,7 +213,6 @@ const DEFAULT_BREED_MAP = {
   'earth+fire': 'lava',
   'steam+water': 'cloud'
 };
-
 function ensureBreedFile() {
   try {
     const dir = path.dirname(BREED_PATH);
@@ -265,9 +220,7 @@ function ensureBreedFile() {
     if (!fs.existsSync(BREED_PATH)) {
       fs.writeFileSync(BREED_PATH, JSON.stringify(DEFAULT_BREED_MAP, null, 2));
     }
-  } catch (e) {
-    console.error('ensureBreedFile failed:', e);
-  }
+  } catch (e) { console.error('ensureBreedFile failed:', e); }
 }
 function loadBreedMap() {
   ensureBreedFile();
@@ -293,6 +246,12 @@ function combineClass(a, b) {
   const k2 = `${String(b).toLowerCase()}+${String(a).toLowerCase()}`;
   return BREED_MAP[k1] || BREED_MAP[k2] || null;
 }
+
+// ==== HTTP access log ====
+app.use((req, _res, next) => {
+  logLine('http', `${req.method} ${req.path}`, { ip: req.ip, body: req.body || null });
+  next();
+});
 
 // ==== Auth ====
 app.post('/auth/login', (req, res) => {
@@ -639,23 +598,68 @@ app.post('/visit/steal-plot', auth, (req, res) => {
   res.json({ ok: true, class: p.class });
 });
 
-// ==== Floors ====
-app.post('/floors/buy', auth, (req, res) => {
-  const floors = listFloorsByUserStmt.all(req.userId);
-  const maxIdx = floors.reduce((m, f) => Math.max(m, f.idx), 0);
-  const nextIdx = maxIdx + 1;
-  const price = (nextIdx === 1) ? 0 : nextIdx * 1000;
+// ==== RESTORE (upload) — safe: integrity + backup + rollback ====
+const upload = multer({ storage: multer.memoryStorage() });
+app.post('/admin/upload-db', upload.single('db'), (req, res) => {
+  if ((req.headers['x-admin-token'] || '') !== (process.env.ADMIN_TOKEN || '')) {
+    return res.sendStatus(403);
+  }
+  if (!req.file) return res.status(400).json({ error: 'missing file field "db"' });
 
-  const me = getUserByIdStmt.get(req.userId);
-  if (me.coins < price) return res.status(400).json({ error: 'Not enough coins' });
+  const TMP = DB_PATH + '.restore';
+  const BAK = DB_PATH + '.bak';
 
-  ensureFloorStmt.run(req.userId, nextIdx);
-  const newFloor = db.prepare(`SELECT * FROM floors WHERE user_id = ? AND idx = ?`).get(req.userId, nextIdx);
-  for (let i = 1; i <= 10; i++) ensurePlotStmt.run(newFloor.id, i);
-  if (price > 0) subCoinsStmt.run(price, req.userId);
+  try { fs.writeFileSync(TMP, req.file.buffer); }
+  catch (e) { return res.status(500).json({ error: 'write tmp failed', detail: String(e) }); }
 
-  logAction(req.userId, 'floor_buy', { idx: nextIdx, price });
-  res.json({ ok: true, floorId: newFloor.id, idx: nextIdx, price });
+  // pre-check integrity
+  try {
+    const t = new Database(TMP);
+    const r = t.prepare('PRAGMA integrity_check').get();
+    t.close();
+    if (!r || r.integrity_check !== 'ok') {
+      fs.unlinkSync(TMP);
+      return res.status(400).json({ error: 'integrity_check != ok' });
+    }
+  } catch (e) {
+    try { fs.unlinkSync(TMP); } catch {}
+    return res.status(500).json({ error: 'integrity probe failed', detail: String(e) });
+  }
+
+  try {
+    try { db?.close(); } catch {}
+    try { if (fs.existsSync(DB_PATH)) fs.renameSync(DB_PATH, BAK); } catch {}
+    fs.renameSync(TMP, DB_PATH);
+
+    // mở thử + chạy schema để sync code hiện tại
+    const test = new Database(DB_PATH);
+    try {
+      const r2 = test.prepare('PRAGMA integrity_check').get();
+      if (!r2 || r2.integrity_check !== 'ok') throw new Error('integrity after swap != ok');
+      const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+      test.exec(sql);
+    } finally { test.close(); }
+
+    // mở lại DB chính
+    openDb();
+    runMigrations();
+
+    try { fs.unlinkSync(BAK); } catch {}
+    logLine('restore', 'success');
+    return res.json({ ok: true, restarted: false });
+  } catch (e) {
+    // rollback
+    logLine('restore', 'failed, rollback', { err: String(e) });
+    try {
+      if (fs.existsSync(BAK)) {
+        try { if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH); } catch {}
+        fs.renameSync(BAK, DB_PATH);
+      }
+      openDb(); runMigrations();
+    } catch {}
+    try { if (fs.existsSync(TMP)) fs.unlinkSync(TMP); } catch {}
+    return res.status(500).json({ error: 'restore failed (rolled back)', detail: String(e) });
+  }
 });
 
 // ==== WebSocket push state ====
