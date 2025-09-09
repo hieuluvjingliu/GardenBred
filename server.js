@@ -12,8 +12,9 @@ import multer from 'multer';
 
 // ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const BREED_PATH = path.join(__dirname, 'tools', 'breed_map.json');       // <- root
-const DB_PATH    = process.env.DB_PATH || path.join(__dirname, 'game.db');
+const DB_PATH     = process.env.DB_PATH || path.join(__dirname, 'game.db');
+const SCHEMA_PATH = path.join(__dirname, 'tools', 'schema.sql');       // <-- cố định tools/
+const BREED_PATH  = path.join(__dirname, 'tools', 'breed_map.json');   // <-- cố định tools/
 
 const app = express();
 const server = http.createServer(app);
@@ -21,7 +22,7 @@ const wss = new WebSocketServer({ server });
 
 app.use(express.json());
 app.use(cookieParser());
-// ⚠️ ĐỪNG serve cả project root để tránh lộ game.db
+// ⚠️ KHÔNG serve cả project root để tránh lộ game.db
 // app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -35,9 +36,12 @@ app.get('/admin/download-db', (req, res) => {
 
 // ==== DB open + migrations (safe) ====
 let db;
+let restoring = false;                         // flag ngăn truy vấn khi đang restore
+function safeDbReady() { return db && db.open === true && !restoring; }
+
 function openDb() { db = new Database(DB_PATH); }
 function runMigrations() {
-  const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
+  const sql = fs.readFileSync(SCHEMA_PATH, 'utf8');
   db.exec(sql);
 }
 function integrityOk(dbFilePath) {
@@ -180,7 +184,7 @@ const marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHE
 // logs
 const logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
 
-// === log helpers (dùng sau khi đã có logStmt) ===
+// === log helpers ===
 function logAction(userId, action, payloadObj) {
   const payload = JSON.stringify(payloadObj ?? {});
   try { logStmt.run(userId ?? null, action, payload, Date.now()); } catch {}
@@ -203,7 +207,7 @@ function userFloorsCount(userId) { return getFloorsCountStmt.get(userId).cnt; }
 function trapPriceForUser(userId) { return 1000 * userFloorsCount(userId); }
 function trapMaxForUser(userId) { return userFloorsCount(userId) * 5; }
 
-// ==== Breed map from JSON (root) ====
+// ==== Breed map from JSON (tools/) ====
 const DEFAULT_BREED_MAP = {
   'water+fire': 'steam',
   'water+wind': 'wave',
@@ -412,14 +416,19 @@ app.post('/plot/plant', auth, (req, res) => {
 
 // tick: planted -> growing -> mature
 setInterval(() => {
-  const rows = db.prepare(`SELECT * FROM plots WHERE stage IN ('planted','growing')`).all();
-  const t = now();
-  for (const r of rows) {
-    if (r.stage === 'planted') {
-      const half = r.planted_at + Math.floor((r.mature_at - r.planted_at) / 2);
-      if (t >= half) setPlotStageStmt.run('growing', r.id);
+  if (!safeDbReady()) return;
+  try {
+    const rows = db.prepare(`SELECT * FROM plots WHERE stage IN ('planted','growing')`).all();
+    const t = now();
+    for (const r of rows) {
+      if (r.stage === 'planted') {
+        const half = r.planted_at + Math.floor((r.mature_at - r.planted_at) / 2);
+        if (t >= half) setPlotStageStmt.run('growing', r.id);
+      }
+      if (r.stage === 'growing' && t >= r.mature_at) setPlotStageStmt.run('mature', r.id);
     }
-    if (r.stage === 'growing' && t >= r.mature_at) setPlotStageStmt.run('mature', r.id);
+  } catch (e) {
+    console.error('[tick] error:', e);
   }
 }, 2000);
 
@@ -626,6 +635,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
     return res.status(500).json({ error: 'integrity probe failed', detail: String(e) });
   }
 
+  restoring = true;
   try {
     try { db?.close(); } catch {}
     try { if (fs.existsSync(DB_PATH)) fs.renameSync(DB_PATH, BAK); } catch {}
@@ -636,7 +646,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
     try {
       const r2 = test.prepare('PRAGMA integrity_check').get();
       if (!r2 || r2.integrity_check !== 'ok') throw new Error('integrity after swap != ok');
-      const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
+      const sql = fs.readFileSync(SCHEMA_PATH, 'utf8');   // dùng SCHEMA_PATH (tools/)
       test.exec(sql);
     } finally { test.close(); }
 
@@ -646,6 +656,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
 
     try { fs.unlinkSync(BAK); } catch {}
     logLine('restore', 'success');
+    restoring = false;
     return res.json({ ok: true, restarted: false });
   } catch (e) {
     // rollback
@@ -658,6 +669,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
       openDb(); runMigrations();
     } catch {}
     try { if (fs.existsSync(TMP)) fs.unlinkSync(TMP); } catch {}
+    restoring = false;
     return res.status(500).json({ error: 'restore failed (rolled back)', detail: String(e) });
   }
 });
@@ -675,6 +687,7 @@ wss.on('connection', (ws, req) => {
 });
 
 function pushState(userId) {
+  if (!safeDbReady()) return;
   const ws = sockets.get(userId);
   if (!ws || ws.readyState !== 1) return;
 
