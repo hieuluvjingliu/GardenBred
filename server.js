@@ -33,6 +33,7 @@ app.get('/admin/download-db', (req, res) => {
 });
 
 // ==== DB open + migrations ====
+// ==== DB open + migrations (safe) ====
 let db;
 function openDb() {
   db = new Database(DB_PATH);
@@ -41,34 +42,59 @@ function runMigrations() {
   const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
   db.exec(sql);
 }
-openDb();
+
+// Integrity helper
+function integrityOk(dbFilePath) {
+  const t = new Database(dbFilePath);
+  try {
+    const r = t.prepare('PRAGMA integrity_check').get();
+    return r && (r.integrity_check === 'ok' || r['integrity_check'] === 'ok');
+  } finally { t.close(); }
+}
+
+try {
+  openDb();
+  // Kiểm tra tính toàn vẹn trước khi chạy migrations
+  if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
+  runMigrations();
+  console.log('[DB] ready');
+} catch (e) {
+  console.error('[DB] startup failed:', e);
+  process.exit(1);
+}
+// đảm bảo chạy migrations mỗi lần khởi động
 runMigrations();
 
-// ==== RESTORE (upload) — an toàn: ghi file tạm -> close DB -> swap -> restart ====
-const upload = multer({ storage: multer.memoryStorage() });
-app.post('/admin/upload-db', upload.single('db'), (req, res) => {
-  if ((req.headers['x-admin-token'] || '') !== (process.env.ADMIN_TOKEN || '')) {
-    return res.sendStatus(403);
-  }
-  if (!req.file) return res.status(400).json({ error: 'missing file' });
+// ==== DB open + migrations (safe) ====
+let db;
+function openDb() {
+  db = new Database(DB_PATH);
+}
+function runMigrations() {
+  const sql = fs.readFileSync(path.join(__dirname, 'tools', 'schema.sql'), 'utf8');
+  db.exec(sql);
+}
 
-  const TMP = DB_PATH + '.restore';
-  fs.writeFile(TMP, req.file.buffer, err => {
-    if (err) return res.status(500).json({ error: 'write failed' });
+// Integrity helper
+function integrityOk(dbFilePath) {
+  const t = new Database(dbFilePath);
+  try {
+    const r = t.prepare('PRAGMA integrity_check').get();
+    return r && (r.integrity_check === 'ok' || r['integrity_check'] === 'ok');
+  } finally { t.close(); }
+}
 
-    try {
-      try { db.close(); } catch (_) {}
-      fs.renameSync(TMP, DB_PATH);
-
-      // trả lời trước rồi restart để app mở DB mới
-      res.json({ ok: true, restarting: true });
-      setTimeout(() => process.exit(0), 200);
-    } catch (e) {
-      return res.status(500).json({ error: 'swap failed', detail: String(e) });
-    }
-  });
-});
-
+try {
+  openDb();
+  // Kiểm tra tính toàn vẹn trước khi chạy migrations
+  if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
+  runMigrations();
+  console.log('[DB] ready');
+} catch (e) {
+  console.error('[DB] startup failed:', e);
+  process.exit(1);
+}
+// ==== RESTORE (upload) — cần đóng DB ====
 // ==== Logging ====
 const LOG_DIR = path.join(__dirname, 'log');
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
