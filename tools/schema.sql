@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS plots (
   stage TEXT NOT NULL DEFAULT 'empty',
   planted_at INTEGER,
   mature_at INTEGER,
+  mutation TEXT DEFAULT NULL,              -- NEW: mutation tier cho seed đang trồng (green/blue/gold...)
   FOREIGN KEY(floor_id) REFERENCES floors(id) ON DELETE CASCADE
 );
 
@@ -52,6 +53,7 @@ CREATE TABLE IF NOT EXISTS inventory_seeds (
   class TEXT NOT NULL,
   base_price INTEGER NOT NULL,
   is_mature INTEGER NOT NULL DEFAULT 0, 
+  mutation TEXT DEFAULT NULL,              -- NEW: mutation tier cho seed (green/blue/gold...)
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -60,17 +62,17 @@ CREATE TABLE IF NOT EXISTS seed_catalog (
   base_price INTEGER NOT NULL
 );
 
--- listings store class to avoid losing it on escrow deletion
 CREATE TABLE IF NOT EXISTS market_listings (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   seller_id INTEGER NOT NULL,
-  item_type TEXT NOT NULL, -- 'seed'
-  item_id INTEGER NOT NULL, -- escrow id in inventory (deleted from inv until sold)
+  item_type TEXT NOT NULL,   -- 'seed'
+  item_id INTEGER NOT NULL,  -- escrow id in inventory (deleted from inv until sold)
   class TEXT NOT NULL,
   base_price INTEGER NOT NULL,
   ask_price INTEGER NOT NULL,
-  status TEXT NOT NULL, -- 'open' | 'sold'
+  status TEXT NOT NULL,      -- 'open' | 'sold'
   created_at INTEGER NOT NULL,
+  mutation TEXT DEFAULT NULL,              -- NEW: mutation tier cho seed rao bán (giữ màu/multiplier)
   FOREIGN KEY(seller_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -84,5 +86,4 @@ CREATE TABLE IF NOT EXISTS logs (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS floors_user_idx_unique ON floors(user_id, idx);
--- Chống nhân bản slot
 CREATE UNIQUE INDEX IF NOT EXISTS plots_floor_slot_unique ON plots(floor_id, slot);

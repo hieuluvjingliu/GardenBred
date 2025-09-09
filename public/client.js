@@ -12,6 +12,40 @@ function getCachedQty(cache, key, fallback=1){
   return Number.isFinite(v) && v > 0 ? v : fallback;
 }
 
+// ---- MUTATION META (client-side only) ----
+const MUT_INFO = {
+  green:   { name:'green',   mult:1.2,  color:'#35e08a' },
+  blue:    { name:'blue',    mult:1.5,  color:'#3b82f6' },
+  yellow:  { name:'yellow',  mult:2.0,  color:'#facc15' },
+  pink:    { name:'pink',    mult:3.0,  color:'#ec4899' },
+  red:     { name:'red',     mult:4.0,  color:'#ef4444' },
+  gold:    { name:'gold',    mult:6.0,  color:'#f59e0b' },
+  rainbow: { name:'rainbow', mult:11.0, color:'#a78bfa' }
+};
+function getMutationMeta(obj){
+  const key = obj?.mutation || obj?.mutation_name;
+  if (!key) return null;
+  const meta = MUT_INFO[key] || null;
+  if (!meta) return null;
+  return {
+    key,
+    name: obj?.mutation_name || meta.name,
+    mult: Number.isFinite(obj?.mutation_mult) ? obj.mutation_mult : meta.mult,
+    color: obj?.mutation_color || obj?.mutation_hex || meta.color
+  };
+}
+
+// --- Helper badge mutation cho khu Breed result ---
+function renderMutationBadge(mut){
+  const key = mut || 'normal';
+  const cls = {
+    green:'mut-green', blue:'mut-blue', yellow:'mut-yellow',
+    pink:'mut-pink', red:'mut-red', gold:'mut-gold',
+    rainbow:'mut-rainbow', normal:'mut-normal'
+  }[key] || 'mut-normal';
+  return `<span class="badge ${cls}">${key}</span>`;
+}
+
 function setActive(tab){
   $$('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   $$('.tab').forEach(sec=>sec.classList.toggle('hidden', sec.id!==tab));
@@ -75,7 +109,6 @@ function preserveSelectValue(sel, fillFn){
   if (old && Array.from(sel.options).some(o=>o.value===old)) sel.value = old;
 }
 function snapshotFloorActionSelections(){
-  // lấy state hiện tại từ DOM trước khi render lại
   floorActionSel = {};
   $$('#floors .floor').forEach(f=>{
     const floorId = +f.dataset.floorId;
@@ -88,7 +121,6 @@ function snapshotFloorActionSelections(){
   });
 }
 function restoreFloorActionSelections(){
-  // đặt lại value nếu vẫn còn tồn tại trong options
   Object.entries(floorActionSel).forEach(([fid, sel])=>{
     const f = $(`#floors .floor[data-floor-id="${fid}"]`);
     if (!f) return;
@@ -153,7 +185,6 @@ function renderShop(){
 
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = cls;
 
-    // qty control (persist by cache)
     const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
       cache: seedQtyCache, key: cls
     });
@@ -187,7 +218,6 @@ function renderShop(){
 
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = p.type;
 
-    // qty control (persist by cache)
     const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
       cache: potQtyCache, key: p.type
     });
@@ -207,7 +237,7 @@ function renderShop(){
   });
 }
 
-/* ---------- MARKET: render danh sách từ state.market ---------- */
+/* ---------- MARKET ---------- */
 function renderMarketListings(){
   const ul = document.getElementById('marketList');
   if (!ul) return;
@@ -233,12 +263,17 @@ function renderMarketListings(){
   });
 }
 
-
 /* ---------- DATA HELPERS ---------- */
 function groupMatureByClass(){
   const by = {};
   (state?.seedInv||[]).filter(s=>s.is_mature===1).forEach(s=>{ by[s.class] = (by[s.class]||0)+1; });
   return by;
+}
+
+function decorateSeedText(seed) {
+  const m = getMutationMeta(seed);
+  if (m) return `#${seed.id} ${seed.class} [${m.name} ×${m.mult}]`;
+  return `#${seed.id} ${seed.class}`;
 }
 
 function populateSelects(){
@@ -251,7 +286,7 @@ function populateSelects(){
       sellSel.innerHTML = '';
       state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
         const o = document.createElement('option');
-        o.value = s.id; o.textContent = `#${s.id} ${s.class}`;
+        o.value = s.id; o.textContent = decorateSeedText(s);
         sellSel.appendChild(o);
       });
     });
@@ -264,10 +299,23 @@ function populateSelects(){
       listSel.innerHTML = '';
       state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
         const o = document.createElement('option');
-        o.value = s.id; o.textContent = `#${s.id} ${s.class}`;
+        o.value = s.id; o.textContent = decorateSeedText(s);
         listSel.appendChild(o);
       });
     });
+
+    const priceInput = $('#listPrice');
+    const syncHint = ()=>{
+      const sid = parseInt(listSel.value,10);
+      const seed = (state?.seedInv||[]).find(x=>x.id===sid);
+      if (!seed || !priceInput) return;
+      const base = seed.base_price || 0;
+      const min = Math.floor(base * 0.9);
+      const max = Math.floor(base * 1.5);
+      priceInput.placeholder = `${min} - ${max}`;
+    };
+    listSel.addEventListener('change', syncHint);
+    setTimeout(syncHint, 0);
   }
 
   // Mature by class
@@ -277,26 +325,26 @@ function populateSelects(){
     const by = groupMatureByClass();
     Object.keys(by).sort().forEach(cls=>{
       const li = document.createElement('li');
-      li.dataset.mature = "1";   // highlight bằng CSS
+      li.dataset.mature = "1";
       li.textContent = `${cls}: ${by[cls]}`;
       matUl.appendChild(li);
     });
   }
 
-  // Breed selects (mature only)
+  // Breed selects
   const selA = $('#breedSelectA'), selB = $('#breedSelectB');
   if (selA && selB){
     const oldA = selA.value, oldB = selB.value;
     selA.innerHTML=''; selB.innerHTML='';
     state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
-      const oa=document.createElement('option'); oa.value=s.id; oa.textContent=`#${s.id} ${s.class}`; selA.appendChild(oa);
-      const ob=document.createElement('option'); ob.value=s.id; ob.textContent=`#${s.id} ${s.class}`; selB.appendChild(ob);
+      const oa=document.createElement('option'); oa.value=s.id; oa.textContent=decorateSeedText(s); selA.appendChild(oa);
+      const ob=document.createElement('option'); ob.value=s.id; ob.textContent=decorateSeedText(s); selB.appendChild(ob);
     });
     if (Array.from(selA.options).some(o=>o.value===oldA)) selA.value = oldA;
     if (Array.from(selB.options).some(o=>o.value===oldB)) selB.value = oldB;
   }
 
-  // Form cũ ở đáy (giữ để không lỗi nếu còn trong HTML)
+  // Form cũ (safe)
   const floorSel = $('#plantFloor');
   if (floorSel){
     preserveSelectValue(floorSel, ()=>{
@@ -319,7 +367,7 @@ function populateSelects(){
   const seedSel = $('#plantSeed');
   if (seedSel){
     preserveSelectValue(seedSel, ()=>{
-      seedSel.innerHTML=''; state.seedInv.filter(s=>s.is_mature===0).forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=`#${s.id} ${s.class}`; seedSel.appendChild(o); });
+      seedSel.innerHTML=''; state.seedInv.filter(s=>s.is_mature===0).forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=decorateSeedText(s); seedSel.appendChild(o); });
     });
   }
 }
@@ -337,6 +385,42 @@ function renderBuyFloorPrice(){
   const maxIdx = floors.reduce((m,f)=>Math.max(m,f.idx),0);
   const nextIdx = maxIdx + 1;
   el.textContent = `Giá mở tầng ${nextIdx}: ${nextFloorPrice()} coins`;
+}
+
+// --- helpers để tô màu badge theo mutation ---
+function hexToRgb(hex){
+  const m = String(hex || '').replace('#','').match(/^([0-9a-f]{3}|[0-9a-f]{6})$/i);
+  if(!m) return {r:0,g:0,b:0};
+  let h = m[1];
+  if(h.length===3) h = h.split('').map(c=>c+c).join('');
+  const n = parseInt(h,16);
+  return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+}
+function pickTextColorForBg(hex){
+  const {r,g,b} = hexToRgb(hex);
+  // relative luminance (WCAG)
+  const lum = (0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255));
+  return lum > 0.6 ? '#041326' : '#ffffff'; // nền sáng -> chữ sẫm, nền tối -> chữ trắng
+}
+
+function addMutationBadge(container, obj) {
+  const m = getMutationMeta(obj);
+  if (!m) return;
+
+  const badge = document.createElement('div');
+  badge.className = 'mut-tag';
+  badge.textContent = m.name;
+  badge.title = `${m.name} ×${m.mult}`;
+
+  // Tô màu theo mutation
+  if (m.color){
+    badge.style.background   = m.color;                      // nền đúng màu mutation
+    badge.style.color        = pickTextColorForBg(m.color);  // chữ tương phản
+    badge.style.borderColor  = m.color;                      // viền cùng màu
+    badge.style.boxShadow    = `0 0 12px ${m.color}66`;      // glow nhẹ cùng màu
+  }
+
+  container.appendChild(badge);
 }
 
 /* ---------- RENDER STATE ---------- */
@@ -376,13 +460,23 @@ function renderState(s){
         el.className='plot'; 
         el.dataset.plotId=p.id; 
         el.dataset.stage=p.stage||'empty'; 
-        el.dataset.class=p.class||''; // để CSS theme theo hệ
+        el.dataset.class=p.class||'';
         if(p.mature_at) el.dataset.matureAt=p.mature_at;
+        if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
+
+        const meta = getMutationMeta(p);
+        el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
 
         const stats=document.createElement('div'); 
         stats.className='stats';
-        stats.innerHTML=`<div class="stat cls"><div class="label">Class</div><div class="value">${p.class||'empty'}</div></div>
-                         <div class="stat time"><div class="label">Time left</div><div class="value"></div></div>`;
+        const lines = [];
+        lines.push(`<div class="stat cls"><div class="label">Class</div><div class="value">${p.class||'empty'}</div></div>`);
+        lines.push(`<div class="stat time"><div class="label">Time left</div><div class="value"></div></div>`);
+        if (p.mutation_name || Number.isFinite(p?.mutation_mult)) {
+          const mutText = `${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}`;
+          lines.push(`<div class="stat mut"><div class="label">Mut</div><div class="value">${mutText}</div></div>`);
+        }
+        stats.innerHTML = lines.join('');
 
         const visual=document.createElement('div'); 
         visual.className='visual';
@@ -398,6 +492,8 @@ function renderState(s){
           plant.className='plant';
           plant.src=`/assets/${folder}/seed_${p.stage}_${p.class}.png`; 
           visual.appendChild(plant);
+
+          addMutationBadge(visual, p); // chỉ badge, không overlay tint
         }
 
         el.append(stats,visual); 
@@ -407,13 +503,12 @@ function renderState(s){
 
       f.appendChild(wrap);
 
-      // Action bar mỗi tầng
       const act=document.createElement('div'); 
       act.className='floor-actions';
       act.innerHTML=`<span class="floor-tag">Floor ${fp.floor.idx}</span>
         <select class="sel-slot">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
         <select class="sel-pot">${(s.potInv||[]).map(p=>`<option value="${p.id}">#${p.id} ${p.type}</option>`).join('')}</select>
-        <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">#${x.id} ${x.class}</option>`).join('')}</select>
+        <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">${decorateSeedText(x)}</option>`).join('')}</select>
         <button class="btn-place">Place Pot</button>
         <button class="btn-plant">Plant</button>
         <button class="btn-remove danger">Remove Plot</button>`;
@@ -446,7 +541,6 @@ function renderState(s){
       floorsDiv.appendChild(f);
     });
 
-    // Buy floor ở cuối
     const maxIdx = (s.floors||[]).reduce((m,f)=>Math.max(m,f.idx),0);
     const price = nextFloorPrice();
     const card=document.createElement('div'); 
@@ -464,7 +558,7 @@ function renderState(s){
   populateSelects();
   renderShop();
   renderBuyFloorPrice();
-  renderMarketListings();   // <<< vẽ danh sách chợ trời
+  renderMarketListings();
 }
 
 async function refresh(){ const data = await get('/me/state'); renderState(data); }
@@ -512,7 +606,38 @@ $('#btnSellShop')?.addEventListener('click', async ()=>{
 $('#btnBreed')?.addEventListener('click', async ()=>{
   const a=parseInt($('#breedSelectA').value,10), b=parseInt($('#breedSelectB').value,10); if(!a||!b) return;
   if (a===b) return alert('Chọn 2 cây khác nhau');
-  try{ const r = await api('/breed',{ seedAId:a, seedBId:b }); $('#breedOut').textContent = `Out: ${r.outClass} (base ${r.base})`; await refresh(); }catch(e){ showError(e, 'breed'); }
+  try{
+    const r = await api('/breed',{ seedAId:a, seedBId:b });
+    $('#breedOut').innerHTML =
+      `${renderMutationBadge(r.mutation)} Out: <b>${r.outClass}</b> (base ${r.base})`;
+    await refresh();
+  }catch(e){ showError(e, 'breed'); }
+});
+
+// Random Breed
+document.getElementById('btnRandomBreed')?.addEventListener('click', ()=>{
+  const inv = (window.state?.seedInv || state?.seedInv || []).filter(s => s.is_mature === 1);
+  const breedOut = document.getElementById('breedOut');
+  const byClass = {};
+  for (const s of inv) (byClass[s.class] ||= []).push(s);
+  const classes = Object.keys(byClass);
+  if (classes.length < 2) {
+    if (breedOut) breedOut.textContent = 'Cần ít nhất 2 hạt mature thuộc 2 class khác nhau!';
+    return;
+  }
+  const i = Math.floor(Math.random()*classes.length);
+  let j = Math.floor(Math.random()*(classes.length-1));
+  if (j >= i) j++;
+  const c1 = classes[i], c2 = classes[j];
+  const seed1 = byClass[c1][Math.floor(Math.random()*byClass[c1].length)];
+  const seed2 = byClass[c2][Math.floor(Math.random()*byClass[c2].length)];
+  const selA = document.getElementById('breedSelectA');
+  const selB = document.getElementById('breedSelectB');
+  if (selA && selB) {
+    selA.value = String(seed1.id);
+    selB.value = String(seed2.id);
+    document.getElementById('btnBreed')?.click();
+  }
 });
 
 /* ---------- MARKET ---------- */
@@ -522,7 +647,7 @@ $('#btnList')?.addEventListener('click', async ()=>{
   if(!id||!price) return;
   try{
     await api('/market/list',{ seedId:id, askPrice:price });
-    await refresh(); // /me/state -> state.market mới -> renderMarketListings()
+    await refresh();
   }catch(e){ showError(e, 'market-list'); }
 });
 $('#marketList')?.addEventListener('click', async (e)=>{
@@ -531,7 +656,7 @@ $('#marketList')?.addEventListener('click', async (e)=>{
   try{ await api('/market/buy',{ listingId:id }); await refresh(); }catch(e){ showError(e, 'market-buy'); }
 });
 
-/* ---------- FORM cũ ở đáy (nếu còn) ---------- */
+/* ---------- FORM cũ ---------- */
 $('#btnPlacePot')?.addEventListener('click', async ()=>{
   const floorId=parseInt($('#plantFloor').value,10);
   const slot=parseInt($('#plantSlot').value,10);
@@ -579,8 +704,6 @@ function clearAllVisitViews(){ $$('.visit-view').forEach(v=>v.innerHTML=''); }
 async function renderVisitedFloor(uid, floorId){
   const container = document.querySelector('#visit-'+uid);
   if (!container) return;
-
-  // SKELETON
   container.innerHTML = '<div class="skeleton"></div>';
 
   try {
@@ -597,6 +720,10 @@ async function renderVisitedFloor(uid, floorId){
       el.dataset.stage  = p.stage || 'empty';
       el.dataset.class  = p.class  || '';
       if (p.mature_at) el.dataset.matureAt = p.mature_at;
+      if (p.mutation_name) el.dataset.mutation = p.mutation_name;
+
+      const meta = getMutationMeta(p);
+      el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
 
       const stats = document.createElement('div');
       stats.className = 'stats';
@@ -611,6 +738,13 @@ async function renderVisitedFloor(uid, floorId){
       statTime.innerHTML = `<div class="label">Time left</div><div class="value"></div>`;
       stats.appendChild(statTime);
 
+      if (p.mutation_name || Number.isFinite(p?.mutation_mult)) {
+        const mut = document.createElement('div');
+        mut.className = 'stat mut';
+        mut.innerHTML = `<div class="label">Mut</div><div class="value">${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}</div>`;
+        stats.appendChild(mut);
+      }
+
       const visual = document.createElement('div');
       visual.className = 'visual';
 
@@ -622,38 +756,22 @@ async function renderVisitedFloor(uid, floorId){
       }
 
       if (p.class && p.stage){
-        const stageFolder = p.stage==='planted' ? 'Seed_Planted'
-                         : p.stage==='growing' ? 'Seed_Growing'
-                         : p.stage==='mature'  ? 'Seed_Mature' : null;
-        if (stageFolder){
-          const plantImg = document.createElement('img');
-          plantImg.className = 'plant';
-          plantImg.src = `/assets/${stageFolder}/seed_${p.stage}_${p.class}.png`;
-          visual.appendChild(plantImg);
-        }
+        const folder = p.stage==='planted' ? 'Seed_Planted'
+                     : p.stage==='growing' ? 'Seed_Growing'
+                     : 'Seed_Mature';
+        const plantImg = document.createElement('img');
+        plantImg.className = 'plant';
+        plantImg.src = `/assets/${folder}/seed_${p.stage}_${p.class}.png`;
+        visual.appendChild(plantImg);
+
+        addMutationBadge(visual, p); // chỉ badge
       }
 
       el.append(stats, visual);
       if (p.stage==='mature') {
         el.classList.add('mature');
-        el.title = 'Click để ăn trộm';
+        el.title = (el.title ? el.title + ' — ' : '') + 'Click để ăn trộm';
       }
-
-      el.addEventListener('click', async ()=>{
-        if (p.stage!=='mature') return;
-        try{
-          const r = await api('/visit/steal-plot', {
-            targetUserId: data.floor.user_id,
-            floorId: data.floor.id,
-            plotId: p.id
-          });
-          if (r.trap) alert('Trap! penalty ' + r.penalty);
-          else if (r.ok) alert('Stolen seed class ' + r.class);
-          else alert(r.reason || 'fail');
-          await refresh();
-          await renderVisitedFloor(uid, data.floor.id);
-        }catch(err){ showError(err,'visit-steal'); }
-      });
 
       wrap.appendChild(el);
     });
@@ -664,7 +782,6 @@ async function renderVisitedFloor(uid, floorId){
   }
 }
 
-// Click nút Visit trong danh sách Online
 $('#onlineList')?.addEventListener('click', async (e)=>{
   const btn = e.target.closest('.visit');
   if (!btn) return;
@@ -688,7 +805,7 @@ function ensureFloorVisible(){
 $('#btnPrevFloor')?.addEventListener('click', ()=>{ currentFloorIdx = Math.max(0, currentFloorIdx-1); ensureFloorVisible(); });
 $('#btnNextFloor')?.addEventListener('click', ()=>{ const n = $$('#floors .floor').length; currentFloorIdx = Math.min(n-1, currentFloorIdx+1); ensureFloorVisible(); });
 
-/* ---------- HARVEST ALL (NEW) ---------- */
+/* ---------- HARVEST ALL ---------- */
 async function harvestAllMature() {
   const btn = document.getElementById('btnHarvestAll');
   if (btn) btn.disabled = true;
@@ -725,15 +842,15 @@ function tickTimers(){
 }
 setInterval(tickTimers, 1000);
 
-/* ===== Auto Pot / Auto Plant (+ Dynamic Class Filter) ===== */
+/* ===== Auto Pot / Auto Plant ===== */
 const Auto = {
   pot: false,
   plant: false,
-  _busy: false,      // khóa tránh spam request
+  _busy: false,
   _timerId: null,
   filters: {
-    useAllClasses: true,                   // BẬT để trồng mọi class
-    classes: { /* dynamic: 'fire':true, ... */ },
+    useAllClasses: true,
+    classes: {},
     pots: { timeskip:true, gold:true, basic:true }
   }
 };
@@ -774,12 +891,10 @@ function getAvailableClassesFromState(){
   return Array.from(set).sort();
 }
 
-// Tạo nút toggle + bộ lọc checkbox trong khu Farm Controls (render lại mỗi lần để sync động)
 function ensureFarmAutoControls(){
   const bar = document.getElementById('farmControls');
   if (!bar) return;
 
-  // Toggle buttons (tạo một lần, sau đó chỉ sync)
   let btnPot = bar.querySelector('.btnAutoPot');
   let btnPlant = bar.querySelector('.btnAutoPlant');
 
@@ -817,7 +932,6 @@ function ensureFarmAutoControls(){
     btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
   }
 
-  // ---- Filters container (rebuild mỗi lần để sync class động)
   let box = bar.querySelector('.auto-filters');
   if (!box){
     box = document.createElement('div');
@@ -826,7 +940,6 @@ function ensureFarmAutoControls(){
   }
   box.innerHTML = '';
 
-  // --- Class filter group (All + dynamic classes)
   const clsGroup = document.createElement('div');
   clsGroup.className = 'filter-group';
   const clsLabel = document.createElement('span');
@@ -834,7 +947,6 @@ function ensureFarmAutoControls(){
   clsLabel.textContent = 'Class:';
   clsGroup.appendChild(clsLabel);
 
-  // All classes master checkbox
   const allWrap = document.createElement('label');
   allWrap.className = 'chip';
   allWrap.title = 'Allow all classes';
@@ -846,14 +958,13 @@ function ensureFarmAutoControls(){
   allWrap.querySelector('input').addEventListener('change', (e)=>{
     Auto.filters.useAllClasses = !!e.target.checked;
     autoSave();
-    ensureFarmAutoControls(); // re-render để enable/disable các checkbox class
+    ensureFarmAutoControls();
   });
   clsGroup.appendChild(allWrap);
 
-  // Dynamic classes from current inventory
   const classes = getAvailableClassesFromState();
   classes.forEach(cls=>{
-    if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true; // mặc định bật
+    if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true;
 
     const id = 'flt-cls-'+cls;
     const wrap = document.createElement('label');
@@ -870,7 +981,6 @@ function ensureFarmAutoControls(){
     clsGroup.appendChild(wrap);
   });
 
-  // --- Pot filter group
   const potGroup = document.createElement('div');
   potGroup.className = 'filter-group';
   const potLabel = document.createElement('span');
@@ -898,7 +1008,6 @@ function ensureFarmAutoControls(){
   box.appendChild(potGroup);
 }
 
-// Tìm một ô trống chưa có pot
 function findEmptyNoPotPlot() {
   if (!state) return null;
   for (const fp of state.plots) {
@@ -911,7 +1020,6 @@ function findEmptyNoPotPlot() {
   return null;
 }
 
-// Lấy 1 pot từ inventory theo filter (ưu tiên timeskip -> gold -> basic)
 function pickPotFromInv(){
   const inv = Array.isArray(state?.potInv) ? state.potInv.slice() : [];
   const order = { timeskip: 0, gold: 1, basic: 2 };
@@ -920,7 +1028,6 @@ function pickPotFromInv(){
   return allowed[0] || null;
 }
 
-// Tìm ô đã có pot nhưng đang trống để trồng
 function findEmptyWithPotPlot(){
   if (!state) return null;
   for (const fp of state.plots) {
@@ -933,41 +1040,34 @@ function findEmptyWithPotPlot(){
   return null;
 }
 
-// Lấy 1 seed chưa mature theo filter class (All hoặc theo từng class)
 function pickSeedForPlant(){
   const seeds = Array.isArray(state?.seedInv) ? state.seedInv : [];
   const pool = seeds.filter(s => s.is_mature === 0);
-
   if (Auto.filters.useAllClasses) return pool[0] || null;
-
   return pool.find(s => Auto.filters.classes[s.class] !== false) || null;
 }
 
-// Thực hiện 1 hành động / tick (đặt pot trước, rồi mới trồng)
 async function autoTickOnce(){
   if (Auto._busy || (!Auto.pot && !Auto.plant)) return;
   Auto._busy = true;
 
   try{
-    // 1) Auto Pot
     if (Auto.pot){
       const target = findEmptyNoPotPlot();
       const pot = pickPotFromInv();
       if (target && pot){
         await api('/plot/place-pot', { floorId: target.floorId, slot: target.slot, potId: pot.id });
         await refresh();
-        return; // làm 1 việc/tick
+        return;
       }
     }
-
-    // 2) Auto Plant
     if (Auto.plant){
       const target = findEmptyWithPotPlot();
       const seed = pickSeedForPlant();
       if (target && seed){
         await api('/plot/plant', { floorId: target.floorId, slot: target.slot, seedId: seed.id });
         await refresh();
-        return; // làm 1 việc/tick
+        return;
       }
     }
   } catch(e){
@@ -977,13 +1077,11 @@ async function autoTickOnce(){
   }
 }
 
-// Khởi động vòng lặp nhẹ nhàng, mỗi 1.2s thử 1 action
 function startAutoLoop(){
   if (Auto._timerId) return;
   Auto._timerId = setInterval(autoTickOnce, 1200);
 }
 
-// Gọi khi app vào được và mỗi lần render state để chắc UI có sẵn
 (function initAutoFeatures(){
   document.addEventListener('DOMContentLoaded', ()=>{
     ensureFarmAutoControls();
@@ -991,7 +1089,6 @@ function startAutoLoop(){
   });
 })();
 
-// auto-refresh (trừ khi đang ở Online)
 setInterval(()=>{ if($('#tabs').classList.contains('hidden')) return;
   const active = Array.from($$('.tabs button')).find(b=>b.classList.contains('active'))?.dataset.tab;
   if (active === 'online') return;

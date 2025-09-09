@@ -10,11 +10,74 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 
+// ==== MUTATION TIERS ====
+const MUTATION_TIERS = [
+  { key: 'green',   mult: 1.20, p: 0.10 },
+  { key: 'blue',    mult: 1.50, p: 0.08 },
+  { key: 'yellow',  mult: 2.00, p: 0.05 },
+  { key: 'pink',    mult: 3.00, p: 0.03 },
+  { key: 'red',     mult: 4.00, p: 0.02 },
+  { key: 'gold',    mult: 6.00, p: 0.01 },
+  { key: 'rainbow', mult: 11.0, p: 0.005 }
+];
+function rollMutationTier() {
+  const r = Math.random();
+  let acc = 0;
+  for (const t of MUTATION_TIERS) {
+    acc += t.p;
+    if (r < acc) return t;
+  }
+  return { key: null, mult: 1.0, p: 1 - acc };
+}
+function mutationMultiplier(key) {
+  return (MUTATION_TIERS.find(t => t.key === key)?.mult) ?? 1.0;
+}
+
 // ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DB_PATH     = process.env.DB_PATH || path.join(__dirname, 'game.db');
 const SCHEMA_PATH = path.join(__dirname, 'tools', 'schema.sql');       // <-- cố định tools/
-const BREED_PATH  = path.join(__dirname, 'tools', 'breed_map.json');   // <-- cố định tools/
+
+// === WEIGHTED BREED CONFIG (thay cho breed_map.json) ===
+const CLASS_WEIGHTS_PATH = path.join(__dirname, 'tools', 'class_weights.json');
+
+function loadClassWeights() {
+  try {
+    const raw = fs.readFileSync(CLASS_WEIGHTS_PATH, 'utf8');
+    const obj = JSON.parse(raw);          // { className: weightNumber }
+    const entries = Object.entries(obj)
+      .map(([k, v]) => [String(k).toLowerCase(), Number(v)])
+      .filter(([, w]) => Number.isFinite(w) && w > 0);
+
+    if (!entries.length) throw new Error('no positive weights');
+    return Object.fromEntries(entries);
+  } catch (e) {
+    console.error('[CLASS_WEIGHTS] load failed:', e.message || e);
+    // fallback an toàn (4 class cơ bản = 1.0)
+    return { fire: 1, water: 1, wind: 1, earth: 1 };
+  }
+}
+let CLASS_WEIGHTS = loadClassWeights();
+
+fs.watchFile(CLASS_WEIGHTS_PATH, { interval: 1000 }, () => {
+  try {
+    CLASS_WEIGHTS = loadClassWeights();
+    console.log('[CLASS_WEIGHTS] reloaded');
+  } catch (e) {
+    console.error('[CLASS_WEIGHTS] reload failed:', e.message || e);
+  }
+});
+
+function pickWeightedClass(weightsObj) {
+  const items = Object.entries(weightsObj);
+  const total = items.reduce((s, [, w]) => s + w, 0);
+  if (!(total > 0)) return 'fire'; // fallback
+  let r = Math.random() * total;
+  for (const [k, w] of items) {
+    if ((r -= w) <= 0) return k;
+  }
+  return items[items.length - 1][0]; // fallback
+}
 
 const app = express();
 const server = http.createServer(app);
@@ -95,45 +158,48 @@ function prepareAll() {
   addCoinsStmt = db.prepare(`UPDATE users SET coins = coins + ? WHERE id = ?`);
   subCoinsStmt = db.prepare(`UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`);
 
-  // inventory seeds
-  invAddSeedStmt = db.prepare(`INSERT INTO inventory_seeds (user_id, class, base_price, is_mature) VALUES (?, ?, ?, ?)`);
+  // inventory seeds  (PATCH: thêm mutation)
+  invAddSeedStmt  = db.prepare(`INSERT INTO inventory_seeds (user_id, class, base_price, is_mature, mutation) VALUES (?, ?, ?, ?, ?)`);
   invListSeedsStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE user_id = ?`);
-  invGetSeedStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
-  invDelSeedStmt = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
+  invGetSeedStmt   = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
+  invDelSeedStmt   = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
 
   // inventory pots
-  invAddPotStmt = db.prepare(`INSERT INTO inventory_pots (user_id, type, speed_mult, yield_mult) VALUES (?, ?, ?, ?)`);
+  invAddPotStmt  = db.prepare(`INSERT INTO inventory_pots (user_id, type, speed_mult, yield_mult) VALUES (?, ?, ?, ?)`);
   invListPotsStmt = db.prepare(`SELECT * FROM inventory_pots WHERE user_id = ?`);
-  invGetPotStmt = db.prepare(`SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`);
-  invDelPotStmt = db.prepare(`DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`);
+  invGetPotStmt   = db.prepare(`SELECT * FROM inventory_pots WHERE id = ? AND user_id = ?`);
+  invDelPotStmt   = db.prepare(`DELETE FROM inventory_pots WHERE id = ? AND user_id = ?`);
 
-  // plots update
+  // plots update (PATCH: thêm mutation)
   setPlotPotStmt = db.prepare(`UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`);
   setPlotAfterPlantStmt = db.prepare(
-    `UPDATE plots SET seed_id=?, class=?, stage='planted', planted_at=?, mature_at=? WHERE id=?`
-  );
+  `UPDATE plots
+   SET seed_id=?, class=?, mutation=?, stage='planted', planted_at=?, mature_at=?
+   WHERE id=?`
+);
+
   setPlotStageStmt = db.prepare(`UPDATE plots SET stage=? WHERE id=?`);
   clearPlotSeedOnlyStmt = db.prepare(
-    `UPDATE plots SET seed_id=NULL, class=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
+    `UPDATE plots SET seed_id=NULL, class=NULL, mutation=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
   );
   clearPlotAllStmt = db.prepare(
-    `UPDATE plots SET pot_id=NULL, pot_type=NULL, seed_id=NULL, class=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
+    `UPDATE plots SET pot_id=NULL, pot_type=NULL, seed_id=NULL, class=NULL, mutation=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
   );
 
   // online / floors helpers
   listUsersOnlineStmt = db.prepare(`SELECT id, username FROM users ORDER BY id DESC LIMIT 50`);
-  addTrapToFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`);
-  useTrapOnFloorStmt = db.prepare(`UPDATE floors SET trap_count = trap_count - 1 WHERE id = ? AND trap_count > 0`);
+  addTrapToFloorStmt  = db.prepare(`UPDATE floors SET trap_count = trap_count + 1 WHERE id = ?`);
+  useTrapOnFloorStmt  = db.prepare(`UPDATE floors SET trap_count = trap_count - 1 WHERE id = ? AND trap_count > 0`);
   listFloorsByUserStmt = db.prepare(`SELECT * FROM floors WHERE user_id = ? ORDER BY idx ASC`);
-  getFloorByIdStmt = db.prepare(`SELECT * FROM floors WHERE id = ?`);
+  getFloorByIdStmt     = db.prepare(`SELECT * FROM floors WHERE id = ?`);
 
-  // market
+  // market (PATCH: thêm mutation)
   marketCreateStmt = db.prepare(
-    `INSERT INTO market_listings (seller_id, item_type, item_id, class, base_price, ask_price, status, created_at)
-     VALUES (?, 'seed', ?, ?, ?, ?, 'open', ?)`
+    `INSERT INTO market_listings (seller_id, item_type, item_id, class, base_price, mutation, ask_price, status, created_at)
+     VALUES (?, 'seed', ?, ?, ?, ?, ?, 'open', ?)`
   );
   marketOpenStmt = db.prepare(`SELECT * FROM market_listings WHERE status = 'open' ORDER BY created_at DESC LIMIT 100`);
-  marketGetStmt = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
+  marketGetStmt  = db.prepare(`SELECT * FROM market_listings WHERE id = ?`);
   marketCloseStmt = db.prepare(`UPDATE market_listings SET status='sold' WHERE id = ?`);
 
   // logs
@@ -184,50 +250,6 @@ function marketMax(base) { return Math.floor(base * 1.5); }
 function userFloorsCount(userId) { return getFloorsCountStmt.get(userId).cnt; }
 function trapPriceForUser(userId) { return 1000 * userFloorsCount(userId); }
 function trapMaxForUser(userId) { return userFloorsCount(userId) * 5; }
-
-// ==== Breed map from JSON (tools/) ====
-const DEFAULT_BREED_MAP = {
-  'water+fire': 'steam',
-  'water+wind': 'wave',
-  'water+earth': 'plant',
-  'water+wave': 'tsunami',
-  'wind+earth': 'dust',
-  'earth+fire': 'lava',
-  'steam+water': 'cloud'
-};
-function ensureBreedFile() {
-  try {
-    const dir = path.dirname(BREED_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    if (!fs.existsSync(BREED_PATH)) {
-      fs.writeFileSync(BREED_PATH, JSON.stringify(DEFAULT_BREED_MAP, null, 2));
-    }
-  } catch (e) { console.error('ensureBreedFile failed:', e); }
-}
-function loadBreedMap() {
-  ensureBreedFile();
-  try {
-    const raw = fs.readFileSync(BREED_PATH, 'utf-8');
-    const obj = JSON.parse(raw);
-    const out = {};
-    for (const [k, v] of Object.entries(obj)) out[String(k).toLowerCase()] = v;
-    return out;
-  } catch (e) {
-    console.error('loadBreedMap failed, fallback:', e);
-    return { ...DEFAULT_BREED_MAP };
-  }
-}
-let BREED_MAP = loadBreedMap();
-fs.watchFile(BREED_PATH, { interval: 1000 }, () => {
-  try { BREED_MAP = loadBreedMap(); console.log('[BREED_MAP] reloaded from file'); }
-  catch (e) { console.error('[BREED_MAP] reload failed:', e); }
-});
-function combineClass(a, b) {
-  if (!a || !b) return null;
-  const k1 = `${String(a).toLowerCase()}+${String(b).toLowerCase()}`;
-  const k2 = `${String(b).toLowerCase()}+${String(a).toLowerCase()}`;
-  return BREED_MAP[k1] || BREED_MAP[k2] || null;
-}
 
 // ==== HTTP access log ====
 app.use((req, _res, next) => {
@@ -297,7 +319,7 @@ app.post('/shop/buy', auth, (req, res) => {
       return res.status(400).json({ error: 'Not enough coins' });
     }
     subCoinsStmt.run(cost, req.userId);
-    for (let i = 0; i < qty; i++) invAddSeedStmt.run(req.userId, classOrType, base, 0);
+    for (let i = 0; i < qty; i++) invAddSeedStmt.run(req.userId, classOrType, base, 0, null);
     logAction(req.userId, 'shop_buy_seed', { class: classOrType, qty, cost });
     return res.json({ ok: true });
   }
@@ -404,10 +426,10 @@ app.post('/plot/plant', auth, (req, res) => {
   const growTime = Math.floor(base * speed);
   const mAt = now() + growTime;
 
-  setPlotAfterPlantStmt.run(seedId, seed.class, now(), mAt, plot.id);
+  setPlotAfterPlantStmt.run(seedId, seed.class, seed.mutation || null, now(), mAt, plot.id);
   invDelSeedStmt.run(seedId, req.userId);
 
-  logAction(req.userId, 'plant', { floorId, slot, seedId, class: seed.class, mature_at: mAt });
+  logAction(req.userId, 'plant', { floorId, slot, seedId, class: seed.class, mutation: seed.mutation || null, mature_at: mAt });
   res.json({ ok: true, mature_at: mAt });
 });
 
@@ -435,9 +457,9 @@ app.post('/plot/harvest', auth, (req, res) => {
   if (!p) return res.status(404).json({ error: 'plot not found' });
   if (p.stage !== 'mature') return res.status(400).json({ error: 'not mature yet' });
   const base = floorPriceBase(p.class);
-  invAddSeedStmt.run(req.userId, p.class, base, 1);
+  invAddSeedStmt.run(req.userId, p.class, base, 1, p.mutation || null);
   clearPlotSeedOnlyStmt.run(plotId);
-  logAction(req.userId, 'harvest', { plotId, class: p.class, base });
+  logAction(req.userId, 'harvest', { plotId, class: p.class, base, mutation: p.mutation || null });
   res.json({ ok: true });
 });
 
@@ -449,7 +471,7 @@ app.post('/plot/harvest-all', auth, (req, res) => {
     for (const p of plots) {
       if (p.stage === 'mature') {
         const base = floorPriceBase(p.class);
-        invAddSeedStmt.run(req.userId, p.class, base, 1);
+        invAddSeedStmt.run(req.userId, p.class, base, 1, p.mutation || null);
         clearPlotSeedOnlyStmt.run(p.id);
         count++;
       }
@@ -457,20 +479,6 @@ app.post('/plot/harvest-all', auth, (req, res) => {
   }
   logAction(req.userId, 'harvest_all', { harvested: count });
   res.json({ ok: true, harvested: count });
-});
-
-app.post('/plot/remove', auth, (req, res) => {
-  const { floorId, slot } = req.body || {};
-  if (!floorId || !slot) return res.status(400).json({ error: 'missing params' });
-
-  const floor = getFloorByIdStmt.get(floorId);
-  if (!floor || floor.user_id !== req.userId) return res.status(403).json({ error: 'not your floor' });
-  const plot = getPlotsByFloorStmt.all(floorId).find(p => p.slot === Number(slot));
-  if (!plot) return res.status(404).json({ error: 'plot not found' });
-
-  clearPlotAllStmt.run(plot.id);
-  logAction(req.userId, 'plot_remove', { floorId, slot, plotId: plot.id });
-  res.json({ ok: true });
 });
 
 // ==== Breed (mature only) ====
@@ -482,17 +490,25 @@ app.post('/breed', auth, (req, res) => {
     return res.status(400).json({ error: 'seeds must be mature' });
   }
 
-  const outClass = combineClass(A.class, B.class);
-  if (!outClass) return res.status(400).json({ error: 'no breed recipe' });
+  // NEW: random class theo trọng số từ tools/class_weights.json
+  const outClass = pickWeightedClass(CLASS_WEIGHTS);
 
   const baseOut = calcBreedBase(A.base_price, B.base_price);
+  // random mutation cho con
+  const mut = rollMutationTier(); // { key, mult }
   upsertSeedCatalogStmt.run(outClass, baseOut);
-  invAddSeedStmt.run(req.userId, outClass, baseOut, 0);
+  invAddSeedStmt.run(req.userId, outClass, baseOut, 0, mut.key);
   invDelSeedStmt.run(seedAId, req.userId);
   invDelSeedStmt.run(seedBId, req.userId);
 
-  logAction(req.userId, 'breed', { in: [A.class, B.class], out: outClass, base: baseOut });
-  res.json({ ok: true, outClass, base: baseOut });
+  logAction(req.userId, 'breed', {
+    in: [A.class, B.class],
+    out: outClass,
+    base: baseOut,
+    mutation: mut.key,
+    weights_snapshot: CLASS_WEIGHTS
+  });
+  res.json({ ok: true, outClass, base: baseOut, mutation: mut.key, multiplier: mut.mult });
 });
 
 // ==== Sell to shop (mature only) ====
@@ -501,10 +517,12 @@ app.post('/sell/shop', auth, (req, res) => {
   const S = invGetSeedStmt.get(seedId, req.userId);
   if (!S) return res.status(404).json({ error: 'seed not found' });
   if (S.is_mature !== 1) return res.status(400).json({ error: 'only mature seeds can be sold' });
-  const pay = sellToShopAmount(S.base_price);
+  // tính giá theo mutation
+  const mult = mutationMultiplier(S.mutation);
+  const pay = sellToShopAmount(Math.floor(S.base_price * mult));
   invDelSeedStmt.run(seedId, req.userId);
   addCoinsStmt.run(pay, req.userId);
-  logAction(req.userId, 'sell_shop', { seedId, class: S.class, paid: pay });
+  logAction(req.userId, 'sell_shop', { seedId, class: S.class, paid: pay, mutation: S.mutation, multiplier: mult });
   res.json({ ok: true, paid: pay });
 });
 
@@ -514,13 +532,16 @@ app.post('/market/list', auth, (req, res) => {
   const S = invGetSeedStmt.get(seedId, req.userId);
   if (!S) return res.status(404).json({ error: 'seed not found' });
   if (S.is_mature !== 1) return res.status(400).json({ error: 'only mature seeds can be listed' });
-  const min = marketMin(S.base_price), max = marketMax(S.base_price);
+
+  // min/max dựa trên base * multiplier
+  const eff = Math.max(1, Math.floor(S.base_price * mutationMultiplier(S.mutation)));
+  const min = marketMin(eff), max = marketMax(eff);
   if (askPrice < min || askPrice > max) {
     return res.status(400).json({ error: `ask must be within ${min}-${max}` });
   }
-  marketCreateStmt.run(req.userId, seedId, S.class, S.base_price, askPrice, now());
+  marketCreateStmt.run(req.userId, seedId, S.class, S.base_price, S.mutation || null, askPrice, now());
   invDelSeedStmt.run(seedId, req.userId); // escrow
-  logAction(req.userId, 'market_list', { seedId, class: S.class, askPrice });
+  logAction(req.userId, 'market_list', { seedId, class: S.class, askPrice, mutation: S.mutation || null });
   res.json({ ok: true });
 });
 
@@ -532,10 +553,10 @@ app.post('/market/buy', auth, (req, res) => {
   if (buyer.coins < L.ask_price) return res.status(400).json({ error: 'not enough coins' });
   subCoinsStmt.run(L.ask_price, req.userId);
   addCoinsStmt.run(L.ask_price, L.seller_id);
-  invAddSeedStmt.run(req.userId, L.class, L.base_price, 1); // mua về là mature
+  invAddSeedStmt.run(req.userId, L.class, L.base_price, 1, L.mutation || null); // mua về là mature, giữ mutation
   marketCloseStmt.run(listingId);
   logAction(req.userId, 'market_buy', {
-    listingId, class: L.class, base: L.base_price, paid: L.ask_price, seller: L.seller_id
+    listingId, class: L.class, base: L.base_price, paid: L.ask_price, seller: L.seller_id, mutation: L.mutation || null
   });
   res.json({ ok: true });
 });
@@ -638,12 +659,11 @@ app.post('/visit/steal-plot', auth, (req, res) => {
     logAction(req.userId, 'steal_fail', { targetUserId, floorId, plotId, reason: 'not mature' });
     return res.json({ ok: false, reason: 'not mature' });
   }
-
   const base = floorPriceBase(p.class);
-  invAddSeedStmt.run(req.userId, p.class, base, 1);
+  invAddSeedStmt.run(req.userId, p.class, base, 1, p.mutation || null);
   clearPlotSeedOnlyStmt.run(p.id);
-  logAction(req.userId, 'steal_success', { targetUserId, floorId, plotId: p.id, class: p.class });
-  res.json({ ok: true, class: p.class });
+  logAction(req.userId, 'steal_success', { targetUserId, floorId, plotId: p.id, class: p.class, mutation: p.mutation || null });
+  res.json({ ok: true, class: p.class, mutation: p.mutation || null });
 });
 
 // ==== RESTORE (upload) — safe: integrity + backup + rollback ====

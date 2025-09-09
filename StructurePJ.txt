@@ -9,6 +9,6 @@ garden-bred-mvp-full/
 │
 └── tools/                # quản lý database
     │── breed_map.json
-    │
+    │── class_weights.json
     │── schema.sql        # cấu trúc bảng SQLite
     └── migrate.js        # script tạo DB từ schema
