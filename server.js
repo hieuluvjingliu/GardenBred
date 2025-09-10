@@ -439,7 +439,7 @@ app.post('/plot/place-pot', auth, (req, res) => {
 });
 
 app.post('/plot/plant', auth, (req, res) => {
-  const { floorId, slot, seedId } = req.body;
+  const { floorId, slot, seedId, mutation } = req.body;
   const seed = invGetSeedStmt.get(seedId, req.userId);
   if (!seed || seed.is_mature !== 0) return res.status(400).json({ error: 'seed must be not-planted' });
 
@@ -457,12 +457,19 @@ app.post('/plot/plant', auth, (req, res) => {
   const growTime = Math.floor(base * speed);
   const mAt = now() + growTime;
 
-  setPlotAfterPlantStmt.run(seedId, seed.class, seed.mutation || null, now(), mAt, plot.id);
+  // nếu client gửi mutation thì override, còn không thì lấy mutation của seed
+  const mutFinal = req.body.mutation || seed.mutation || null;
+
+  setPlotAfterPlantStmt.run(seedId, seed.class, mutFinal, now(), mAt, plot.id);
   invDelSeedStmt.run(seedId, req.userId);
 
-  logAction(req.userId, 'plant', { floorId, slot, seedId, class: seed.class, mutation: seed.mutation || null, mature_at: mAt });
-  res.json({ ok: true, mature_at: mAt });
+  logAction(req.userId, 'plant', {
+    floorId, slot, seedId, class: seed.class,
+    mutation: mutFinal, mature_at: mAt
+  });
+  res.json({ ok: true, mature_at: mAt, mutation: mutFinal });
 });
+
 
 // tick: planted -> growing -> mature
 setInterval(() => {

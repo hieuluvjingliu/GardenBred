@@ -1,4 +1,4 @@
-:root{ 
+:root{  
   --bg-0:#060912;
   --bg-1:#0c1224;
   --panel:#0f1526;
@@ -101,6 +101,13 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
   background:linear-gradient(180deg,#0d1431,#0a1023);
   box-shadow:var(--shadow);
   transition:border-color .2s, box-shadow .2s, transform .08s;
+  /* Anti-blink: fade-in khi element được mount */
+  animation: plotIn .18s ease both;
+  will-change: opacity, transform;
+}
+@keyframes plotIn{
+  from{ opacity:0; transform: translateY(2px); }
+  to  { opacity:1; transform: translateY(0); }
 }
 .plot:hover{border-color:#5aa0ff}
 .plot.mature{outline:2px solid #53e6ff;box-shadow:0 0 24px #53e6ff33}
@@ -115,10 +122,21 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
 .plot .stat .value{font-size:16px;font-weight:800}
 .plot .visual{position:relative;display:flex;align-items:center;justify-content:center;padding-right:8px;overflow:hidden}
 
-/* Plant & pot positioning */
-.plot img.pot{position:absolute;bottom:10px;left:58%;transform:translateX(-50%);width:clamp(120px,45%,200px);z-index:1}
-.plot img.plant{position:absolute;left:58%;transform:translateX(-50%);bottom:clamp(72px,35%,120px);
-  max-width:clamp(160px,55%,240px);max-height:clamp(160px,60%,240px);z-index:2}
+/* Plant & pot positioning + ảnh fade-in nhẹ */
+.plot img.pot{
+  position:absolute;bottom:10px;left:58%;transform:translateX(-50%);
+  width:clamp(120px,45%,200px);z-index:1;
+  opacity:0; animation: imgIn .2s ease .06s both;
+  will-change: opacity;
+}
+.plot img.plant{
+  position:absolute;left:58%;transform:translateX(-50%);
+  bottom:clamp(72px,35%,120px);
+  max-width:clamp(160px,55%,240px);max-height:clamp(160px,60%,240px);z-index:2;
+  opacity:0; animation: imgIn .22s ease .08s both;
+  will-change: opacity, filter;
+}
+@keyframes imgIn{ to{ opacity:1; } }
 
 /* Element tint by class */
 .plot .visual{background:radial-gradient(280px 120px at 60% 90%, #203a77 0%, transparent 60%)}
@@ -181,7 +199,7 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
 
 /* 3) Growing animation — nhịp nhẹ cho cây đang lớn */
 .plot[data-stage="growing"] img.plant {
-  animation: growPulse 2s ease-in-out infinite;
+  animation: growPulse 2s ease-in-out infinite, imgIn .22s ease .08s both;
 }
 @keyframes growPulse{
   0%, 100% { transform: translateX(-50%) scale(1); }
@@ -309,6 +327,22 @@ h1, h2, h3 {
   content:""; position:absolute; inset:3px; background:#fff; border-radius:2px;
 }
 .auto-filters .chip span{ color:#dbe8ff; font-size:13px; }
+
+/* === Thu gọn bộ lọc + nút “› Toàn bộ” === */
+.auto-filters.collapsed .filter-group .chip:not(.chip-all){ display:none; }
+.auto-filters .expander{
+  margin-left:auto; display:flex; align-items:center; gap:8px;
+}
+.auto-filters .expander .btn-expand{
+  padding:6px 10px; border-radius:10px;
+  border:1px solid #2a3a60; background:#0e1a3a; color:#eaf4ff;
+  font-weight:800; letter-spacing:.2px; cursor:pointer;
+}
+.auto-filters .expander .btn-expand:hover{
+  border-color:#53b7ff; box-shadow:0 0 12px #53b7ff33; transform:translateY(-1px);
+}
+.auto-filters.collapsed .expander .hint{ opacity:.8; }
+.auto-filters:not(.collapsed) .expander .hint{ display:none; }
 
 /* ===== Qty control (used by client.js buildQtyControl) ===== */
 .qty{
@@ -501,6 +535,11 @@ h1, h2, h3 {
   .skeleton::after{
     animation: none !important;
   }
+  .plot,
+  .plot img.pot,
+  .plot img.plant{
+    animation: none !important;
+  }
   .plot:hover,
   .card:hover, .floor-actions:hover, .buy-floor-card:hover, .visit-view:hover,
   .tabs button.active::after{
@@ -600,3 +639,109 @@ h1, h2, h3 {
   border-color:#53b7ff;
   box-shadow:0 0 12px #53b7ff33;
 }
+
+/* Border + glow theo mutation (DEDUPED: chỉ giữ block đầy đủ này) */
+.plot[data-mutation="green"]   { border-color:#35e08a; box-shadow:0 0 18px #35e08a55; }
+.plot[data-mutation="blue"]    { border-color:#3b82f6; box-shadow:0 0 18px #3b82f655; }
+.plot[data-mutation="yellow"]  { border-color:#facc15; box-shadow:0 0 18px #facc1555; }
+.plot[data-mutation="pink"]    { border-color:#ec4899; box-shadow:0 0 18px #ec489955; }
+.plot[data-mutation="red"]     { border-color:#ef4444; box-shadow:0 0 18px #ef444455; }
+.plot[data-mutation="gold"]    { border-color:#f59e0b; box-shadow:0 0 20px #f59e0b66; }
+.plot[data-mutation="rainbow"] { border-color:#a78bfa; box-shadow:0 0 22px #a78bfa77; }
+/* Áp riêng cho ảnh plant khi mutation = rainbow */
+.mut-rainbow-plant{
+  animation: hueSpin 6s linear infinite;
+  filter: saturate(1.25) brightness(1.05);
+}
+@keyframes hueSpin{
+  from { filter: hue-rotate(0deg) saturate(1.25) brightness(1.05); }
+  to   { filter: hue-rotate(360deg) saturate(1.25) brightness(1.05); }
+}
+
+/* Nút Steal khi Visit */
+.btn-steal{
+  margin-top:8px;
+  padding:8px 12px;
+  border-radius:10px;
+  border:1px solid #7c2d12;
+  background:linear-gradient(180deg,#2b0f0f,#1a0b0b);
+  color:#ffd8a8;
+  font-weight:800;
+  box-shadow:0 0 10px rgba(255,140,66,.15), inset 0 0 0 1px rgba(255,140,66,.08);
+}
+.btn-steal:hover{
+  transform: translateY(-1px);
+  border-color:#ff8c42;
+  box-shadow:0 0 16px rgba(255,140,66,.25), inset 0 0 0 1px rgba(255,140,66,.15);
+}
+
+/* ===== Notifications (toast) ===== */
+.notify-wrap{
+  position: fixed;
+  left: 16px;
+  bottom: 84px;            /* đổi thành top:100px nếu muốn neo trên */
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;    /* không chắn click phần còn lại */
+}
+
+.notify{
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  gap: 10px;
+  background: rgba(20,28,44,.95);
+  border: 1px solid rgba(120,166,255,.25);
+  border-left: 4px solid var(--notify-accent, #60a5fa);
+  color: #e9eefc;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0,0,0,.35);
+  font-size: 13px; line-height: 1.25;
+  opacity: 0; transform: translateX(-10px);
+  animation: notify-in .22s ease forwards;
+}
+.notify.exit{ animation: notify-out .25s ease forwards; }
+
+.notify .thumb{
+  width: 42px; height: 42px; border-radius: 10px;
+  display: grid; place-items: center; overflow: hidden;
+  background: rgba(255,255,255,.06);
+}
+.notify .thumb img{ width:100%; height:100%; object-fit:cover; }
+
+.notify .title{ font-weight: 700; margin-top:2px; }
+.notify .desc{ opacity:.9; margin-top:2px; }
+.notify .meta{ opacity:.75; font-size:12px; margin-top:4px; }
+
+.notify .actions{ display:flex; align-items:center; gap:6px; }
+.notify .btn{
+  border:1px solid rgba(255,255,255,.18);
+  background: rgba(255,255,255,.06);
+  padding:6px 8px; border-radius:8px; font-size:12px;
+  cursor:pointer; user-select:none;
+}
+.notify .btn:hover{ background: rgba(255,255,255,.12); }
+
+@keyframes notify-in{ to{ opacity:1; transform:translateX(0);} }
+@keyframes notify-out{ to{ opacity:0; transform:translateX(-10px);} }
+
+/* Variants (màu viền trái) */
+.notify.success{ --notify-accent:#22c55e; }
+.notify.info   { --notify-accent:#3b82f6; }
+.notify.warn   { --notify-accent:#eab308; }
+.notify.error  { --notify-accent:#ef4444; }
+.notify.pink   { --notify-accent:#ec4899; }
+.notify.gold   { --notify-accent:#f59e0b; }
+.notify.rainbow{ --notify-accent:#a78bfa; }
+
+/* Compact mode (tùy chọn) */
+.notify.compact{ grid-template-columns: 1fr auto; }
+.notify.compact .thumb{ display:none; }
+
+/* ====== YÊU CẦU THÊM ====== */
+/* Ẩn nút Floor lên/xuống ở thanh đầu */
+#btnPrevFloor, #btnNextFloor { display:none !important; }

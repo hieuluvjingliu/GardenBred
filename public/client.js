@@ -22,6 +22,27 @@ const MUT_INFO = {
   gold:    { name:'gold',    mult:6.0,  color:'#f59e0b' },
   rainbow: { name:'rainbow', mult:11.0, color:'#a78bfa' }
 };
+const MUT_KEYS = Object.keys(MUT_INFO); // ['green','blue','yellow','pink','red','gold','rainbow']
+
+// Map bộ lọc màu (áp lên riêng ảnh plant)
+const MUT_FILTERS = {
+  green:   'hue-rotate(95deg) saturate(1.25) brightness(1.02)',
+  blue:    'hue-rotate(200deg) saturate(1.30) brightness(1.03)',
+  yellow:  'hue-rotate(35deg) saturate(1.35) brightness(1.05)',
+  pink:    'hue-rotate(320deg) saturate(1.35) brightness(1.02)',
+  red:     'hue-rotate(0deg) saturate(1.45) brightness(1.02)',
+  gold:    'hue-rotate(28deg) saturate(1.55) brightness(1.08)',
+  rainbow: '' // riêng "rainbow" sẽ animate ở CSS
+};
+function applyMutationFilterToPlant(imgEl, mutKey){
+  if (!imgEl) return;
+  if (mutKey === 'rainbow') {
+    imgEl.classList.add('mut-rainbow-plant');
+    return;
+  }
+  const f = MUT_FILTERS[mutKey];
+  if (f) imgEl.style.filter = f;
+}
 function getMutationMeta(obj){
   const key = obj?.mutation || obj?.mutation_name;
   if (!key) return null;
@@ -39,22 +60,152 @@ function getMutationMeta(obj){
 function renderMutationBadge(mut){
   const key = mut || 'normal';
   const cls = {
-    green:'mut-green', blue:'mut-blue', yellow:'mut-yellow',
-    pink:'mut-pink', red:'mut-red', gold:'mut-gold',
-    rainbow:'mut-rainbow', normal:'mut-normal'
+    green:'mut-green', blue:'mut-blue', yellow:'mut-yellow', pink:'mut-pink',
+    red:'mut-red', gold:'mut-gold', rainbow:'mut-rainbow', normal:'mut-normal'
   }[key] || 'mut-normal';
   return `<span class="badge ${cls}">${key}</span>`;
 }
 
-function setActive(tab){
-  $$('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
-  $$('.tab').forEach(sec=>sec.classList.toggle('hidden', sec.id!==tab));
+/* ========================= FIX RACE AUTO PLANT ========================= */
+// Chặn double-submit cùng seedId & đánh dấu seed vừa trồng
+const AUTO_INFLIGHT = new Set();        // seedId đang gọi API /plot/plant
+const AUTO_RECENT_PLANTED = new Set();  // seedId vừa trồng xong (đợi state đồng bộ)
+const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+/* ====================================================================== */
+
+/* ========================= NOTIFIER (Toast dùng chung) ========================= */
+class Notifier {
+  constructor(opts={}){
+    this.wrap = null;
+    this.max = opts.max ?? 6;
+    this.ttl = opts.ttl ?? 3000;
+    this.coalesceMs = opts.coalesceMs ?? 350; // gộp sự kiện trùng trong ~350ms
+    this._lastByKey = new Map();
+  }
+  ensureWrap(){
+    if (!this.wrap){
+      this.wrap = document.getElementById('toastContainer');
+      if (!this.wrap){
+        this.wrap = document.createElement('div');
+        this.wrap.id = 'toastContainer';
+        this.wrap.className = 'notify-wrap';
+        document.body.appendChild(this.wrap);
+      } else {
+        this.wrap.classList.add('notify-wrap');
+      }
+    }
+    return this.wrap;
+  }
+  show(cfg){
+    const wrap = this.ensureWrap();
+    const type = cfg.type || 'info';
+    const ttl = cfg.ttl ?? this.ttl;
+
+    // Coalesce theo key
+    if (cfg.key){
+      const last = this._lastByKey.get(cfg.key);
+      const now = Date.now();
+      if (last && (now - last.ts) < this.coalesceMs){
+        last.count++;
+        const descEl = last.el.querySelector('.desc');
+        if (descEl && !descEl.textContent.includes('×')) {
+          descEl.insertAdjacentText('beforeend', ` ×${last.count}`);
+        } else if (descEl) {
+          descEl.textContent = descEl.textContent.replace(/×\d+$/, `×${last.count}`);
+        }
+        last.ts = now;
+        return last.el;
+      }
+    }
+
+    const el = document.createElement('div');
+    el.className = `notify ${type}`;
+    const thumbHtml = cfg.thumb ? `<img src="${cfg.thumb}" alt="">` : (cfg.icon || `<svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 3a9 9 0 1 1 0 18a9 9 0 0 1 0-18zm1 5h-2v6h2V8zm0 8h-2v2h2v-2z"/></svg>`);
+    el.innerHTML = `
+      <div class="thumb">${thumbHtml}</div>
+      <div class="texts">
+        <div class="title">${cfg.title || 'Notification'}</div>
+        ${cfg.desc ? `<div class="desc">${cfg.desc}</div>` : ''}
+        ${cfg.meta ? `<div class="meta">${cfg.meta}</div>` : ''}
+      </div>
+      <div class="actions"></div>
+    `;
+
+    // actions
+    const actBox = el.querySelector('.actions');
+    (cfg.actions||[]).forEach(a=>{
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = a.label;
+      b.onclick = (ev)=>{
+        ev.stopPropagation();
+        try{ a.onClick?.(); }catch{}
+        closeNow();
+      };
+      actBox.appendChild(b);
+    });
+
+    // Append mới dưới cùng
+    wrap.appendChild(el);
+    while(wrap.children.length > this.max){
+      wrap.firstElementChild?.remove();
+    }
+
+    const timer = setTimeout(()=> closeNow(), ttl);
+    function closeNow(){
+      clearTimeout(timer);
+      el.classList.add('exit');
+      setTimeout(()=> el.remove(), 220);
+    }
+    el.addEventListener('click', closeNow);
+
+    if (cfg.key){
+      this._lastByKey.set(cfg.key, {ts: Date.now(), count: 1, el});
+      setTimeout(()=> this._lastByKey.delete(cfg.key), this.coalesceMs + 50);
+    }
+    return el;
+  }
 }
-function showApp(){
-  $('#auth').classList.add('hidden');
-  $('#hud').classList.remove('hidden');
-  $('#tabs').classList.remove('hidden');
-  setActive('shop');
+window.notifyBus = new Notifier({ max:6, ttl:3000, coalesceMs:350 });
+
+/* ========= Helpers hiển thị mutation gọn ========= */
+function formatMutationShort(arg){
+  // arg có thể là chuỗi (key) hoặc object seed/plot
+  if (!arg) return '';
+  if (typeof arg === 'string') {
+    const m = MUT_INFO[arg];
+    return m ? `${m.name} ×${m.mult}` : '';
+  }
+  const meta = getMutationMeta(arg);
+  return meta ? `${meta.name} ×${meta.mult}` : '';
+}
+
+// Convenience helpers
+function notifPlant({cls, floorName, potId, seedName, mutation, seed, img}){
+  // Ưu tiên lấy text mutation từ seed (có thể có mutation_mult), fallback key
+  const mutTxt = formatMutationShort(seed || mutation);
+  const desc = seedName ? `${seedName} (class ${cls})${mutTxt ? ' · Mut: '+mutTxt : ''}` : `Class ${cls}${mutTxt ? ' · Mut: '+mutTxt : ''}`;
+  const meta = `Floor: ${floorName ?? '?'} · Pot: ${potId ?? '-'}`;
+  return notifyBus.show({ type:'success', title:'Đã trồng', desc, meta, thumb: img, key:`plant:${floorName}:${cls}:${mutTxt}` });
+}
+function notifBuy({what, qty, price, where}){
+  return notifyBus.show({ type:'info', title:'Đã mua', desc:`${qty||1} ${what}`, meta: [price!=null?`Giá: ${price}`:null, where||null].filter(Boolean).join(' · '), key:`buy:${what}` });
+}
+function notifSell({what, qty, price}){
+  return notifyBus.show({ type:'warn', title:'Đã bán', desc:`${qty||1} ${what}`, meta: (price!=null?`Thu: ${price}`:''), key:`sell:${what}` });
+}
+function notifBreed({resultCls, parents, mutation, base}){
+  const mutTxt = formatMutationShort(mutation);
+  return notifyBus.show({ type:'success', title:'Lai thành công', desc:`→ ${resultCls}${base!=null? ` (base ${base})`:''}`, meta: [parents?`Từ: ${parents.join(' + ')}`:'', mutTxt?`Mut: ${mutTxt}`:''].filter(Boolean).join(' · '), key:`breed:${resultCls}:${mutTxt||''}` });
+}
+function notifTrap({name, floorName, result}){
+  return notifyBus.show({ type:'gold', title:'Trap', desc:name, meta:`Floor: ${floorName}${result? ` · ${result}`:''}`, key:`trap:${name}:${floorName}` });
+}
+function notifInfo(title, desc, meta){
+  return notifyBus.show({ type:'info', title, desc, meta });
+}
+function notifError(title, desc){
+  return notifyBus.show({ type:'error', title, desc });
 }
 
 /* ---------------- API ---------------- */
@@ -64,11 +215,10 @@ async function api(path, body){
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body || {})
   });
-
   const raw = await res.text();
   let data = null;
-  try { data = raw ? JSON.parse(raw) : {}; } catch { data = { error: raw || res.statusText }; }
-
+  try { data = raw ? JSON.parse(raw) : {}; }
+  catch { data = { error: raw || res.statusText }; }
   if (!res.ok) {
     const err = {
       status: res.status,
@@ -83,22 +233,27 @@ async function api(path, body){
 }
 function showError(e, context=''){
   const title = context ? `[${context}] ` : '';
-  const msg = `${title}${e?.error || e?.message || 'error'}`
-            + (e?.status ? ` (HTTP ${e.status})` : '');
+  const msg = `${title}${e?.error || e?.message || 'error'} ${e?.status ? `(HTTP ${e.status})` : ''}`.trim();
   alert(msg);
-  console.error('API error:', {
-    context,
-    status: e?.status,
-    statusText: e?.statusText,
-    error: e?.error,
-    details: e?.details,
-    raw: e?._raw
-  });
+  notifyBus.show({ type:'error', title:'Lỗi', desc: msg });
+  console.error('API error:', { context, status: e?.status, statusText: e?.statusText, error: e?.error, details: e?.details, raw: e?._raw });
 }
 async function get(path){
   const res = await fetch(path);
   if(!res.ok) throw await res.json();
   return res.json();
+}
+
+function setActive(tab){
+  $$('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  $$('.tab').forEach(sec=>sec.classList.toggle('hidden', sec.id!==tab));
+}
+function showApp(){
+  $('#auth').classList.add('hidden');
+  $('#hud').classList.remove('hidden');
+  $('#tabs').classList.remove('hidden');
+  setActive('shop');
+  notifInfo('Xin chào!', 'Đăng nhập thành công');
 }
 
 /* ---------- HELPERS ---------- */
@@ -114,8 +269,8 @@ function snapshotFloorActionSelections(){
     const floorId = +f.dataset.floorId;
     const act = f.querySelector('.floor-actions');
     if (!act) return;
-    const slot   = act.querySelector('.sel-slot')?.value;
-    const potId  = act.querySelector('.sel-pot')?.value;
+    const slot = act.querySelector('.sel-slot')?.value;
+    const potId = act.querySelector('.sel-pot')?.value;
     const seedId = act.querySelector('.sel-seed')?.value;
     floorActionSel[floorId] = { slot, potId, seedId };
   });
@@ -126,17 +281,12 @@ function restoreFloorActionSelections(){
     if (!f) return;
     const act = f.querySelector('.floor-actions');
     if (!act) return;
-
     const slotSel = act.querySelector('.sel-slot');
     const potSel  = act.querySelector('.sel-pot');
     const seedSel = act.querySelector('.sel-seed');
-
-    if (slotSel && sel.slot && Array.from(slotSel.options).some(o=>o.value===sel.slot))
-      slotSel.value = sel.slot;
-    if (potSel && sel.potId && Array.from(potSel.options).some(o=>o.value===sel.potId))
-      potSel.value = sel.potId;
-    if (seedSel && sel.seedId && Array.from(seedSel.options).some(o=>o.value===sel.seedId))
-      seedSel.value = sel.seedId;
+    if (slotSel && sel.slot && Array.from(slotSel.options).some(o=>o.value===sel.slot)) slotSel.value = sel.slot;
+    if (potSel  && sel.potId && Array.from(potSel.options).some(o=>o.value===sel.potId)) potSel.value  = sel.potId;
+    if (seedSel && sel.seedId&& Array.from(seedSel.options).some(o=>o.value===sel.seedId)) seedSel.value = sel.seedId;
   });
 }
 
@@ -145,10 +295,9 @@ function buildQtyControl({cache, key, onChange}){
   const wrap = document.createElement('div');
   wrap.className = 'qty';
   const minus = document.createElement('button'); minus.type='button'; minus.textContent='–';
-  const input = document.createElement('input');
-  input.type = 'number'; input.min = '1'; input.inputMode = 'numeric';
+  const input = document.createElement('input'); input.type='number'; input.min='1'; input.inputMode='numeric';
   input.value = getCachedQty(cache, key, 1);
-  const plus = document.createElement('button'); plus.type='button'; plus.textContent='+';
+  const plus  = document.createElement('button'); plus.type='button'; plus.textContent='+';
 
   const syncCache = ()=>{
     const v = parseInt(input.value,10);
@@ -157,8 +306,7 @@ function buildQtyControl({cache, key, onChange}){
   };
   input.addEventListener('input', syncCache);
   input.addEventListener('focus', ()=>{ wrap.dataset.focused='1'; });
-  input.addEventListener('blur', ()=>{ delete wrap.dataset.focused; });
-
+  input.addEventListener('blur',  ()=>{ delete wrap.dataset.focused; });
   minus.addEventListener('click', ()=>{
     const v = Math.max(1, (parseInt(input.value,10)||1)-1);
     input.value = v; syncCache();
@@ -171,25 +319,23 @@ function buildQtyControl({cache, key, onChange}){
   wrap.append(minus, input, plus);
   return { wrap, input };
 }
-
 function renderShop(){
-  const seedGrid = $('#seedShopGrid'); if (!seedGrid) return;
+  const seedGrid = $('#seedShopGrid');
+  if (!seedGrid) return;
   seedGrid.innerHTML='';
   ['fire','water','wind','earth'].forEach(cls=>{
-    const el = document.createElement('div');
-    el.className='item';
-
+    const el = document.createElement('div'); el.className='item';
     const img = document.createElement('img');
     img.src = `/assets/Seed_Planted/seed_planted_${cls}.png`;
     img.loading = 'lazy';
-    img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:cls.toUpperCase(),style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
-
+    img.onerror = ()=>{
+      img.replaceWith(Object.assign(document.createElement('div'),{
+        textContent:cls.toUpperCase(),
+        style:'height:72px;display:flex;align-items:center;justify-content:center'
+      }));
+    };
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = cls;
-
-    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
-      cache: seedQtyCache, key: cls
-    });
-
+    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({ cache: seedQtyCache, key: cls });
     const btn = document.createElement('button');
     btn.textContent = `Buy ${cls} (100)`;
     btn.addEventListener('click', async ()=>{
@@ -197,43 +343,45 @@ function renderShop(){
       seedQtyCache[cls] = String(qty);
       try{
         await api('/shop/buy',{ itemType:'seed', classOrType: cls, qty });
+        notifBuy({ what:`seed ${cls}`, qty, price: 100*qty, where: 'Shop' });
         await refresh();
       }catch(e){ showError(e,'buy-seed'); }
     });
-
     el.append(img, lbl, qtyWrap, btn);
     seedGrid.appendChild(el);
   });
 
-  const potGrid = $('#potShopGrid'); if (!potGrid) return; potGrid.innerHTML='';
+  const potGrid = $('#potShopGrid');
+  if (!potGrid) return;
+  potGrid.innerHTML='';
   const potDefs = [
-    {type:'basic', img:'pot1.png', label:'Basic (100)'},
-    {type:'gold', img:'pot2.png', label:'Gold +50% (300)'},
-    {type:'timeskip', img:'pot3.png', label:'Time Skip +50% (300)'}
+    {type:'basic',    img:'pot1.png', label:'Basic (100)',           price:100},
+    {type:'gold',     img:'pot2.png', label:'Gold +50% (300)',       price:300},
+    {type:'timeskip', img:'pot3.png', label:'Time Skip +50% (300)',  price:300}
   ];
   potDefs.forEach(p=>{
     const el=document.createElement('div'); el.className='item';
-
-    const img = document.createElement('img'); img.src = `/assets/Pots_Image/${p.img}`;
+    const img = document.createElement('img');
+    img.src = `/assets/Pots_Image/${p.img}`;
     img.loading = 'lazy';
-    img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:p.type,style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
-
-    const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = p.type;
-
-    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({
-      cache: potQtyCache, key: p.type
-    });
-
+    img.onerror = ()=>{
+      img.replaceWith(Object.assign(document.createElement('div'),{
+        textContent:p.type,
+        style:'height:72px;display:flex;align-items:center;justify-content:center'
+      }));
+    };
+    const lbl = document.createElement('span'); lbl.className = 'label'; lbl.textContent = p.type;
+    const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({ cache: potQtyCache, key: p.type });
     const btn = document.createElement('button'); btn.textContent = p.label;
     btn.addEventListener('click', async ()=>{
       const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
       potQtyCache[p.type] = String(qty);
       try{
         await api('/shop/buy',{ itemType:'pot', classOrType:p.type, qty });
+        notifBuy({ what:`pot ${p.type}`, qty, price: p.price*qty, where:'Shop' });
         await refresh();
       }catch(e){ showError(e,'buy-pot'); }
     });
-
     el.append(img,lbl,qtyWrap,btn);
     potGrid.appendChild(el);
   });
@@ -243,15 +391,12 @@ function renderShop(){
 function renderMarketListings(){
   const ul = document.getElementById('marketList');
   if (!ul) return;
-
   const listings = state?.market || [];
   ul.innerHTML = '';
-
   if (!listings.length){
     ul.innerHTML = '<li><small>Chưa có món nào được rao.</small></li>';
     return;
   }
-
   listings.forEach(L=>{
     const li = document.createElement('li');
     li.innerHTML = `
@@ -268,10 +413,11 @@ function renderMarketListings(){
 /* ---------- DATA HELPERS ---------- */
 function groupMatureByClass(){
   const by = {};
-  (state?.seedInv||[]).filter(s=>s.is_mature===1).forEach(s=>{ by[s.class] = (by[s.class]||0)+1; });
+  (state?.seedInv||[]).filter(s=>s.is_mature===1).forEach(s=>{
+    by[s.class] = (by[s.class]||0)+1;
+  });
   return by;
 }
-
 function decorateSeedText(seed) {
   const m = getMutationMeta(seed);
   if (m) return `#${seed.id} ${seed.class} [${m.name} ×${m.mult}]`;
@@ -280,64 +426,50 @@ function decorateSeedText(seed) {
 
 /* ===== INVENTORY: filters + render + Plant All ===== */
 function getInventoryFilters(){
-  const st  = ($('#fltInvState')?.value || 'all');
+  const st = ($('#fltInvState')?.value || 'all');
   const cls = ($('#fltInvClass')?.value || 'all');
   const mut = ($('#fltInvMut')?.value || 'all');
   return { st, cls, mut };
 }
-
 function seedMatchFilter(s, {st, cls, mut}){
-  // state filter
   if (st === 'not' && s.is_mature !== 0) return false;
   if (st === 'mat' && s.is_mature !== 1) return false;
-  // class filter
   if (cls !== 'all' && s.class !== cls) return false;
-  // mutation filter
   const mKey = s.mutation || s.mutation_name || null;
   if (mut === 'none' && mKey) return false;
   if (mut !== 'all' && mut !== 'none' && mKey !== mut) return false;
   return true;
 }
-
 function getFilteredSeedsForInventory(){
   const list = Array.isArray(state?.seedInv) ? state.seedInv.slice() : [];
   const f = getInventoryFilters();
   return list.filter(s => seedMatchFilter(s, f));
 }
-
 function ensureInventoryClassOptions(){
   const sel = $('#fltInvClass');
   if (!sel) return;
   const classes = Array.from(new Set((state?.seedInv||[]).map(s=>s.class))).sort();
   preserveSelectValue(sel, ()=>{
     const cur = sel.value;
-    sel.innerHTML = '<option value="all">All classes</option>' +
-      classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+    sel.innerHTML = '<option value="all">All classes</option>' + classes.map(c=>`<option value="${c}">${c}</option>`).join('');
     if (Array.from(sel.options).some(o=>o.value===cur)) sel.value = cur;
   });
 }
-
 function renderInventorySeeds(){
-  const ul = $('#seedInv'); if (!ul) return;
+  const ul = $('#seedInv');
+  if (!ul) return;
   const rows = getFilteredSeedsForInventory().filter(s=>s.is_mature===0 || $('#fltInvState')?.value!=='not');
   ul.innerHTML = '';
-
   if (!rows.length){
     ul.innerHTML = '<li><small>Không có seed phù hợp filter.</small></li>';
     return;
   }
-
   for (const s of rows){
-    const li = document.createElement('li');
-    li.className = 'inv-item';
+    const li = document.createElement('li'); li.className = 'inv-item';
     const m = getMutationMeta(s);
-
     li.innerHTML = `
       <div class="title">${decorateSeedText(s)}</div>
-      <div class="small">base ${s.base_price ?? '-'} • id ${s.id}</div>
-    `;
-
-    // badge mutation (nếu có)
+      <div class="small">base ${s.base_price ?? '-'} • id ${s.id}</div>`;
     if (m){
       const tag = document.createElement('div');
       tag.className = 'mut-tag';
@@ -350,41 +482,35 @@ function renderInventorySeeds(){
       }
       li.appendChild(tag);
     }
-
     ul.appendChild(li);
   }
 }
-
 async function plantAllFiltered(){
-  // Lấy seeds theo filter, chỉ trồng seeds NOT MATURE
   const seeds = getFilteredSeedsForInventory().filter(s=>s.is_mature===0);
   if (!seeds.length) return alert('Không có seed phù hợp để trồng.');
 
-  // Lấy danh sách plot trống nhưng đã có pot
   const targets = [];
   for (const fp of (state?.plots||[])){
     for (const p of fp.plots){
       if (p.pot_id && p.stage === 'empty'){
-        targets.push({ floorId: fp.floor.id, slot: p.slot });
+        targets.push({ floorId: fp.floor.id, slot: p.slot, floorIdx: fp.floor.idx });
       }
     }
   }
   if (!targets.length) return alert('Không còn slot trống có pot để trồng.');
 
   let planted = 0;
-  // Ghép từng seed vào từng target
   while (targets.length && seeds.length){
     const t = targets.shift();
     const s = seeds.shift();
     try {
       await api('/plot/plant', { floorId: t.floorId, slot: t.slot, seedId: s.id });
       planted++;
+      notifPlant({ cls:s.class, seedName:s.class, floorName:`Floor ${t.floorIdx}`, potId:t.slot, mutation:s.mutation, seed:s });
     } catch (e) {
       showError(e, 'plant-all');
-      // nếu lỗi, thử seed kế tiếp/target kế tiếp
     }
   }
-
   alert(`Đã trồng ${planted} seed.`);
   await refresh();
 }
@@ -393,31 +519,30 @@ async function plantAllFiltered(){
 function populateSelects(){
   if (!state) return;
 
-  // Sell (mature only)
   const sellSel = $('#sellSeedSelect');
   if (sellSel){
     preserveSelectValue(sellSel, ()=>{
       sellSel.innerHTML = '';
       state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
         const o = document.createElement('option');
-        o.value = s.id; o.textContent = decorateSeedText(s);
+        o.value = s.id;
+        o.textContent = decorateSeedText(s);
         sellSel.appendChild(o);
       });
     });
   }
 
-  // Market (mature only)
   const listSel = $('#listSeedSelect');
   if (listSel){
     preserveSelectValue(listSel, ()=>{
       listSel.innerHTML = '';
       state.seedInv.filter(s=>s.is_mature===1).forEach(s=>{
         const o = document.createElement('option');
-        o.value = s.id; o.textContent = decorateSeedText(s);
+        o.value = s.id;
+        o.textContent = decorateSeedText(s);
         listSel.appendChild(o);
       });
     });
-
     const priceInput = $('#listPrice');
     const syncHint = ()=>{
       const sid = parseInt(listSel.value,10);
@@ -432,8 +557,7 @@ function populateSelects(){
     setTimeout(syncHint, 0);
   }
 
-  // Mature by class
-  const matUl = $('#matureByClass'); 
+  const matUl = $('#matureByClass');
   if (matUl){
     matUl.innerHTML='';
     const by = groupMatureByClass();
@@ -445,7 +569,6 @@ function populateSelects(){
     });
   }
 
-  // Breed selects
   const selA = $('#breedSelectA'), selB = $('#breedSelectB');
   if (selA && selB){
     const oldA = selA.value, oldB = selB.value;
@@ -458,34 +581,51 @@ function populateSelects(){
     if (Array.from(selB.options).some(o=>o.value===oldB)) selB.value = oldB;
   }
 
-  // Form cũ (safe)
   const floorSel = $('#plantFloor');
   if (floorSel){
     preserveSelectValue(floorSel, ()=>{
       floorSel.innerHTML='';
-      state.floors.forEach(f=>{ const o=document.createElement('option'); o.value=f.id; o.textContent=`Floor ${f.idx}`; floorSel.appendChild(o); });
+      state.floors.forEach(f=>{
+        const o=document.createElement('option');
+        o.value=f.id; o.textContent=`Floor ${f.idx}`;
+        floorSel.appendChild(o);
+      });
     });
   }
   const slotSel = $('#plantSlot');
   if (slotSel){
     preserveSelectValue(slotSel, ()=>{
-      slotSel.innerHTML=''; for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=`Slot ${i}`; slotSel.appendChild(o); }
+      slotSel.innerHTML='';
+      for(let i=1;i<=10;i++){
+        const o=document.createElement('option');
+        o.value=i; o.textContent=`Slot ${i}`;
+        slotSel.appendChild(o);
+      }
     });
   }
   const potSel = $('#plantPot');
   if (potSel){
     preserveSelectValue(potSel, ()=>{
-      potSel.innerHTML=''; state.potInv.forEach(p=>{ const o=document.createElement('option'); o.value=p.id; o.textContent=`#${p.id} ${p.type}`; potSel.appendChild(o); });
+      potSel.innerHTML='';
+      state.potInv.forEach(p=>{
+        const o=document.createElement('option');
+        o.value=p.id; o.textContent=`#${p.id} ${p.type}`;
+        potSel.appendChild(o);
+      });
     });
   }
   const seedSel = $('#plantSeed');
   if (seedSel){
     preserveSelectValue(seedSel, ()=>{
-      seedSel.innerHTML=''; state.seedInv.filter(s=>s.is_mature===0).forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=decorateSeedText(s); seedSel.appendChild(o); });
+      seedSel.innerHTML='';
+      state.seedInv.filter(s=>s.is_mature===0).forEach(s=>{
+        const o=document.createElement('option');
+        o.value=s.id; o.textContent=decorateSeedText(s);
+        seedSel.appendChild(o);
+      });
     });
   }
 
-  // Inventory filter: cập nhật options class + render danh sách
   ensureInventoryClassOptions();
   renderInventorySeeds();
 }
@@ -516,46 +656,36 @@ function hexToRgb(hex){
 }
 function pickTextColorForBg(hex){
   const {r,g,b} = hexToRgb(hex);
-  // relative luminance (WCAG)
   const lum = (0.2126*(r/255) + 0.7152*(g/255) + 0.0722*(b/255));
-  return lum > 0.6 ? '#041326' : '#ffffff'; // nền sáng -> chữ sẫm, nền tối -> chữ trắng
+  return lum > 0.6 ? '#041326' : '#ffffff';
 }
-
 function addMutationBadge(container, obj) {
   const m = getMutationMeta(obj);
   if (!m) return;
-
   const badge = document.createElement('div');
   badge.className = 'mut-tag';
   badge.textContent = m.name;
   badge.title = `${m.name} ×${m.mult}`;
-
-  // Tô màu theo mutation
   if (m.color){
-    badge.style.background   = m.color;                      // nền đúng màu mutation
-    badge.style.color        = pickTextColorForBg(m.color);  // chữ tương phản
-    badge.style.borderColor  = m.color;                      // viền cùng màu
-    badge.style.boxShadow    = `0 0 12px ${m.color}66`;      // glow nhẹ cùng màu
+    badge.style.background = m.color;
+    badge.style.color = pickTextColorForBg(m.color);
+    badge.style.borderColor = m.color;
+    badge.style.boxShadow = `0 0 12px ${m.color}66`;
   }
-
   container.appendChild(badge);
 }
 
 /* ====== HIỂN THỊ 2 TẦNG / TRANG + LƯU localStorage ====== */
 const LS_FLOOR_PAGE_KEY = 'floor_page';
-let floorPage = 0; // 0-based
-
+let floorPage = 0;
 function loadFloorPageFromStorage(){
-  try{
-    const v = parseInt(localStorage.getItem(LS_FLOOR_PAGE_KEY),10);
-    if (Number.isFinite(v) && v>=0) floorPage = v;
-  }catch{}
+  try{ const v = parseInt(localStorage.getItem(LS_FLOOR_PAGE_KEY),10);
+    if (Number.isFinite(v) && v>=0) floorPage = v; }catch{}
 }
 function saveFloorPageToStorage(){
   try{ localStorage.setItem(LS_FLOOR_PAGE_KEY, String(floorPage)); }catch{}
 }
 loadFloorPageFromStorage();
-
 function getTotalFloorPagesFromState(s){
   const totalFloors = (s?.plots || []).length;
   return Math.max(1, Math.ceil(totalFloors / 2));
@@ -572,29 +702,23 @@ function getVisibleFloorPairs(s){
 }
 
 /* ====== VIRTUALIZE PLOTS ====== */
-/** Set các plot đang “thật sự” nằm trong viewport => tickTimers chỉ cập nhật cho chúng */
 const visibleTimerPlots = new Set();
-/** Observer để render plot khi cuộn tới (có đệm) */
 let plotRenderObserver = null;
-/** Observer để theo dõi plot có nằm trong viewport không (cho timer) */
 let timerVisObserver = null;
-
 function ensureObservers(){
   if (!plotRenderObserver){
     plotRenderObserver = new IntersectionObserver(entries=>{
       for (const ent of entries){
         const placeholder = ent.target;
         if (!ent.isIntersecting) continue;
-        // Lấy data đã gắn sẵn cho placeholder
         const p = placeholder.__plotData;
         if (!p) { plotRenderObserver.unobserve(placeholder); continue; }
         const real = buildPlotElement(p);
         placeholder.replaceWith(real);
         plotRenderObserver.unobserve(placeholder);
-        // Bắt đầu quan sát hiển thị cho timer
         timerVisObserver?.observe(real);
       }
-    }, { root:null, rootMargin:'400px 0px', threshold:0.01 }); // đệm khoảng 400px theo chiều dọc
+    }, { root:null, rootMargin:'400px 0px', threshold:0.01 });
   }
   if (!timerVisObserver){
     timerVisObserver = new IntersectionObserver(entries=>{
@@ -602,7 +726,6 @@ function ensureObservers(){
         const el = ent.target;
         if (ent.isIntersecting) {
           visibleTimerPlots.add(el);
-          // cập nhật ngay một nhịp để khỏi trống
           updatePlotTimer(el);
         } else {
           visibleTimerPlots.delete(el);
@@ -611,32 +734,26 @@ function ensureObservers(){
     }, { root:null, rootMargin:'100px 0px', threshold:0.01 });
   }
 }
-
-/** Xây 1 placeholder plot để lazy render */
 function buildPlotPlaceholder(p){
   const ph = document.createElement('div');
   ph.className = 'plot';
   ph.style.minHeight = '260px';
   ph.innerHTML = `<div class="skeleton" style="height:100%;"></div>`;
-  ph.__plotData = p; // gắn tạm dữ liệu để observer lấy
+  ph.__plotData = p;
   return ph;
 }
-
-/** Xây plot đầy đủ (tách ra để tái dùng) */
 function buildPlotElement(p){
   const el=document.createElement('div');
-  el.className='plot'; 
-  el.dataset.plotId=p.id; 
-  el.dataset.stage=p.stage||'empty'; 
+  el.className='plot';
+  el.dataset.plotId=p.id;
+  el.dataset.stage=p.stage||'empty';
   el.dataset.class=p.class||'';
   if(p.mature_at) el.dataset.matureAt=p.mature_at;
   if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
-
   const meta = getMutationMeta(p);
   el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
 
-  const stats=document.createElement('div'); 
-  stats.className='stats';
+  const stats=document.createElement('div'); stats.className='stats';
   const lines = [];
   lines.push(`<div class="stat cls"><div class="label">Class</div><div class="value">${p.class||'empty'}</div></div>`);
   lines.push(`<div class="stat time"><div class="label">Time left</div><div class="value"></div></div>`);
@@ -646,33 +763,27 @@ function buildPlotElement(p){
   }
   stats.innerHTML = lines.join('');
 
-  const visual=document.createElement('div'); 
-  visual.className='visual';
-  if(p.pot_type){ 
-    const pot=document.createElement('img'); 
-    pot.className='pot';
+  const visual=document.createElement('div'); visual.className='visual';
+  if(p.pot_type){
+    const pot=document.createElement('img'); pot.className='pot';
     pot.src=`/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
     pot.loading = 'lazy';
     visual.appendChild(pot);
   }
-  if(p.class&&p.stage){ 
-    const folder=p.stage==='planted'?'Seed_Planted':p.stage==='growing'?'Seed_Growing':'Seed_Mature';
-    const plant=document.createElement('img'); 
-    plant.className='plant';
-    plant.src=`/assets/${folder}/seed_${p.stage}_${p.class}.png`;
+  if(p.class&&p.stage){
+    const folder = p.stage==='planted' ? 'Seed_Planted' : (p.stage==='growing' ? 'Seed_Growing' : 'Seed_Mature');
+    const plant = document.createElement('img'); plant.className = 'plant';
+    plant.src = `/assets/${folder}/seed_${p.stage}_${p.class}.png`;
     plant.loading = 'lazy';
     visual.appendChild(plant);
-
+    const mmeta = getMutationMeta(p);
+    if (mmeta?.key) applyMutationFilterToPlant(plant, mmeta.key);
     addMutationBadge(visual, p);
   }
-
-  el.append(stats,visual); 
-  if(p.stage==='mature') el.classList.add('mature'); 
-
+  el.append(stats,visual);
+  if(p.stage==='mature') el.classList.add('mature');
   return el;
 }
-
-/** Render danh sách plots với virtualization */
 function virtualizePlotsInto(container, plots){
   ensureObservers();
   container.innerHTML = '';
@@ -692,15 +803,15 @@ function computeFloorsSig(s){
       ...(fp.plots||[]).map(p=>[p.id,p.stage,p.class,p.mature_at,p.pot_type,p.mutation_name,p.mutation_mult])
     ]);
     return JSON.stringify(parts);
-  }catch{return '';}
+  }catch{ return ''; }
 }
 
 /* ---------- RENDER STATE (soft/atomic) ---------- */
 function renderState(s, opts = {}){
   state=s;
   ensureFarmAutoControls();
-
   $('#hudUser').textContent = s.me.username;
+
   const coinsEl = $('#hudCoins');
   if (coinsEl.textContent !== String(s.me.coins)) {
     coinsEl.textContent = s.me.coins;
@@ -708,47 +819,32 @@ function renderState(s, opts = {}){
     setTimeout(()=>coinsEl.classList.remove('updated'), 600);
   }
 
-  const priceEl = $('#trapPrice');
-  if (priceEl) priceEl.textContent = (s.trapPrice ?? '-');
-  const maxEl = $('#trapMax');
-  if (maxEl) maxEl.textContent = (s.trapMax ?? '-');
+  const priceEl = $('#trapPrice'); if (priceEl) priceEl.textContent = (s.trapPrice ?? '-');
+  const maxEl   = $('#trapMax');  if (maxEl)   maxEl.textContent   = (s.trapMax ?? '-');
 
   const floorsDiv=$('#floors');
   if(floorsDiv){
     const newSig = computeFloorsSig(s);
-    const shouldRebuildFloors =
-      opts.forceFloors === true ||
-      !opts.soft ||
-      newSig !== _lastFloorsSig;
-
+    const shouldRebuildFloors = opts.forceFloors === true || !opts.soft || newSig !== _lastFloorsSig;
     if (shouldRebuildFloors){
       snapshotFloorActionSelections();
 
-      // Dùng fragment để thay thế "atomic"
       const frag = document.createDocumentFragment();
-
-      // Giới hạn trang & lấy 2 tầng hiển thị
       clampFloorPageForState(s);
       saveFloorPageToStorage();
       const visibleFloorPairs = getVisibleFloorPairs(s);
 
       visibleFloorPairs.forEach(fp=>{
-        const f=document.createElement('div'); 
-        f.className='floor'; 
-        f.dataset.floorId=fp.floor.id;
+        const f=document.createElement('div'); f.className='floor'; f.dataset.floorId=fp.floor.id;
         f.innerHTML=`<h3>Floor ${fp.floor.idx}</h3>`;
 
-        const wrap=document.createElement('div'); 
-        wrap.className='plots';
-
-        // === Virtualize ở đây ===
+        const wrap=document.createElement('div'); wrap.className='plots';
         virtualizePlotsInto(wrap, fp.plots);
-
         f.appendChild(wrap);
 
-        const act=document.createElement('div'); 
-        act.className='floor-actions';
-        act.innerHTML=`<span class="floor-tag">Floor ${fp.floor.idx}</span>
+        const act=document.createElement('div'); act.className='floor-actions';
+        act.innerHTML=`
+          <span class="floor-tag">Floor ${fp.floor.idx}</span>
           <select class="sel-slot">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
           <select class="sel-pot">${(s.potInv||[]).map(p=>`<option value="${p.id}">#${p.id} ${p.type}</option>`).join('')}</select>
           <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">${decorateSeedText(x)}</option>`).join('')}</select>
@@ -759,52 +855,69 @@ function renderState(s, opts = {}){
 
         act.addEventListener('change',()=>{
           floorActionSel[fp.floor.id]={
-            slot:act.querySelector('.sel-slot')?.value,
-            potId:act.querySelector('.sel-pot')?.value,
+            slot:  act.querySelector('.sel-slot')?.value,
+            potId: act.querySelector('.sel-pot')?.value,
             seedId:act.querySelector('.sel-seed')?.value
           };
         });
-
         act.addEventListener('click',async e=>{
           const floorId=fp.floor.id,slot=parseInt(act.querySelector('.sel-slot').value,10);
+
           if(e.target.closest('.btn-place')){
-            const potId=parseInt(act.querySelector('.sel-pot').value,10); if(!potId) return;
-            try{await api('/plot/place-pot',{floorId,slot,potId});await refresh();}catch(err){showError(err,'place-pot');}
+            const potId=parseInt(act.querySelector('.sel-pot').value,10);
+            if(!potId) return;
+            try{
+              await api('/plot/place-pot',{ floorId, slot, potId });
+              notifInfo('Đã đặt pot', `#${potId}`, `Floor ${fp.floor.idx} · Slot ${slot}`);
+              await refresh();
+            }catch(err){showError(err,'place-pot');}
           }
+
           if(e.target.closest('.btn-plant')){
-            const seedId=parseInt(act.querySelector('.sel-seed').value,10); if(!seedId) return;
-            try{await api('/plot/plant',{floorId,slot,seedId});await refresh();}catch(err){showError(err,'plant');}
+            const seedId=parseInt(act.querySelector('.sel-seed').value,10);
+            if(!seedId) return;
+            try{
+              await api('/plot/plant',{ floorId, slot, seedId });
+              const sseed = (state?.seedInv||[]).find(x=>x.id===seedId);
+              notifPlant({ cls: sseed?.class, seedName:sseed?.class, floorName:`Floor ${fp.floor.idx}`, potId:slot, mutation: sseed?.mutation || sseed?.mutation_name, seed: sseed });
+              await refresh();
+            }catch(err){showError(err,'plant');}
           }
+
           if(e.target.closest('.btn-remove')){
             if(!confirm('Xóa ô này?'))return;
-            try{await api('/plot/remove',{floorId,slot});await refresh();}catch(err){showError(err,'remove');}
+            try{
+              await api('/plot/remove',{ floorId, slot });
+              notifyBus.show({ type:'warn', title:'Đã xoá ô', meta:`Floor ${fp.floor.idx} · Slot ${slot}` });
+              await refresh();
+            }catch(err){showError(err,'remove');}
           }
         });
 
         frag.appendChild(f);
       });
 
-      // Thẻ "Mua tầng" (không phụ thuộc phân trang)
       const maxIdx = (s.floors||[]).reduce((m,f)=>Math.max(m,f.idx),0);
       const price = nextFloorPrice();
-      const card=document.createElement('div'); 
-      card.className='buy-floor-card';
+      const card=document.createElement('div'); card.className='buy-floor-card';
       card.innerHTML=`<div class="price">Mở tầng ${maxIdx+1}: <b>${price}</b> coins</div><button class="do-buy-floor">Buy Floor</button>`;
       card.querySelector('.do-buy-floor').addEventListener('click',async()=>{
         if(!confirm(`Mở tầng ${maxIdx+1} với giá ${price} coins?`))return;
-        try{await api('/floors/buy',{});await refresh();}catch(err){showError(err,'buy-floor');}
+        try{
+          await api('/floors/buy',{});
+          notifInfo('Đã mở tầng', `Floor ${maxIdx+1}`, `Giá ${price} coins`);
+          await refresh();
+        }catch(err){showError(err,'buy-floor');}
       });
       frag.appendChild(card);
 
-      // Thanh điều hướng Previous / Next dưới các tầng
       const totalPages = getTotalFloorPagesFromState(s);
       const nav = document.createElement('div');
       nav.className = 'floor-nav';
       nav.innerHTML = `
         <button class="btn prev" ${floorPage===0?'disabled':''}>Previous floor</button>
         <div class="page-indicator">Page ${floorPage+1}/${totalPages}</div>
-        <button class="btn next" ${floorPage>=totalPages-1?'disabled':''}>Next floor</button>
-      `;
+        <button class="btn next" ${floorPage>=totalPages-1?'disabled':''}>Next floor</button>`;
       nav.querySelector('.prev')?.addEventListener('click', ()=>{
         if (floorPage>0){ floorPage--; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
       });
@@ -813,11 +926,12 @@ function renderState(s, opts = {}){
       });
       frag.appendChild(nav);
 
-      // Thay thế atomic để tránh blink
-      floorsDiv.replaceChildren(frag);
-
-      restoreFloorActionSelections();
-      _lastFloorsSig = newSig;
+      // --- Anti-blink: atomic replace trong rAF ---
+      requestAnimationFrame(()=> {
+        $('#floors').replaceChildren(frag);
+        restoreFloorActionSelections();
+        _lastFloorsSig = newSig;
+      });
     }
   }
 
@@ -825,14 +939,23 @@ function renderState(s, opts = {}){
   renderShop();
   renderBuyFloorPrice();
   renderMarketListings();
-}
 
-async function refresh(opts = {}){ const data = await get('/me/state'); renderState(data, opts); }
+  // Ẩn (gỡ) nút Floor lên/xuống cũ trước Harvest All nếu còn tồn tại
+  removeLegacyFloorButtons();
+}
+async function refresh(opts = {}){
+  const data = await get('/me/state');
+  renderState(data, opts);
+}
 
 /* ---------- AUTH ---------- */
 $('#btnLogin').addEventListener('click', async ()=>{
-  const username=$('#username').value.trim(); if(!username) return alert('Enter username');
-  await api('/auth/login',{username}); showApp(); await refresh(); connectWS();
+  const username=$('#username').value.trim();
+  if(!username) return alert('Enter username');
+  await api('/auth/login',{username});
+  showApp();
+  await refresh();
+  connectWS();
 });
 
 /* ---------- TABS ---------- */
@@ -840,16 +963,22 @@ $$('.tabs button').forEach(b=>b.addEventListener('click', ()=> {
   setActive(b.dataset.tab);
   if (b.dataset.tab==='online') maybeLoadOnline();
 }));
-
 let _lastOnlineLoad = 0;
-function maybeLoadOnline(){ const now = Date.now(); if (now - _lastOnlineLoad < 1500) return; _lastOnlineLoad = now; loadOnline(); }
+function maybeLoadOnline(){
+  const now = Date.now();
+  if (now - _lastOnlineLoad < 1500) return;
+  _lastOnlineLoad = now;
+  loadOnline();
+}
 
 /* ---------- SHOP SUBTABS ---------- */
 $('#shop')?.addEventListener('click', (e)=>{
   const b = e.target.closest('#shopTabs button');
   if (!b) return;
   $('#shopTabs').querySelectorAll('button').forEach(x=>x.classList.toggle('active', x===b));
-  ['shopSeeds','shopPots','shopTrap'].forEach(id=>{ $('#'+id).classList.toggle('hidden', b.dataset.sub !== id); });
+  ['shopSeeds','shopPots','shopTrap'].forEach(id=>{
+    $('#'+id).classList.toggle('hidden', b.dataset.sub !== id);
+  });
 });
 
 /* ---------- SUBTABS INVENTORY ---------- */
@@ -866,26 +995,38 @@ $('#fltInvMut')?.addEventListener('change', renderInventorySeeds);
 $('#btnPlantAll')?.addEventListener('click', plantAllFiltered);
 
 /* ---------- SHOP / TRAP ---------- */
-$('#buyTrap')?.addEventListener('click', async ()=>{ try{ await api('/shop/buy-trap',{}); await refresh(); }catch(e){ showError(e,'buy-trap'); } });
+$('#buyTrap')?.addEventListener('click', async ()=>{
+  try{
+    await api('/shop/buy-trap',{});
+    notifBuy({ what:'trap', qty:1, price: state?.trapPrice, where:'Shop' });
+    await refresh();
+  }catch(e){ showError(e,'buy-trap'); }
+});
 
 /* ---------- SELL ---------- */
 $('#btnSellShop')?.addEventListener('click', async ()=>{
-  const id = parseInt($('#sellSeedSelect').value,10); if(!id) return;
-  try{ const r = await api('/sell/shop',{ seedId:id }); alert('Paid '+r.paid); await refresh(); }catch(e){ showError(e, 'sell'); }
+  const id = parseInt($('#sellSeedSelect').value,10);
+  if(!id) return;
+  try{
+    const r = await api('/sell/shop',{ seedId:id });
+    notifSell({ what:`seed #${id}`, qty:1, price:r.paid });
+    alert('Paid '+r.paid);
+    await refresh();
+  }catch(e){ showError(e, 'sell'); }
 });
 
 /* ---------- BREED ---------- */
 $('#btnBreed')?.addEventListener('click', async ()=>{
-  const a=parseInt($('#breedSelectA').value,10), b=parseInt($('#breedSelectB').value,10); if(!a||!b) return;
+  const a=parseInt($('#breedSelectA').value,10), b=parseInt($('#breedSelectB').value,10);
+  if(!a||!b) return;
   if (a===b) return alert('Chọn 2 cây khác nhau');
   try{
     const r = await api('/breed',{ seedAId:a, seedBId:b });
-    $('#breedOut').innerHTML =
-      `${renderMutationBadge(r.mutation)} Out: <b>${r.outClass}</b> (base ${r.base})`;
+    $('#breedOut').innerHTML = `${renderMutationBadge(r.mutation)} Out: <b>${r.outClass}</b> (base ${r.base})`;
+    notifBreed({ resultCls:r.outClass, parents:[`#${a}`, `#${b}`], mutation:r.mutation, base:r.base });
     await refresh();
   }catch(e){ showError(e, 'breed'); }
 });
-
 // Random Breed
 document.getElementById('btnRandomBreed')?.addEventListener('click', ()=>{
   const inv = (window.state?.seedInv || state?.seedInv || []).filter(s => s.is_mature === 1);
@@ -919,13 +1060,19 @@ $('#btnList')?.addEventListener('click', async ()=>{
   if(!id||!price) return;
   try{
     await api('/market/list',{ seedId:id, askPrice:price });
+    notifyBus.show({ type:'info', title:'Đã niêm yết', desc:`#${id}`, meta:`Giá ${price}` });
     await refresh();
   }catch(e){ showError(e, 'market-list'); }
 });
 $('#marketList')?.addEventListener('click', async (e)=>{
-  const b=e.target.closest('.buy-listing'); if(!b) return; 
+  const b=e.target.closest('.buy-listing');
+  if(!b) return;
   const id=parseInt(b.dataset.id,10);
-  try{ await api('/market/buy',{ listingId:id }); await refresh(); }catch(e){ showError(e, 'market-buy'); }
+  try{
+    await api('/market/buy',{ listingId:id });
+    notifBuy({ what:`listing #${id}`, qty:1, where:'Market' });
+    await refresh();
+  }catch(e){ showError(e, 'market-buy'); }
 });
 
 /* ---------- FORM cũ ---------- */
@@ -934,25 +1081,41 @@ $('#btnPlacePot')?.addEventListener('click', async ()=>{
   const slot=parseInt($('#plantSlot').value,10);
   const potId=parseInt($('#plantPot').value,10);
   if(!floorId||!slot||!potId) return;
-  try{ await api('/plot/place-pot',{ floorId, slot, potId }); await refresh(); }catch(e){ showError(e, 'place-pot'); }
+  try{
+    await api('/plot/place-pot',{ floorId, slot, potId });
+    notifInfo('Đã đặt pot', `#${potId}`, `FloorId ${floorId} · Slot ${slot}`);
+    await refresh();
+  }catch(e){ showError(e, 'place-pot'); }
 });
 $('#btnPlant')?.addEventListener('click', async ()=>{
-  const floorId=parseInt($('#plantFloor').value,10);
-  const slot=parseInt($('#plantSlot').value,10);
-  const seedId=parseInt($('#plantSeed').value,10);
+  const floorId = parseInt($('#plantFloor').value,10);
+  const slot = parseInt($('#plantSlot').value,10);
+  const seedId = parseInt($('#plantSeed').value,10);
+  const mutation= $('#plantMutation')?.value || null;
   if(!floorId||!slot||!seedId) return;
-  try{ await api('/plot/plant',{ floorId, slot, seedId }); await refresh(); }catch(e){ showError(e, 'plant'); }
+  try{
+    await api('/plot/plant',{ floorId, slot, seedId, mutation });
+    const sseed = (state?.seedInv||[]).find(x=>x.id===seedId);
+    notifPlant({ cls:sseed?.class, seedName:sseed?.class, floorName:`FloorId ${floorId}`, potId:slot, mutation: mutation || sseed?.mutation, seed:sseed });
+    await refresh();
+  }catch(e){ showError(e, 'plant'); }
 });
 
 /* ---------- ONLINE (Visit & Steal) ---------- */
 async function loadOnline(){
   try{
     const r = await get('/online');
-    const ul=$('#onlineList'); if (!ul) return;
+    const ul=$('#onlineList');
+    if (!ul) return;
     ul.innerHTML='';
     r.users.forEach(async (u)=>{
       const li=document.createElement('li');
-      li.innerHTML = `<div class="row"><b>${u.username}</b> (#${u.id}) <select class="visit-floor" data-uid="${u.id}"></select> <button class="visit" data-uid="${u.id}">Visit</button></div><div class="visit-view" id="visit-${u.id}"></div>`;
+      li.innerHTML = `
+        <div class="row"><b>${u.username}</b> (#${u.id})
+          <select class="visit-floor" data-uid="${u.id}"></select>
+          <button class="visit" data-uid="${u.id}">Visit</button>
+        </div>
+        <div class="visit-view" id="visit-${u.id}"></div>`;
       ul.appendChild(li);
       try{
         const f = await get('/visit/floors?userId='+u.id);
@@ -960,7 +1123,9 @@ async function loadOnline(){
         preserveSelectValue(sel, ()=>{
           sel.innerHTML='';
           f.floors.forEach(fl=>{
-            const o=document.createElement('option'); o.value=fl.id; o.textContent=`Floor ${fl.idx} (traps ${fl.trap_count})`; sel.appendChild(o);
+            const o=document.createElement('option');
+            o.value=fl.id; o.textContent=`Floor ${fl.idx} (traps ${fl.trap_count})`;
+            sel.appendChild(o);
           });
         });
         sel.addEventListener('change', ()=>{
@@ -972,55 +1137,82 @@ async function loadOnline(){
   }catch(e){ console.log(e); }
 }
 function clearAllVisitViews(){ $$('.visit-view').forEach(v=>v.innerHTML=''); }
-
 async function renderVisitedFloor(uid, floorId){
   const container = document.querySelector('#visit-'+uid);
   if (!container) return;
   container.innerHTML = '<div class="skeleton"></div>';
-
   try {
     const data = await get('/visit/floor?floorId='+floorId);
     container.innerHTML = '';
-
-    const wrap = document.createElement('div');
-    wrap.className = 'plots';
-
+    const wrap = document.createElement('div'); wrap.className = 'plots';
     data.plots.forEach(p=>{
       const el = buildPlotElement(p);
-      // theo dõi viewport cho timer ở trang visit
+      if (p.stage === 'mature') {
+        const steal = document.createElement('button');
+        steal.className = 'btn-steal';
+        steal.textContent = 'Steal';
+        steal.title = 'Ăn trộm hạt mature từ plot này';
+        const statsBox = el.querySelector('.stats');
+        (statsBox || el).appendChild(steal);
+        steal.addEventListener('click', async ()=>{
+          try{
+            const r = await api('/visit/steal-plot', { targetUserId: uid, floorId: floorId, plotId: p.id });
+            if (r?.trap) {
+              alert(`Bị TRAP! -${r.penalty} coins`);
+              notifTrap({ name:'Trap kích hoạt', floorName:`#${floorId}`, result:`-${r.penalty} coins` });
+            } else if (r?.ok) {
+              const mutTxt = formatMutationShort(r.mutation);
+              alert(`Steal thành công: ${r.class}${mutTxt? ` [${mutTxt}]`:''}`);
+              notifyBus.show({ type:'success', title:'Steal OK', desc:`${r.class}${mutTxt? ` · Mut: ${mutTxt}`:''}` });
+            } else if (r?.reason) {
+              alert(`Steal fail: ${r.reason}`);
+              notifError('Steal fail', r.reason);
+            }
+            await renderVisitedFloor(uid, floorId);
+            await refresh();
+          }catch(e){ showError(e,'steal'); }
+        });
+      }
       ensureObservers();
       timerVisObserver?.observe(el);
       wrap.appendChild(el);
     });
-
     container.appendChild(wrap);
-  } catch(e) {
-    console.log(e);
-  }
+  } catch(e) { console.log(e); }
 }
-
 $('#onlineList')?.addEventListener('click', async (e)=>{
   const btn = e.target.closest('.visit');
   if (!btn) return;
   const uid = parseInt(btn.dataset.uid, 10);
-  const li  = btn.closest('li');
+  const li = btn.closest('li');
   const sel = li.querySelector('.visit-floor');
   const floorId = parseInt(sel?.value, 10);
   if (!floorId) return;
-
   clearAllVisitViews();
   await renderVisitedFloor(uid, floorId);
 });
 
-/* ---------- FLOOR NAV (cuộn trong trang đang hiển thị) ---------- */
+/* ---------- FLOOR NAV (legacy buttons removed automatically) ---------- */
+function removeLegacyFloorButtons(){
+  // Loại bỏ 2 nút ↑ Floor / ↓ Floor nếu vẫn còn trong DOM trước nút Harvest All
+  $('#btnPrevFloor')?.remove();
+  $('#btnNextFloor')?.remove();
+}
 function ensureFloorVisible(){
   const floors = $$('#floors .floor');
   if (floors.length===0) return;
   currentFloorIdx = Math.max(0, Math.min(currentFloorIdx, floors.length-1));
   floors[currentFloorIdx].scrollIntoView({behavior:'smooth', block:'center'});
 }
-$('#btnPrevFloor')?.addEventListener('click', ()=>{ currentFloorIdx = Math.max(0, currentFloorIdx-1); ensureFloorVisible(); });
-$('#btnNextFloor')?.addEventListener('click', ()=>{ const n = $$('#floors .floor').length; currentFloorIdx = Math.min(n-1, currentFloorIdx+1); ensureFloorVisible(); });
+$('#btnPrevFloor')?.addEventListener('click', ()=>{
+  currentFloorIdx = Math.max(0, currentFloorIdx-1);
+  ensureFloorVisible();
+});
+$('#btnNextFloor')?.addEventListener('click', ()=>{
+  const n = $$('#floors .floor').length;
+  currentFloorIdx = Math.min(n-1, currentFloorIdx+1);
+  ensureFloorVisible();
+});
 
 /* ---------- HARVEST ALL ---------- */
 async function harvestAllMature() {
@@ -1029,6 +1221,7 @@ async function harvestAllMature() {
   try {
     const r = await api('/plot/harvest-all', {});
     alert(`Đã thu hoạch ${r.harvested} plot mature`);
+    notifyBus.show({ type:'success', title:'Harvest', desc:`${r.harvested} plots` });
     await refresh();
   } catch (e) {
     showError(e, 'harvest-all');
@@ -1048,33 +1241,38 @@ function connectWS(){
     try{
       const msg=JSON.parse(ev.data);
       if(msg.type==='state:update'){
-        // Gộp nhiều event nhanh thành 1 lần render
         _wsPendingPayload = msg.payload;
         if (_wsTimer) return;
         _wsTimer = setTimeout(()=>{
           const payload = _wsPendingPayload;
           _wsPendingPayload = null;
           _wsTimer = null;
-          renderState(payload, { soft:false, forceFloors:true }); // action => render mạnh tay
+          // Anti-blink: chỉ soft refresh, không force rebuild floors
+          renderState(payload, { soft:true });
         }, 120);
       }
     }catch(e){}
   };
 }
-function fmtMs(ms){ if (ms<=0) return 'Mature'; const s=Math.ceil(ms/1000); const m=Math.floor(s/60); const r=s%60; return `${m}:${String(r).padStart(2,'0')}`; }
-
-/** cập nhật timer cho 1 plot element */
+function fmtMs(ms){
+  if (ms<=0) return 'Mature';
+  const s=Math.ceil(ms/1000);
+  const m=Math.floor(s/60);
+  const r=s%60;
+  return `${m}:${String(r).padStart(2,'0')}`;
+}
 function updatePlotTimer(el){
   const tVal = el.querySelector('.stat.time .value');
   if (!tVal) return;
   const st = el.dataset.stage;
-  if (st === 'mature'){ tVal.textContent = 'Mature'; return; }
+  if (st === 'mature'){
+    tVal.textContent = 'Mature';
+    return;
+  }
   const mAt = +el.dataset.matureAt || 0;
   const now = Date.now();
   tVal.textContent = mAt ? fmtMs(mAt - now) : '';
 }
-
-/** chỉ quét các plot đang trong viewport (đã theo dõi bằng IntersectionObserver) */
 function tickTimers(){
   if (visibleTimerPlots.size === 0) return;
   for (const el of visibleTimerPlots){
@@ -1092,15 +1290,17 @@ const Auto = {
   filters: {
     useAllClasses: true,
     classes: {},
-    pots: { timeskip:true, gold:true, basic:true }
-  }
+    pots: { timeskip:true, gold:true, basic:true },
+    useAllMuts: true,
+    muts: {}
+  },
+  // UI collapse state cho từng nhóm filter
+  ui: { clsOpen:false, potOpen:false, mutOpen:false }
 };
 function autoSave(){
   try {
     localStorage.setItem('auto_settings', JSON.stringify({
-      pot: Auto.pot,
-      plant: Auto.plant,
-      filters: Auto.filters
+      pot: Auto.pot, plant: Auto.plant, filters: Auto.filters, ui: Auto.ui
     }));
   } catch {}
 }
@@ -1109,7 +1309,7 @@ function autoLoad(){
     const raw = localStorage.getItem('auto_settings');
     if(!raw) return;
     const obj = JSON.parse(raw);
-    if (typeof obj.pot === 'boolean')   Auto.pot   = obj.pot;
+    if (typeof obj.pot === 'boolean') Auto.pot = obj.pot;
     if (typeof obj.plant === 'boolean') Auto.plant = obj.plant;
     if (obj.filters){
       Auto.filters.useAllClasses = (obj.filters.useAllClasses !== undefined) ? !!obj.filters.useAllClasses : true;
@@ -1119,6 +1319,13 @@ function autoLoad(){
       if (obj.filters.pots && typeof obj.filters.pots === 'object') {
         Auto.filters.pots = { timeskip:true, gold:true, basic:true, ...obj.filters.pots };
       }
+      if (obj.filters.useAllMuts !== undefined) Auto.filters.useAllMuts = !!obj.filters.useAllMuts;
+      if (obj.filters.muts && typeof obj.filters.muts === 'object') {
+        Auto.filters.muts = { ...obj.filters.muts };
+      }
+    }
+    if (obj.ui && typeof obj.ui === 'object') {
+      Auto.ui = { clsOpen:false, potOpen:false, mutOpen:false, ...obj.ui };
     }
   }catch{}
 }
@@ -1126,10 +1333,60 @@ autoLoad();
 
 function getAvailableClassesFromState(){
   const set = new Set();
-  (state?.seedInv||[]).forEach(s=>{
-    if (s && s.class) set.add(s.class);
-  });
+  (state?.seedInv||[]).forEach(s=>{ if (s && s.class) set.add(s.class); });
   return Array.from(set).sort();
+}
+
+// Tạo 1 nhóm filter thu gọn: chỉ hiện "All" + nút "›" để bung
+function buildCollapsedFilterGroup({ titleText, allChecked, onToggleAll, isOpen, onToggleOpen, chips // [{id,label,checked,disabled,onChange}]
+}){
+  const group = document.createElement('div'); group.className = 'filter-group';
+  const label = document.createElement('span'); label.className = 'label'; label.textContent = titleText;
+  group.appendChild(label);
+
+  // All chip
+  const allWrap = document.createElement('label'); allWrap.className = 'chip';
+  allWrap.title = `Allow all ${titleText.toLowerCase()}`;
+  allWrap.innerHTML = `<input type="checkbox" ${allChecked ? 'checked':''}> <span>All</span>`;
+  allWrap.querySelector('input').addEventListener('change', (e)=>{
+    onToggleAll(!!e.target.checked);
+    autoSave();
+    // Khi tắt All, tự động bung để người dùng chọn chi tiết
+    if (!e.target.checked && !isOpen()) {
+      onToggleOpen(true);
+      autoSave();
+      ensureFarmAutoControls();
+    }
+  });
+  group.appendChild(allWrap);
+
+  // Nút "›" bung/thu
+  const toggleBtn = document.createElement('button');
+  toggleBtn.type = 'button';
+  toggleBtn.className = 'btn btn-ghost';
+  toggleBtn.textContent = isOpen() ? '‹' : '›';
+  toggleBtn.style.padding = '6px 10px';
+  toggleBtn.title = isOpen() ? 'Thu gọn' : 'Mở toàn bộ';
+  toggleBtn.addEventListener('click', ()=>{
+    onToggleOpen(!isOpen());
+    autoSave();
+    ensureFarmAutoControls();
+  });
+  group.appendChild(toggleBtn);
+
+  // Nếu đang mở: hiện toàn bộ chip con
+  if (isOpen()){
+    chips.forEach(c=>{
+      const wrap = document.createElement('label'); wrap.className = 'chip'; wrap.title = c.label;
+      wrap.innerHTML = `<input type="checkbox" ${c.checked ? 'checked':''} ${c.disabled ? 'disabled':''}> <span>${c.label}</span>`;
+      wrap.querySelector('input').addEventListener('change', (e)=>{
+        c.onChange?.(!!e.target.checked);
+        autoSave();
+      });
+      group.appendChild(wrap);
+    });
+  }
+  return group;
 }
 
 function ensureFarmAutoControls(){
@@ -1148,6 +1405,7 @@ function ensureFarmAutoControls(){
     };
     btnPot.addEventListener('click', ()=>{
       Auto.pot = !Auto.pot; syncBtnPot(); autoSave();
+      notifyBus.show({ type: Auto.pot?'success':'warn', title:'Auto Pot', desc: Auto.pot?'ON':'OFF' });
     });
     syncBtnPot();
     bar.appendChild(btnPot);
@@ -1165,6 +1423,7 @@ function ensureFarmAutoControls(){
     };
     btnPlant.addEventListener('click', ()=>{
       Auto.plant = !Auto.plant; syncBtnPlant(); autoSave();
+      notifyBus.show({ type: Auto.plant?'success':'warn', title:'Auto Plant', desc: Auto.plant?'ON':'OFF' });
     });
     syncBtnPlant();
     bar.appendChild(btnPlant);
@@ -1174,79 +1433,53 @@ function ensureFarmAutoControls(){
   }
 
   let box = bar.querySelector('.auto-filters');
-  if (!box){
-    box = document.createElement('div');
-    box.className = 'auto-filters';
-    bar.appendChild(box);
-  }
+  if (!box){ box = document.createElement('div'); box.className = 'auto-filters'; bar.appendChild(box); }
   box.innerHTML = '';
 
-  const clsGroup = document.createElement('div');
-  clsGroup.className = 'filter-group';
-  const clsLabel = document.createElement('span');
-  clsLabel.className = 'label';
-  clsLabel.textContent = 'Class:';
-  clsGroup.appendChild(clsLabel);
-
-  const allWrap = document.createElement('label');
-  allWrap.className = 'chip';
-  allWrap.title = 'Allow all classes';
-  const allId = 'flt-cls-all';
-  allWrap.innerHTML = `
-    <input type="checkbox" id="${allId}" ${Auto.filters.useAllClasses ? 'checked':''}>
-    <span>All</span>
-  `;
-  allWrap.querySelector('input').addEventListener('change', (e)=>{
-    Auto.filters.useAllClasses = !!e.target.checked;
-    autoSave();
-    ensureFarmAutoControls();
-  });
-  clsGroup.appendChild(allWrap);
-
+  // ====== Class group (collapsed) ======
   const classes = getAvailableClassesFromState();
-  classes.forEach(cls=>{
-    if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true;
+  classes.forEach(cls=>{ if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true; });
+  box.appendChild(buildCollapsedFilterGroup({
+    titleText:'Class',
+    allChecked: Auto.filters.useAllClasses,
+    onToggleAll: (v)=>{ Auto.filters.useAllClasses = v; },
+    isOpen: ()=> Auto.ui.clsOpen,
+    onToggleOpen: (v)=>{ Auto.ui.clsOpen = v; },
+    chips: classes.map(cls=>({
+      id:'cls-'+cls, label:cls, checked: !!Auto.filters.classes[cls],
+      disabled: Auto.filters.useAllClasses,
+      onChange: (v)=>{ Auto.filters.classes[cls] = v; }
+    }))
+  }));
 
-    const id = 'flt-cls-'+cls;
-    const wrap = document.createElement('label');
-    wrap.className = 'chip';
-    wrap.title = `Allow ${cls}`;
-    wrap.innerHTML = `
-      <input type="checkbox" id="${id}" ${Auto.filters.classes[cls] ? 'checked':''} ${Auto.filters.useAllClasses ? 'disabled':''}>
-      <span>${cls}</span>
-    `;
-    wrap.querySelector('input').addEventListener('change', (e)=>{
-      Auto.filters.classes[cls] = !!e.target.checked;
-      autoSave();
-    });
-    clsGroup.appendChild(wrap);
-  });
+  // ====== Pot group (collapsed) ======
+  ['timeskip','gold','basic'].forEach(pt=>{ if (!(pt in Auto.filters.pots)) Auto.filters.pots[pt] = true; });
+  box.appendChild(buildCollapsedFilterGroup({
+    titleText:'Pot',
+    allChecked: Auto.filters.pots.timeskip && Auto.filters.pots.gold && Auto.filters.pots.basic,
+    onToggleAll: (v)=>{ Auto.filters.pots.timeskip = Auto.filters.pots.gold = Auto.filters.pots.basic = v; },
+    isOpen: ()=> Auto.ui.potOpen,
+    onToggleOpen: (v)=>{ Auto.ui.potOpen = v; },
+    chips: ['timeskip','gold','basic'].map(pt=>({
+      id:'pot-'+pt, label:pt, checked: !!Auto.filters.pots[pt],
+      disabled:false, onChange: (v)=>{ Auto.filters.pots[pt] = v; }
+    }))
+  }));
 
-  const potGroup = document.createElement('div');
-  potGroup.className = 'filter-group';
-  const potLabel = document.createElement('span');
-  potLabel.className = 'label';
-  potLabel.textContent = 'Pot:';
-  potGroup.appendChild(potLabel);
-
-  ['timeskip','gold','basic'].forEach(pt=>{
-    const id = 'flt-pot-'+pt;
-    const wrap = document.createElement('label');
-    wrap.className = 'chip';
-    wrap.title = `Allow ${pt}`;
-    wrap.innerHTML = `
-      <input type="checkbox" id="${id}" ${Auto.filters.pots[pt]?'checked':''}>
-      <span>${pt}</span>
-    `;
-    wrap.querySelector('input').addEventListener('change', (e)=>{
-      Auto.filters.pots[pt] = !!e.target.checked;
-      autoSave();
-    });
-    potGroup.appendChild(wrap);
-  });
-
-  box.appendChild(clsGroup);
-  box.appendChild(potGroup);
+  // ====== Mutation group (collapsed) ======
+  MUT_KEYS.forEach(k=>{ if (!(k in Auto.filters.muts)) Auto.filters.muts[k] = true; });
+  box.appendChild(buildCollapsedFilterGroup({
+    titleText:'Mutation',
+    allChecked: Auto.filters.useAllMuts,
+    onToggleAll: (v)=>{ Auto.filters.useAllMuts = v; },
+    isOpen: ()=> Auto.ui.mutOpen,
+    onToggleOpen: (v)=>{ Auto.ui.mutOpen = v; },
+    chips: MUT_KEYS.map(k=>({
+      id:'mut-'+k, label:k, checked: !!Auto.filters.muts[k],
+      disabled: Auto.filters.useAllMuts,
+      onChange: (v)=>{ Auto.filters.muts[k] = v; }
+    }))
+  }));
 }
 
 function findEmptyNoPotPlot() {
@@ -1260,7 +1493,6 @@ function findEmptyNoPotPlot() {
   }
   return null;
 }
-
 function pickPotFromInv(){
   const inv = Array.isArray(state?.potInv) ? state.potInv.slice() : [];
   const order = { timeskip: 0, gold: 1, basic: 2 };
@@ -1268,7 +1500,6 @@ function pickPotFromInv(){
   allowed.sort((a,b)=> (order[a.type]??9) - (order[b.type]??9));
   return allowed[0] || null;
 }
-
 function findEmptyWithPotPlot(){
   if (!state) return null;
   for (const fp of state.plots) {
@@ -1281,36 +1512,108 @@ function findEmptyWithPotPlot(){
   return null;
 }
 
+/* ======= PATCHED: pickSeedForPlant() bỏ seed inflight & vừa trồng ======= */
 function pickSeedForPlant(){
   const seeds = Array.isArray(state?.seedInv) ? state.seedInv : [];
-  const pool = seeds.filter(s => s.is_mature === 0);
-  if (Auto.filters.useAllClasses) return pool[0] || null;
-  return pool.find(s => Auto.filters.classes[s.class] !== false) || null;
+  // Bỏ seed mature, seed đang inflight, seed vừa trồng (chờ state đồng bộ)
+  const pool = seeds.filter(s =>
+    s.is_mature === 0 &&
+    !AUTO_INFLIGHT.has(s.id) &&
+    !AUTO_RECENT_PLANTED.has(s.id)
+  );
+
+  // Filter theo class
+  const classFilter = (s)=>{
+    if (Auto.filters.useAllClasses) return true;
+    return Auto.filters.classes[s.class] !== false;
+  };
+  // Filter theo mutation
+  const mutFilter = (s)=>{
+    if (Auto.filters.useAllMuts) return true;
+    const key = s.mutation || s.mutation_name || null;
+    if (!key) return false;
+    return Auto.filters.muts[key] !== false;
+  };
+
+  const filtered = pool.filter(s => classFilter(s) && mutFilter(s));
+  return filtered[0] || null;
 }
 
+/* ======= PATCHED: autoTickOnce() – optimistic update & guards ======= */
 async function autoTickOnce(){
   if (Auto._busy || (!Auto.pot && !Auto.plant)) return;
   Auto._busy = true;
-
   try{
     if (Auto.pot){
       const target = findEmptyNoPotPlot();
       const pot = pickPotFromInv();
       if (target && pot){
         await api('/plot/place-pot', { floorId: target.floorId, slot: target.slot, potId: pot.id });
-        await refresh();
+        notifInfo('Auto Pot', `#${pot.id} (${pot.type})`, `Floor ${target.floorIdx} · Slot ${target.slot}`);
+        await refresh({ soft:true });
         return;
       }
     }
+
     if (Auto.plant){
       const target = findEmptyWithPotPlot();
       const seed = pickSeedForPlant();
       if (target && seed){
-        await api('/plot/plant', { floorId: target.floorId, slot: target.slot, seedId: seed.id });
-        await refresh();
-        return;
+
+        // 1) Đánh dấu đang xử lý để vòng sau không chọn lại
+        AUTO_INFLIGHT.add(seed.id);
+        try{
+          const body = {
+            floorId: target.floorId,
+            slot: target.slot,
+            seedId: seed.id,
+            mutation: seed.mutation || seed.mutation_name || null
+          };
+          await api('/plot/plant', body);
+
+          // 2) Optimistic update: xóa seed khỏi local inventory ngay
+          if (Array.isArray(state?.seedInv)) {
+            state.seedInv = state.seedInv.filter(x => x.id !== seed.id);
+          }
+
+          // 3) Cập nhật local plot để UI không chọn lại plot này ngay tick sau
+          const fp = (state?.plots || []).find(fp => fp.floor.id === target.floorId);
+          const plotLocal = fp?.plots?.find(p => p.slot === target.slot);
+          if (plotLocal){
+            plotLocal.stage = 'planted';
+            plotLocal.seed_id = seed.id;
+            plotLocal.class = seed.class;
+            plotLocal.mutation_name = seed.mutation || seed.mutation_name || null;
+            plotLocal.mutation_mult = seed.mutation_mult || null;
+          }
+
+          // 4) Đánh dấu “vừa plant” để pickSeedForPlant() không nhặt lại trước khi state đồng bộ
+          AUTO_RECENT_PLANTED.add(seed.id);
+
+          // 5) Thông báo + render mềm, sau đó đợi nhẹ & refresh mềm để đồng bộ state từ server/WS
+          notifPlant({
+            cls: seed.class,
+            seedName: seed.class,
+            floorName: `Floor ${target.floorIdx}`,
+            potId: target.slot,
+            mutation: seed.mutation || seed.mutation_name,
+            seed
+          });
+          renderState(state, { soft: true });
+          await sleep(150);
+          await refresh({ soft: true });
+          return;
+
+        } catch(e){
+          showError(e, 'auto-plant');
+        } finally {
+          // 6) Gỡ inflight; sau 2.5s gỡ "recent" (đủ thời gian server đẩy state mới)
+          AUTO_INFLIGHT.delete(seed.id);
+          setTimeout(()=> AUTO_RECENT_PLANTED.delete(seed.id), 2500);
+        }
       }
     }
+
   } catch(e){
     showError(e, 'auto');
   } finally {
@@ -1320,39 +1623,44 @@ async function autoTickOnce(){
 
 function startAutoLoop(){
   if (Auto._timerId) return;
+  // 1200ms: nhịp default an toàn để state/WS kịp đồng bộ
   Auto._timerId = setInterval(autoTickOnce, 1200);
 }
-
 (function initAutoFeatures(){
   document.addEventListener('DOMContentLoaded', ()=>{
     ensureFarmAutoControls();
     startAutoLoop();
+    removeLegacyFloorButtons();
   });
 })();
 
 /* ---------- Phím tắt ← / → để chuyển trang tầng ---------- */
 document.addEventListener('keydown', (e)=>{
-  // bỏ qua khi gõ trong input/select/textarea
   const tag = (e.target.tagName || '').toLowerCase();
   if (tag==='input' || tag==='select' || tag==='textarea' || e.altKey || e.ctrlKey || e.metaKey) return;
   const activeTab = Array.from($$('.tabs button')).find(b=>b.classList.contains('active'))?.dataset.tab;
   if (activeTab !== 'farm' && activeTab !== 'shop' && activeTab !== 'inventory') {
-    // vẫn cho phép ở hầu hết tab chính liên quan farm
+    // vẫn cho phép
   }
   if (e.key === 'ArrowLeft'){
     const total = getTotalFloorPagesFromState(state||{plots:[]});
-    if (floorPage > 0){ floorPage--; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
+    if (floorPage > 0){
+      floorPage--; saveFloorPageToStorage(); renderState(state, {forceFloors:true});
+    }
     e.preventDefault();
   }
   if (e.key === 'ArrowRight'){
     const total = getTotalFloorPagesFromState(state||{plots:[]});
-    if (floorPage < total - 1){ floorPage++; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
+    if (floorPage < total - 1){
+      floorPage++; saveFloorPageToStorage(); renderState(state, {forceFloors:true});
+    }
     e.preventDefault();
   }
 });
 
 // Polling nhẹ (soft) mỗi 10s, bỏ qua khi đang ở tab online
-setInterval(()=>{ if($('#tabs').classList.contains('hidden')) return;
+setInterval(()=>{
+  if($('#tabs').classList.contains('hidden')) return;
   const active = Array.from($$('.tabs button')).find(b=>b.classList.contains('active'))?.dataset.tab;
   if (active === 'online') return;
   refresh({ soft: true }).catch(()=>{});

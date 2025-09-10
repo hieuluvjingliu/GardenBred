@@ -201,11 +201,25 @@
       <select id="plantSlot"></select>
       <select id="plantPot"></select>
       <select id="plantSeed"></select>
+      <!-- NEW: chọn mutation -->
+      <select id="plantMutation">
+        <option value="">(no mutation)</option>
+        <option value="green">Green</option>
+        <option value="blue">Blue</option>
+        <option value="yellow">Yellow</option>
+        <option value="pink">Pink</option>
+        <option value="red">Red</option>
+        <option value="gold">Gold</option>
+        <option value="rainbow">Rainbow</option>
+      </select>
       <button id="btnPlacePot">Place Pot</button>
       <button id="btnPlant">Plant</button>
     </div>
   </section>
 </div>
+
+<!-- Notifications container (cho hệ thống toast dùng chung) -->
+<div id="toastContainer" class="notify-wrap" aria-live="polite" aria-atomic="true"></div>
 
 <script src="/client.js" defer></script>
 </body>
