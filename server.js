@@ -35,11 +35,16 @@ function mutationMultiplier(key) {
 
 // ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH     = process.env.DB_PATH || path.join(__dirname, 'game.db');
-const SCHEMA_PATH = path.join(__dirname, 'tools', 'schema.sql');       // <-- cố định tools/
+const ROOT_DIR   = __dirname;
+const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
+const TOOLS_DIR  = path.join(ROOT_DIR, 'tools');
 
-// === WEIGHTED BREED CONFIG (thay cho breed_map.json) ===
-const CLASS_WEIGHTS_PATH = path.join(__dirname, 'tools', 'class_weights.json');
+// DB file ở root (có thể override qua ENV)
+const DB_PATH = process.env.DB_PATH || path.join(ROOT_DIR, 'game.db');
+
+// SCHEMA & CLASS_WEIGHTS trong tools/
+const SCHEMA_PATH = process.env.SCHEMA_PATH || path.join(TOOLS_DIR, 'schema.sql');
+const CLASS_WEIGHTS_PATH = process.env.CLASS_WEIGHTS_PATH || path.join(TOOLS_DIR, 'class_weights.json');
 
 function loadClassWeights() {
   try {
@@ -53,30 +58,31 @@ function loadClassWeights() {
     return Object.fromEntries(entries);
   } catch (e) {
     console.error('[CLASS_WEIGHTS] load failed:', e.message || e);
-    // fallback an toàn (4 class cơ bản = 1.0)
     return { fire: 1, water: 1, wind: 1, earth: 1 };
   }
 }
 let CLASS_WEIGHTS = loadClassWeights();
 
-fs.watchFile(CLASS_WEIGHTS_PATH, { interval: 1000 }, () => {
-  try {
-    CLASS_WEIGHTS = loadClassWeights();
-    console.log('[CLASS_WEIGHTS] reloaded');
-  } catch (e) {
-    console.error('[CLASS_WEIGHTS] reload failed:', e.message || e);
-  }
-});
+try {
+  fs.watchFile(CLASS_WEIGHTS_PATH, { interval: 1000 }, () => {
+    try {
+      CLASS_WEIGHTS = loadClassWeights();
+      console.log('[CLASS_WEIGHTS] reloaded');
+    } catch (e) {
+      console.error('[CLASS_WEIGHTS] reload failed:', e.message || e);
+    }
+  });
+} catch { /* optional */ }
 
 function pickWeightedClass(weightsObj) {
   const items = Object.entries(weightsObj);
   const total = items.reduce((s, [, w]) => s + w, 0);
-  if (!(total > 0)) return 'fire'; // fallback
+  if (!(total > 0)) return 'fire';
   let r = Math.random() * total;
   for (const [k, w] of items) {
     if ((r -= w) <= 0) return k;
   }
-  return items[items.length - 1][0]; // fallback
+  return items[items.length - 1][0];
 }
 
 const app = express();
@@ -85,9 +91,34 @@ const wss = new WebSocketServer({ server });
 
 app.use(express.json());
 app.use(cookieParser());
-// ⚠️ KHÔNG serve cả project root để tránh lộ game.db
-// app.use(express.static(__dirname));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// ===== Static (serve từ public/, không lộ game.db) =====
+function sendPublic(res, relPath) {
+  res.sendFile(path.join(PUBLIC_DIR, relPath), { headers: { 'Cache-Control': 'no-store' } });
+}
+if (fs.existsSync(PUBLIC_DIR)) {
+  app.use(express.static(PUBLIC_DIR, {
+    fallthrough: true,
+    index: false,
+    dotfiles: 'ignore',
+    maxAge: 0,
+  }));
+}
+app.get('/', (_req, res) => sendPublic(res, 'index.html'));
+app.get('/index.html', (_req, res) => sendPublic(res, 'index.html'));
+app.get('/client.js', (_req, res) => sendPublic(res, 'client.js'));
+app.get('/style.css', (_req, res) => sendPublic(res, 'style.css'));
+
+// Nếu có public/assets thì expose
+const PUBLIC_ASSETS = path.join(PUBLIC_DIR, 'assets');
+if (fs.existsSync(PUBLIC_ASSETS)) {
+  app.use('/assets', express.static(PUBLIC_ASSETS, {
+    fallthrough: true,
+    index: false,
+    dotfiles: 'ignore',
+    maxAge: 0,
+  }));
+}
 
 // ==== BACKUP (download) ====
 app.get('/admin/download-db', (req, res) => {
@@ -99,7 +130,7 @@ app.get('/admin/download-db', (req, res) => {
 
 // ==== DB open + migrations (safe) ====
 let db;
-let restoring = false;                         // flag ngăn truy vấn khi đang restore
+let restoring = false;
 function safeDbReady() { return db && db.open === true && !restoring; }
 
 function openDb() { db = new Database(DB_PATH); }
@@ -115,7 +146,7 @@ function integrityOk(dbFilePath) {
   } finally { t.close(); }
 }
 
-// ==== Prepared statements (khai báo biến, sẽ gán trong prepareAll) ====
+// ==== Prepared statements ====
 let upsertUserStmt, getUserStmt, getUserByIdStmt, insertSessionStmt, getSessionStmt;
 let getStateStmt, getFloorsStmt, getFloorsCountStmt, ensureFloorStmt;
 let getPlotsByFloorStmt, ensurePlotStmt;
@@ -136,7 +167,7 @@ function prepareAll() {
   );
   getUserStmt = db.prepare(`SELECT * FROM users WHERE username = ?`);
   getUserByIdStmt = db.prepare(`SELECT * FROM users WHERE id = ?`);
-  insertSessionStmt = db.prepare(`INSERT INTO sessions (id, user_id, created_at) VALUES (?, ?, ?)`);
+  insertSessionStmt = db.prepare(`INSERT INTO sessions (id, user_id, created_at) VALUES (?, ?, ?)`); 
   getSessionStmt = db.prepare(`SELECT * FROM sessions WHERE id = ?`);
 
   // state/floors/plots
@@ -159,7 +190,7 @@ function prepareAll() {
   subCoinsStmt = db.prepare(`UPDATE users SET coins = MAX(0, coins - ?) WHERE id = ?`);
 
   // inventory seeds  (PATCH: thêm mutation)
-  invAddSeedStmt  = db.prepare(`INSERT INTO inventory_seeds (user_id, class, base_price, is_mature, mutation) VALUES (?, ?, ?, ?, ?)`);
+  invAddSeedStmt  = db.prepare(`INSERT INTO inventory_seeds (user_id, class, base_price, is_mature, mutation) VALUES (?, ?, ?, ?, ?)`); 
   invListSeedsStmt = db.prepare(`SELECT * FROM inventory_seeds WHERE user_id = ?`);
   invGetSeedStmt   = db.prepare(`SELECT * FROM inventory_seeds WHERE id = ? AND user_id = ?`);
   invDelSeedStmt   = db.prepare(`DELETE FROM inventory_seeds WHERE id = ? AND user_id = ?`);
@@ -173,11 +204,10 @@ function prepareAll() {
   // plots update (PATCH: thêm mutation)
   setPlotPotStmt = db.prepare(`UPDATE plots SET pot_id=?, pot_type=? WHERE id=?`);
   setPlotAfterPlantStmt = db.prepare(
-  `UPDATE plots
-   SET seed_id=?, class=?, mutation=?, stage='planted', planted_at=?, mature_at=?
-   WHERE id=?`
-);
-
+    `UPDATE plots
+     SET seed_id=?, class=?, mutation=?, stage='planted', planted_at=?, mature_at=?
+     WHERE id=?`
+  );
   setPlotStageStmt = db.prepare(`UPDATE plots SET stage=? WHERE id=?`);
   clearPlotSeedOnlyStmt = db.prepare(
     `UPDATE plots SET seed_id=NULL, class=NULL, mutation=NULL, stage='empty', planted_at=NULL, mature_at=NULL WHERE id=?`
@@ -210,15 +240,16 @@ try {
   openDb();
   if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
   runMigrations();
-  prepareAll();                              // <== tạo toàn bộ statements
+  prepareAll();
   console.log('[DB] ready');
+  console.log('[PATHS]', { ROOT_DIR, PUBLIC_DIR, TOOLS_DIR, DB_PATH, SCHEMA_PATH, CLASS_WEIGHTS_PATH });
 } catch (e) {
   console.error('[DB] startup failed:', e);
   process.exit(1);
 }
 
 // ==== Logging (file + table) ====
-const LOG_DIR = path.join(__dirname, 'log');
+const LOG_DIR = path.join(ROOT_DIR, 'log');
 if (!fs.existsSync(LOG_DIR)) fs.mkdirSync(LOG_DIR, { recursive: true });
 
 function logLine(level, msg, extra = {}) {
@@ -228,7 +259,7 @@ function logLine(level, msg, extra = {}) {
   fs.appendFile(f, line + '\n', () => {});
 }
 
-// === log helpers (dùng sau khi đã có logStmt) ===
+// === log helpers ===
 function logAction(userId, action, payloadObj) {
   const payload = JSON.stringify(payloadObj ?? {});
   try { logStmt.run(userId ?? null, action, payload, Date.now()); } catch {}
@@ -265,6 +296,7 @@ app.post('/auth/login', (req, res) => {
   upsertUserStmt.run(username, now());
   const user = getUserStmt.get(username);
 
+  // Đảm bảo có floor 1 + 10 plot
   ensureFloorStmt.run(user.id, 1);
   const floor = db.prepare(`SELECT * FROM floors WHERE user_id = ? AND idx = 1`).get(user.id);
   for (let i = 1; i <= 10; i++) ensurePlotStmt.run(floor.id, i);
@@ -360,7 +392,6 @@ app.post('/shop/buy-trap', auth, (req, res) => {
   const coins = getUserByIdStmt.get(req.userId).coins;
   if (coins < totalCost) return res.status(400).json({ error: 'Not enough coins', need: totalCost, have: coins });
 
-  // Phân bổ bẫy vào các tầng còn chỗ
   const tx = db.transaction(() => {
     subCoinsStmt.run(totalCost, req.userId);
     let remaining = qty;
@@ -490,11 +521,8 @@ app.post('/breed', auth, (req, res) => {
     return res.status(400).json({ error: 'seeds must be mature' });
   }
 
-  // NEW: random class theo trọng số từ tools/class_weights.json
   const outClass = pickWeightedClass(CLASS_WEIGHTS);
-
   const baseOut = calcBreedBase(A.base_price, B.base_price);
-  // random mutation cho con
   const mut = rollMutationTier(); // { key, mult }
   upsertSeedCatalogStmt.run(outClass, baseOut);
   invAddSeedStmt.run(req.userId, outClass, baseOut, 0, mut.key);
@@ -517,7 +545,6 @@ app.post('/sell/shop', auth, (req, res) => {
   const S = invGetSeedStmt.get(seedId, req.userId);
   if (!S) return res.status(404).json({ error: 'seed not found' });
   if (S.is_mature !== 1) return res.status(400).json({ error: 'only mature seeds can be sold' });
-  // tính giá theo mutation
   const mult = mutationMultiplier(S.mutation);
   const pay = sellToShopAmount(Math.floor(S.base_price * mult));
   invDelSeedStmt.run(seedId, req.userId);
@@ -533,7 +560,6 @@ app.post('/market/list', auth, (req, res) => {
   if (!S) return res.status(404).json({ error: 'seed not found' });
   if (S.is_mature !== 1) return res.status(400).json({ error: 'only mature seeds can be listed' });
 
-  // min/max dựa trên base * multiplier
   const eff = Math.max(1, Math.floor(S.base_price * mutationMultiplier(S.mutation)));
   const min = marketMin(eff), max = marketMax(eff);
   if (askPrice < min || askPrice > max) {
@@ -553,7 +579,7 @@ app.post('/market/buy', auth, (req, res) => {
   if (buyer.coins < L.ask_price) return res.status(400).json({ error: 'not enough coins' });
   subCoinsStmt.run(L.ask_price, req.userId);
   addCoinsStmt.run(L.ask_price, L.seller_id);
-  invAddSeedStmt.run(req.userId, L.class, L.base_price, 1, L.mutation || null); // mua về là mature, giữ mutation
+  invAddSeedStmt.run(req.userId, L.class, L.base_price, 1, L.mutation || null); // mua về là mature
   marketCloseStmt.run(listingId);
   logAction(req.userId, 'market_buy', {
     listingId, class: L.class, base: L.base_price, paid: L.ask_price, seller: L.seller_id, mutation: L.mutation || null
@@ -561,11 +587,10 @@ app.post('/market/buy', auth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ----- BUY FLOOR (fixed) -----
+// ----- BUY FLOOR -----
 app.post('/floors/buy', auth, (req, res) => {
   try {
     const userId = req.userId;
-
     const { maxIdx } = db.prepare(
       `SELECT COALESCE(MAX(idx), 0) AS maxIdx FROM floors WHERE user_id = ?`
     ).get(userId);
@@ -599,8 +624,6 @@ app.post('/floors/buy', auth, (req, res) => {
     return res.status(500).json({ error: 'BUY_FLOOR_FAILED' });
   }
 });
-
-// (optional) nếu ai đó thử GET:
 app.get('/floors/buy', (_req, res) => res.status(405).json({ error: 'USE_POST' }));
 
 // ==== Online / Visit ====
@@ -705,14 +728,14 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
     try {
       const r2 = test.prepare('PRAGMA integrity_check').get();
       if (!r2 || r2.integrity_check !== 'ok') throw new Error('integrity after swap != ok');
-      const sql = fs.readFileSync(SCHEMA_PATH, 'utf8');   // dùng SCHEMA_PATH (tools/)
+      const sql = fs.readFileSync(SCHEMA_PATH, 'utf8');
       test.exec(sql);
     } finally { test.close(); }
 
     // mở lại DB chính
     openDb();
     runMigrations();
-    prepareAll();                              // <== re-create toàn bộ statements
+    prepareAll();
 
     try { fs.unlinkSync(BAK); } catch {}
     logLine('restore', 'success');

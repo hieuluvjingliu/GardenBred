@@ -161,6 +161,7 @@ select:focus,input:focus{outline:none;border-color:#6ee7ff;box-shadow:0 0 0 3px 
 .skeleton{height:140px;border-radius:12px;background:linear-gradient(90deg,#0c1430,#0f1938,#0c1430);
   background-size:200% 100%; animation:sk 1.2s infinite}
 @keyframes sk{0%{background-position:0% 0}100%{background-position:200% 0}}
+
 /* --- UI polish add-ons (append to end) --- */
 
 /* 1) Plot hover mạnh hơn, nổi khối nhẹ */
@@ -351,3 +352,251 @@ h1, h2, h3 {
   backdrop-filter:blur(4px);
 }
 
+/* ===== Floor nav (2 tầng/trang) ===== */
+.floor-nav{
+  display:flex; align-items:center; justify-content:center;
+  gap:12px; padding:12px; margin-top:10px;
+  border-top:1px dashed #2a3a60;
+}
+.floor-nav .btn{
+  padding:8px 12px;
+  border:1px solid #2a3a60;
+  background:#0e1a3a;
+  border-radius:10px;
+  font-weight:800;
+  letter-spacing:.2px;
+}
+.floor-nav .btn:hover{ border-color:#53b7ff; box-shadow:0 0 12px #53b7ff33; }
+.floor-nav .btn[disabled]{
+  opacity:.55; cursor:not-allowed; filter:grayscale(.1);
+  box-shadow:none; transform:none;
+}
+.floor-nav .page-indicator{
+  min-width:120px; text-align:center; font-weight:800; opacity:.9;
+  padding:6px 10px; border-radius:999px; border:1px solid #2a3a60; background:#0b1320;
+}
+
+/* =========================
+   Skeleton & Floor Nav Boost
+   ========================= */
+
+/* Skeleton/placeholder nổi bật hơn, shimmer mượt hơn */
+.skeleton{
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,0.06) 0%,
+      rgba(255,255,255,0.12) 20%,
+      rgba(255,255,255,0.06) 40%) ,
+    linear-gradient(180deg,#0f1938,#0b1323);
+  background-size: 200% 100%, 100% 100%;
+  animation: skx 1.4s ease-in-out infinite;
+  box-shadow:
+    inset 0 0 0 1px #2a3a6055,
+    0 10px 24px rgba(0,0,0,.45);
+  position: relative;
+  overflow: hidden;
+}
+.skeleton::after{
+  /* tia sáng lướt nhẹ */
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.15) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: skshine 1.8s ease-in-out infinite;
+}
+@keyframes skx{
+  0%   { background-position: 0% 0, 0 0; }
+  100% { background-position: 200% 0, 0 0; }
+}
+@keyframes skshine{
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Khi skeleton nằm trong .plot, đảm bảo chiều cao “ổn định” */
+.plot .skeleton{
+  height: 100%;
+  min-height: 260px; /* khớp min-height plot */
+  border-radius: 16px;
+}
+
+/* Nav chuyển tầng – dán kề cuối khu floors, sticky ở đáy viewport */
+.floor-nav{
+  position: sticky;
+  bottom: 10px;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: 1fr max-content 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin-top: 12px;
+
+  background: linear-gradient(180deg,#0e1633cc,#0b122ccc);
+  border: 1px solid #2a3a60;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.45), 0 0 18px #6ee7ff22;
+}
+.floor-nav .btn{
+  /* nút to, dễ bấm */
+  min-width: 160px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #28407a;
+  background: linear-gradient(180deg,#1b2d58,#152449);
+  color: #eaf4ff;
+  font-weight: 800;
+  letter-spacing: .2px;
+  transition: transform .06s, box-shadow .2s, border-color .2s;
+  box-shadow: 0 0 10px #6ee7ff22 inset, 0 6px 16px rgba(0,0,0,.35);
+}
+.floor-nav .btn:hover{
+  transform: translateY(-1px);
+  border-color:#53b7ff;
+  box-shadow: 0 0 14px #6ee7ff3a inset, 0 10px 24px rgba(0,0,0,.45);
+}
+.floor-nav .btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  filter: grayscale(.2);
+}
+
+/* Chữ chỉ báo trang rõ ràng, mono để timer-style */
+.floor-nav .page-indicator{
+  justify-self: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #2a3a60;
+  background: #0b1327;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-weight: 800;
+  color: #dbe8ff;
+  box-shadow: inset 0 0 10px #6ee7ff22;
+}
+
+/* Badge phím tắt nhỏ gọn để đặt cạnh nút (nếu bạn thêm text gợi ý) */
+.kbd{
+  display:inline-block;
+  padding:2px 6px;
+  margin-left:6px;
+  border:1px solid #2a3a60;
+  border-radius:6px;
+  background:#0b1320;
+  font: 700 11px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color:#cfe1ff;
+  opacity:.9;
+}
+
+/* Trang “Visit” cũng có skeleton đẹp */
+.visit-view .skeleton{
+  height: 180px;
+  border-radius: 12px;
+}
+
+/* Giảm chuyển động nếu người dùng chọn reduce motion */
+@media (prefers-reduced-motion: reduce){
+  .skeleton,
+  .skeleton::after{
+    animation: none !important;
+  }
+  .plot:hover,
+  .card:hover, .floor-actions:hover, .buy-floor-card:hover, .visit-view:hover,
+  .tabs button.active::after{
+    transition: none !important;
+  }
+}
+
+/* =========================
+   BỔ SUNG CHO TÍNH NĂNG MỚI
+   ========================= */
+
+/* MiniHUD small pills */
+#miniHud .pill.small{
+  padding:6px 10px; font-weight:800; font-size:12px;
+  border-radius:999px; background:#0b1320; border:1px solid #2a3a60;
+}
+
+/* Tooltip trực quan (icon + badge) */
+.tooltip{
+  position:absolute; left:12px; top:12px; z-index:5;
+  display:flex; align-items:center; gap:8px; padding:6px 8px;
+  border-radius:10px; backdrop-filter: blur(6px);
+  background: #0b1320cc; border:1px solid #2a3a60; box-shadow: var(--shadow);
+}
+.tooltip img.icon{ width:18px; height:18px; object-fit:contain }
+.tooltip .t-title{ font-weight:800; font-size:12px }
+.tooltip .t-mut{ font-weight:900; font-size:11px; padding:2px 6px; border-radius:999px; border:1px solid #fff2 }
+
+/* Sparkle effect khi plot mature (CSS-only, nhẹ) */
+.plot.mature .sparkle{
+  position:absolute; inset:0; pointer-events:none; overflow:hidden;
+}
+.sparkle::before, .sparkle::after{
+  content:""; position:absolute; width:140%; height:2px; left:-20%; top:30%;
+  background: radial-gradient(closest-side, #fff, transparent);
+  filter: blur(1px); opacity:.75; transform: rotate(12deg);
+  animation: spk 1.1s ease-out 1 forwards;
+}
+.sparkle::after{ top:auto; bottom:28%; transform: rotate(-10deg); }
+@keyframes spk{
+  from{ transform: translateX(-20%) rotate(var(--rot,0deg)); opacity: .9 }
+  to  { transform: translateX(120%) rotate(var(--rot,0deg)); opacity: 0 }
+}
+.plot.mature.flash .sparkle::before{ --rot: 12deg }
+.plot.mature.flash .sparkle::after { --rot:-10deg }
+
+/* Farm Map modal + grid */
+#farmMapModal{
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:none; align-items:center; justify-content:center; z-index:50;
+}
+#farmMapModal:not(.hidden){ display:flex; }
+#farmMapModal .modal-inner{
+  width:min(900px, 90vw); max-height:80vh; overflow:auto;
+  background:#0b1320; border:1px solid #2a3a60; border-radius:14px; padding:16px;
+  box-shadow: var(--shadow);
+}
+.map-grid{
+  display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin-top:10px;
+}
+.map-floor{
+  border:1px solid #2a3a60; border-radius:12px; padding:10px; background:#0e1733; cursor:pointer;
+}
+.map-floor:hover{ border-color:#53b7ff; box-shadow:0 0 12px #53b7ff33; }
+.map-floor .meta{ display:flex; justify-content:space-between; font-weight:800; }
+.map-floor .cells{ margin-top:8px; display:grid; grid-template-columns: repeat(5,1fr); gap:4px; }
+.map-floor .cell{
+  height:16px; border-radius:4px; background:#091229; border:1px solid #1d2a46;
+}
+.map-floor .cell.mature{ background:#53e6ff; border-color:#53e6ff; box-shadow:0 0 8px #53e6ff99; }
+
+/* Market dạng card shop */
+.market-grid{
+  display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
+  gap:12px; margin-top:10px;
+}
+.market-card{
+  background:#0b1320; border:1px solid #2a3a60; border-radius:12px; padding:10px;
+  display:grid; grid-template-rows: auto auto auto; gap:8px;
+}
+.market-card .top{ display:flex; align-items:center; gap:10px }
+.market-card img.icon{ width:54px; height:54px; object-fit:contain }
+.market-card .name{ font-weight:800 }
+.market-card .mut{ font-weight:900; font-size:12px; padding:2px 6px; border-radius:999px; border:1px solid #fff2 }
+.market-card .price{ text-align:right; font-weight:900 }
+.market-card .actions{ display:flex; justify-content:space-between; align-items:center }
+
+/* Buttons phụ trợ */
+.btn{ }
+.btn-ghost{
+  background:transparent;
+  border:1px solid #2a3a60;
+  box-shadow:none;
+}
+.btn-ghost:hover{
+  border-color:#53b7ff;
+  box-shadow:0 0 12px #53b7ff33;
+}

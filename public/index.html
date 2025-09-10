@@ -16,7 +16,7 @@
       <button id="btnLogin">Login</button>
     </div>
 
-    <!-- HUD mới (ẩn khi chưa đăng nhập) -->
+    <!-- HUD (ẩn khi chưa đăng nhập) -->
     <div id="hud" class="hidden">
       <span class="pill">
         <svg class="ico user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
@@ -26,6 +26,14 @@
         <svg class="ico coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
         <b id="hudCoins">0</b>
       </span>
+
+      <!-- MiniHUD floating controls (hook cho client.js về sau) -->
+      <div id="miniHud" class="hidden" style="margin-left:8px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="miniAutoPot" class="pill small">Auto Pot: OFF</button>
+        <button id="miniAutoPlant" class="pill small">Auto Plant: OFF</button>
+        <span class="pill small" id="miniTraps">Traps: 0</span>
+        <span class="pill small" id="miniMature">Mature: 0</span>
+      </div>
     </div>
   </header>
 
@@ -75,8 +83,34 @@
       <button data-sub="inv-mature">Mature</button>
     </div>
 
+    <!-- Seeds (Not Planted) + Filters + Plant All -->
     <div id="inv-seeds" class="subtab">
+      <!-- Bộ lọc inventory (hook cho client.js nâng cấp) -->
+      <div class="row" id="invSeedFilters" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <select id="fltInvState" title="State">
+          <option value="all">All</option>
+          <option value="not">Not Planted</option>
+          <option value="mat">Mature</option>
+        </select>
+        <select id="fltInvClass" title="Class">
+          <option value="all">All classes</option>
+        </select>
+        <select id="fltInvMut" title="Mutation">
+          <option value="all">All mutations</option>
+          <option value="none">None</option>
+          <option value="green">green</option>
+          <option value="blue">blue</option>
+          <option value="yellow">yellow</option>
+          <option value="pink">pink</option>
+          <option value="red">red</option>
+          <option value="gold">gold</option>
+          <option value="rainbow">rainbow</option>
+        </select>
+        <button id="btnPlantAll" class="btn">Plant All (filtered)</button>
+      </div>
+
       <ul id="seedInv" class="inv-grid"></ul>
+
       <h3>Sell to Shop</h3>
       <div class="row">
         <select id="sellSeedSelect"></select>
@@ -89,6 +123,12 @@
     </div>
 
     <div id="inv-mature" class="subtab hidden">
+      <!-- Batch list bar (hook cho client.js nâng cấp) -->
+      <div class="row" id="batchListBar" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+        <button id="btnSelectAllMat">Select All</button>
+        <input id="batchAskPrice" placeholder="ask price (áp cho tất cả)" />
+        <button id="btnListBatch">List Selected</button>
+      </div>
       <ul id="matureByClass" class="inv-grid"></ul>
     </div>
   </section>
@@ -100,10 +140,10 @@
       <select id="breedSelectA"></select>
       <select id="breedSelectB"></select>
       <button id="btnBreed">Breed</button>
-      <!-- NEW: Random Breed -->
+      <!-- Random Breed -->
       <button id="btnRandomBreed" class="btn btn-ghost">Random Breed</button>
     </div>
-    <!-- NEW: chỗ hiển thị kết quả có thể chứa badge mutation -->
+    <!-- Kết quả có thể chứa badge mutation -->
     <p id="breedOut" class="breed-out"></p>
   </section>
 
@@ -129,16 +169,32 @@
   <section id="farm" class="tab hidden">
     <h2>Khu trồng</h2>
 
-    <div class="row" id="farmControls">
+    <div class="row" id="farmControls" style="gap:8px;flex-wrap:wrap;">
       <button id="btnPrevFloor">↑ Floor</button>
       <button id="btnNextFloor">↓ Floor</button>
       <button id="btnHarvestAll">Harvest All Mature</button>
+
+      <!-- Nút mở Map overview (hook) -->
+      <button id="btnOpenMap" class="btn btn-ghost">Map</button>
+
+      <!-- Các hook cũ (giữ lại, client.js có thể dùng) -->
       <span id="buyFloorPrice" style="margin-left:8px; display:none;"></span>
       <button id="btnBuyFloor" style="display:none;">Buy Floor</button>
     </div>
 
+    <!-- Floors sẽ render bằng JS -->
     <div id="floors"></div>
 
+    <!-- Modal Farm Map Overview (hook cho client.js nâng cấp) -->
+    <div id="farmMapModal" class="hidden">
+      <div class="modal-inner">
+        <h3>Farm Map</h3>
+        <div id="farmMapGrid" class="map-grid"></div>
+        <button id="btnCloseMap">Close</button>
+      </div>
+    </div>
+
+    <!-- Form actions (giữ nguyên để tương thích code cũ) -->
     <div>
       <h3>Actions</h3>
       <select id="plantFloor"></select>

@@ -181,6 +181,7 @@ function renderShop(){
 
     const img = document.createElement('img');
     img.src = `/assets/Seed_Planted/seed_planted_${cls}.png`;
+    img.loading = 'lazy';
     img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:cls.toUpperCase(),style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
 
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = cls;
@@ -214,6 +215,7 @@ function renderShop(){
     const el=document.createElement('div'); el.className='item';
 
     const img = document.createElement('img'); img.src = `/assets/Pots_Image/${p.img}`;
+    img.loading = 'lazy';
     img.onerror = ()=>{ img.replaceWith(Object.assign(document.createElement('div'),{textContent:p.type,style:'height:72px;display:flex;align-items:center;justify-content:center'})); };
 
     const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = p.type;
@@ -276,6 +278,118 @@ function decorateSeedText(seed) {
   return `#${seed.id} ${seed.class}`;
 }
 
+/* ===== INVENTORY: filters + render + Plant All ===== */
+function getInventoryFilters(){
+  const st  = ($('#fltInvState')?.value || 'all');
+  const cls = ($('#fltInvClass')?.value || 'all');
+  const mut = ($('#fltInvMut')?.value || 'all');
+  return { st, cls, mut };
+}
+
+function seedMatchFilter(s, {st, cls, mut}){
+  // state filter
+  if (st === 'not' && s.is_mature !== 0) return false;
+  if (st === 'mat' && s.is_mature !== 1) return false;
+  // class filter
+  if (cls !== 'all' && s.class !== cls) return false;
+  // mutation filter
+  const mKey = s.mutation || s.mutation_name || null;
+  if (mut === 'none' && mKey) return false;
+  if (mut !== 'all' && mut !== 'none' && mKey !== mut) return false;
+  return true;
+}
+
+function getFilteredSeedsForInventory(){
+  const list = Array.isArray(state?.seedInv) ? state.seedInv.slice() : [];
+  const f = getInventoryFilters();
+  return list.filter(s => seedMatchFilter(s, f));
+}
+
+function ensureInventoryClassOptions(){
+  const sel = $('#fltInvClass');
+  if (!sel) return;
+  const classes = Array.from(new Set((state?.seedInv||[]).map(s=>s.class))).sort();
+  preserveSelectValue(sel, ()=>{
+    const cur = sel.value;
+    sel.innerHTML = '<option value="all">All classes</option>' +
+      classes.map(c=>`<option value="${c}">${c}</option>`).join('');
+    if (Array.from(sel.options).some(o=>o.value===cur)) sel.value = cur;
+  });
+}
+
+function renderInventorySeeds(){
+  const ul = $('#seedInv'); if (!ul) return;
+  const rows = getFilteredSeedsForInventory().filter(s=>s.is_mature===0 || $('#fltInvState')?.value!=='not');
+  ul.innerHTML = '';
+
+  if (!rows.length){
+    ul.innerHTML = '<li><small>Không có seed phù hợp filter.</small></li>';
+    return;
+  }
+
+  for (const s of rows){
+    const li = document.createElement('li');
+    li.className = 'inv-item';
+    const m = getMutationMeta(s);
+
+    li.innerHTML = `
+      <div class="title">${decorateSeedText(s)}</div>
+      <div class="small">base ${s.base_price ?? '-'} • id ${s.id}</div>
+    `;
+
+    // badge mutation (nếu có)
+    if (m){
+      const tag = document.createElement('div');
+      tag.className = 'mut-tag';
+      tag.textContent = `${m.name} ×${m.mult}`;
+      if (m.color){
+        tag.style.background = m.color;
+        tag.style.color = pickTextColorForBg(m.color);
+        tag.style.borderColor = m.color;
+        tag.style.boxShadow = `0 0 12px ${m.color}66`;
+      }
+      li.appendChild(tag);
+    }
+
+    ul.appendChild(li);
+  }
+}
+
+async function plantAllFiltered(){
+  // Lấy seeds theo filter, chỉ trồng seeds NOT MATURE
+  const seeds = getFilteredSeedsForInventory().filter(s=>s.is_mature===0);
+  if (!seeds.length) return alert('Không có seed phù hợp để trồng.');
+
+  // Lấy danh sách plot trống nhưng đã có pot
+  const targets = [];
+  for (const fp of (state?.plots||[])){
+    for (const p of fp.plots){
+      if (p.pot_id && p.stage === 'empty'){
+        targets.push({ floorId: fp.floor.id, slot: p.slot });
+      }
+    }
+  }
+  if (!targets.length) return alert('Không còn slot trống có pot để trồng.');
+
+  let planted = 0;
+  // Ghép từng seed vào từng target
+  while (targets.length && seeds.length){
+    const t = targets.shift();
+    const s = seeds.shift();
+    try {
+      await api('/plot/plant', { floorId: t.floorId, slot: t.slot, seedId: s.id });
+      planted++;
+    } catch (e) {
+      showError(e, 'plant-all');
+      // nếu lỗi, thử seed kế tiếp/target kế tiếp
+    }
+  }
+
+  alert(`Đã trồng ${planted} seed.`);
+  await refresh();
+}
+
+/* ---------- SELECTS & POPULATE ---------- */
 function populateSelects(){
   if (!state) return;
 
@@ -370,6 +484,10 @@ function populateSelects(){
       seedSel.innerHTML=''; state.seedInv.filter(s=>s.is_mature===0).forEach(s=>{ const o=document.createElement('option'); o.value=s.id; o.textContent=decorateSeedText(s); seedSel.appendChild(o); });
     });
   }
+
+  // Inventory filter: cập nhật options class + render danh sách
+  ensureInventoryClassOptions();
+  renderInventorySeeds();
 }
 
 function nextFloorPrice(){
@@ -423,8 +541,162 @@ function addMutationBadge(container, obj) {
   container.appendChild(badge);
 }
 
-/* ---------- RENDER STATE ---------- */
-function renderState(s){
+/* ====== HIỂN THỊ 2 TẦNG / TRANG + LƯU localStorage ====== */
+const LS_FLOOR_PAGE_KEY = 'floor_page';
+let floorPage = 0; // 0-based
+
+function loadFloorPageFromStorage(){
+  try{
+    const v = parseInt(localStorage.getItem(LS_FLOOR_PAGE_KEY),10);
+    if (Number.isFinite(v) && v>=0) floorPage = v;
+  }catch{}
+}
+function saveFloorPageToStorage(){
+  try{ localStorage.setItem(LS_FLOOR_PAGE_KEY, String(floorPage)); }catch{}
+}
+loadFloorPageFromStorage();
+
+function getTotalFloorPagesFromState(s){
+  const totalFloors = (s?.plots || []).length;
+  return Math.max(1, Math.ceil(totalFloors / 2));
+}
+function clampFloorPageForState(s){
+  const total = getTotalFloorPagesFromState(s);
+  if (floorPage >= total) floorPage = total - 1;
+  if (floorPage < 0) floorPage = 0;
+}
+function getVisibleFloorPairs(s){
+  const list = s?.plots || [];
+  const start = floorPage * 2;
+  return list.slice(start, start + 2);
+}
+
+/* ====== VIRTUALIZE PLOTS ====== */
+/** Set các plot đang “thật sự” nằm trong viewport => tickTimers chỉ cập nhật cho chúng */
+const visibleTimerPlots = new Set();
+/** Observer để render plot khi cuộn tới (có đệm) */
+let plotRenderObserver = null;
+/** Observer để theo dõi plot có nằm trong viewport không (cho timer) */
+let timerVisObserver = null;
+
+function ensureObservers(){
+  if (!plotRenderObserver){
+    plotRenderObserver = new IntersectionObserver(entries=>{
+      for (const ent of entries){
+        const placeholder = ent.target;
+        if (!ent.isIntersecting) continue;
+        // Lấy data đã gắn sẵn cho placeholder
+        const p = placeholder.__plotData;
+        if (!p) { plotRenderObserver.unobserve(placeholder); continue; }
+        const real = buildPlotElement(p);
+        placeholder.replaceWith(real);
+        plotRenderObserver.unobserve(placeholder);
+        // Bắt đầu quan sát hiển thị cho timer
+        timerVisObserver?.observe(real);
+      }
+    }, { root:null, rootMargin:'400px 0px', threshold:0.01 }); // đệm khoảng 400px theo chiều dọc
+  }
+  if (!timerVisObserver){
+    timerVisObserver = new IntersectionObserver(entries=>{
+      for (const ent of entries){
+        const el = ent.target;
+        if (ent.isIntersecting) {
+          visibleTimerPlots.add(el);
+          // cập nhật ngay một nhịp để khỏi trống
+          updatePlotTimer(el);
+        } else {
+          visibleTimerPlots.delete(el);
+        }
+      }
+    }, { root:null, rootMargin:'100px 0px', threshold:0.01 });
+  }
+}
+
+/** Xây 1 placeholder plot để lazy render */
+function buildPlotPlaceholder(p){
+  const ph = document.createElement('div');
+  ph.className = 'plot';
+  ph.style.minHeight = '260px';
+  ph.innerHTML = `<div class="skeleton" style="height:100%;"></div>`;
+  ph.__plotData = p; // gắn tạm dữ liệu để observer lấy
+  return ph;
+}
+
+/** Xây plot đầy đủ (tách ra để tái dùng) */
+function buildPlotElement(p){
+  const el=document.createElement('div');
+  el.className='plot'; 
+  el.dataset.plotId=p.id; 
+  el.dataset.stage=p.stage||'empty'; 
+  el.dataset.class=p.class||'';
+  if(p.mature_at) el.dataset.matureAt=p.mature_at;
+  if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
+
+  const meta = getMutationMeta(p);
+  el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
+
+  const stats=document.createElement('div'); 
+  stats.className='stats';
+  const lines = [];
+  lines.push(`<div class="stat cls"><div class="label">Class</div><div class="value">${p.class||'empty'}</div></div>`);
+  lines.push(`<div class="stat time"><div class="label">Time left</div><div class="value"></div></div>`);
+  if (p.mutation_name || Number.isFinite(p?.mutation_mult)) {
+    const mutText = `${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}`;
+    lines.push(`<div class="stat mut"><div class="label">Mut</div><div class="value">${mutText}</div></div>`);
+  }
+  stats.innerHTML = lines.join('');
+
+  const visual=document.createElement('div'); 
+  visual.className='visual';
+  if(p.pot_type){ 
+    const pot=document.createElement('img'); 
+    pot.className='pot';
+    pot.src=`/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
+    pot.loading = 'lazy';
+    visual.appendChild(pot);
+  }
+  if(p.class&&p.stage){ 
+    const folder=p.stage==='planted'?'Seed_Planted':p.stage==='growing'?'Seed_Growing':'Seed_Mature';
+    const plant=document.createElement('img'); 
+    plant.className='plant';
+    plant.src=`/assets/${folder}/seed_${p.stage}_${p.class}.png`;
+    plant.loading = 'lazy';
+    visual.appendChild(plant);
+
+    addMutationBadge(visual, p);
+  }
+
+  el.append(stats,visual); 
+  if(p.stage==='mature') el.classList.add('mature'); 
+
+  return el;
+}
+
+/** Render danh sách plots với virtualization */
+function virtualizePlotsInto(container, plots){
+  ensureObservers();
+  container.innerHTML = '';
+  for (const p of plots){
+    const ph = buildPlotPlaceholder(p);
+    container.appendChild(ph);
+    plotRenderObserver.observe(ph);
+  }
+}
+
+/* ========== SMOOTH RENDER CONTROL (anti-blink) ========== */
+let _lastFloorsSig = '';
+function computeFloorsSig(s){
+  try{
+    const parts = (s?.plots||[]).map(fp=>[
+      fp.floor?.id, fp.floor?.idx,
+      ...(fp.plots||[]).map(p=>[p.id,p.stage,p.class,p.mature_at,p.pot_type,p.mutation_name,p.mutation_mult])
+    ]);
+    return JSON.stringify(parts);
+  }catch{return '';}
+}
+
+/* ---------- RENDER STATE (soft/atomic) ---------- */
+function renderState(s, opts = {}){
   state=s;
   ensureFarmAutoControls();
 
@@ -443,116 +715,110 @@ function renderState(s){
 
   const floorsDiv=$('#floors');
   if(floorsDiv){
-    snapshotFloorActionSelections(); 
-    floorsDiv.innerHTML='';
+    const newSig = computeFloorsSig(s);
+    const shouldRebuildFloors =
+      opts.forceFloors === true ||
+      !opts.soft ||
+      newSig !== _lastFloorsSig;
 
-    s.plots.forEach(fp=>{
-      const f=document.createElement('div'); 
-      f.className='floor'; 
-      f.dataset.floorId=fp.floor.id;
-      f.innerHTML=`<h3>Floor ${fp.floor.idx}</h3>`;
+    if (shouldRebuildFloors){
+      snapshotFloorActionSelections();
 
-      const wrap=document.createElement('div'); 
-      wrap.className='plots';
+      // Dùng fragment để thay thế "atomic"
+      const frag = document.createDocumentFragment();
 
-      fp.plots.forEach(p=>{
-        const el=document.createElement('div');
-        el.className='plot'; 
-        el.dataset.plotId=p.id; 
-        el.dataset.stage=p.stage||'empty'; 
-        el.dataset.class=p.class||'';
-        if(p.mature_at) el.dataset.matureAt=p.mature_at;
-        if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
+      // Giới hạn trang & lấy 2 tầng hiển thị
+      clampFloorPageForState(s);
+      saveFloorPageToStorage();
+      const visibleFloorPairs = getVisibleFloorPairs(s);
 
-        const meta = getMutationMeta(p);
-        el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
+      visibleFloorPairs.forEach(fp=>{
+        const f=document.createElement('div'); 
+        f.className='floor'; 
+        f.dataset.floorId=fp.floor.id;
+        f.innerHTML=`<h3>Floor ${fp.floor.idx}</h3>`;
 
-        const stats=document.createElement('div'); 
-        stats.className='stats';
-        const lines = [];
-        lines.push(`<div class="stat cls"><div class="label">Class</div><div class="value">${p.class||'empty'}</div></div>`);
-        lines.push(`<div class="stat time"><div class="label">Time left</div><div class="value"></div></div>`);
-        if (p.mutation_name || Number.isFinite(p?.mutation_mult)) {
-          const mutText = `${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}`;
-          lines.push(`<div class="stat mut"><div class="label">Mut</div><div class="value">${mutText}</div></div>`);
-        }
-        stats.innerHTML = lines.join('');
+        const wrap=document.createElement('div'); 
+        wrap.className='plots';
 
-        const visual=document.createElement('div'); 
-        visual.className='visual';
-        if(p.pot_type){ 
-          const pot=document.createElement('img'); 
-          pot.className='pot';
-          pot.src=`/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
-          visual.appendChild(pot);
-        }
-        if(p.class&&p.stage){ 
-          const folder=p.stage==='planted'?'Seed_Planted':p.stage==='growing'?'Seed_Growing':'Seed_Mature';
-          const plant=document.createElement('img'); 
-          plant.className='plant';
-          plant.src=`/assets/${folder}/seed_${p.stage}_${p.class}.png`; 
-          visual.appendChild(plant);
+        // === Virtualize ở đây ===
+        virtualizePlotsInto(wrap, fp.plots);
 
-          addMutationBadge(visual, p); // chỉ badge, không overlay tint
-        }
+        f.appendChild(wrap);
 
-        el.append(stats,visual); 
-        if(p.stage==='mature') el.classList.add('mature'); 
-        wrap.appendChild(el);
+        const act=document.createElement('div'); 
+        act.className='floor-actions';
+        act.innerHTML=`<span class="floor-tag">Floor ${fp.floor.idx}</span>
+          <select class="sel-slot">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
+          <select class="sel-pot">${(s.potInv||[]).map(p=>`<option value="${p.id}">#${p.id} ${p.type}</option>`).join('')}</select>
+          <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">${decorateSeedText(x)}</option>`).join('')}</select>
+          <button class="btn-place">Place Pot</button>
+          <button class="btn-plant">Plant</button>
+          <button class="btn-remove danger">Remove Plot</button>`;
+        f.appendChild(act);
+
+        act.addEventListener('change',()=>{
+          floorActionSel[fp.floor.id]={
+            slot:act.querySelector('.sel-slot')?.value,
+            potId:act.querySelector('.sel-pot')?.value,
+            seedId:act.querySelector('.sel-seed')?.value
+          };
+        });
+
+        act.addEventListener('click',async e=>{
+          const floorId=fp.floor.id,slot=parseInt(act.querySelector('.sel-slot').value,10);
+          if(e.target.closest('.btn-place')){
+            const potId=parseInt(act.querySelector('.sel-pot').value,10); if(!potId) return;
+            try{await api('/plot/place-pot',{floorId,slot,potId});await refresh();}catch(err){showError(err,'place-pot');}
+          }
+          if(e.target.closest('.btn-plant')){
+            const seedId=parseInt(act.querySelector('.sel-seed').value,10); if(!seedId) return;
+            try{await api('/plot/plant',{floorId,slot,seedId});await refresh();}catch(err){showError(err,'plant');}
+          }
+          if(e.target.closest('.btn-remove')){
+            if(!confirm('Xóa ô này?'))return;
+            try{await api('/plot/remove',{floorId,slot});await refresh();}catch(err){showError(err,'remove');}
+          }
+        });
+
+        frag.appendChild(f);
       });
 
-      f.appendChild(wrap);
-
-      const act=document.createElement('div'); 
-      act.className='floor-actions';
-      act.innerHTML=`<span class="floor-tag">Floor ${fp.floor.idx}</span>
-        <select class="sel-slot">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
-        <select class="sel-pot">${(s.potInv||[]).map(p=>`<option value="${p.id}">#${p.id} ${p.type}</option>`).join('')}</select>
-        <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">${decorateSeedText(x)}</option>`).join('')}</select>
-        <button class="btn-place">Place Pot</button>
-        <button class="btn-plant">Plant</button>
-        <button class="btn-remove danger">Remove Plot</button>`;
-      f.appendChild(act);
-
-      act.addEventListener('change',()=>{
-        floorActionSel[fp.floor.id]={
-          slot:act.querySelector('.sel-slot')?.value,
-          potId:act.querySelector('.sel-pot')?.value,
-          seedId:act.querySelector('.sel-seed')?.value
-        };
+      // Thẻ "Mua tầng" (không phụ thuộc phân trang)
+      const maxIdx = (s.floors||[]).reduce((m,f)=>Math.max(m,f.idx),0);
+      const price = nextFloorPrice();
+      const card=document.createElement('div'); 
+      card.className='buy-floor-card';
+      card.innerHTML=`<div class="price">Mở tầng ${maxIdx+1}: <b>${price}</b> coins</div><button class="do-buy-floor">Buy Floor</button>`;
+      card.querySelector('.do-buy-floor').addEventListener('click',async()=>{
+        if(!confirm(`Mở tầng ${maxIdx+1} với giá ${price} coins?`))return;
+        try{await api('/floors/buy',{});await refresh();}catch(err){showError(err,'buy-floor');}
       });
+      frag.appendChild(card);
 
-      act.addEventListener('click',async e=>{
-        const floorId=fp.floor.id,slot=parseInt(act.querySelector('.sel-slot').value,10);
-        if(e.target.closest('.btn-place')){
-          const potId=parseInt(act.querySelector('.sel-pot').value,10); if(!potId) return;
-          try{await api('/plot/place-pot',{floorId,slot,potId});await refresh();}catch(err){showError(err,'place-pot');}
-        }
-        if(e.target.closest('.btn-plant')){
-          const seedId=parseInt(act.querySelector('.sel-seed').value,10); if(!seedId) return;
-          try{await api('/plot/plant',{floorId,slot,seedId});await refresh();}catch(err){showError(err,'plant');}
-        }
-        if(e.target.closest('.btn-remove')){
-          if(!confirm('Xóa ô này?'))return;
-          try{await api('/plot/remove',{floorId,slot});await refresh();}catch(err){showError(err,'remove');}
-        }
+      // Thanh điều hướng Previous / Next dưới các tầng
+      const totalPages = getTotalFloorPagesFromState(s);
+      const nav = document.createElement('div');
+      nav.className = 'floor-nav';
+      nav.innerHTML = `
+        <button class="btn prev" ${floorPage===0?'disabled':''}>Previous floor</button>
+        <div class="page-indicator">Page ${floorPage+1}/${totalPages}</div>
+        <button class="btn next" ${floorPage>=totalPages-1?'disabled':''}>Next floor</button>
+      `;
+      nav.querySelector('.prev')?.addEventListener('click', ()=>{
+        if (floorPage>0){ floorPage--; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
       });
+      nav.querySelector('.next')?.addEventListener('click', ()=>{
+        if (floorPage<totalPages-1){ floorPage++; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
+      });
+      frag.appendChild(nav);
 
-      floorsDiv.appendChild(f);
-    });
+      // Thay thế atomic để tránh blink
+      floorsDiv.replaceChildren(frag);
 
-    const maxIdx = (s.floors||[]).reduce((m,f)=>Math.max(m,f.idx),0);
-    const price = nextFloorPrice();
-    const card=document.createElement('div'); 
-    card.className='buy-floor-card';
-    card.innerHTML=`<div class="price">Mở tầng ${maxIdx+1}: <b>${price}</b> coins</div><button class="do-buy-floor">Buy Floor</button>`;
-    floorsDiv.appendChild(card);
-    card.querySelector('.do-buy-floor').addEventListener('click',async()=>{
-      if(!confirm(`Mở tầng ${maxIdx+1} với giá ${price} coins?`))return;
-      try{await api('/floors/buy',{});await refresh();}catch(err){showError(err,'buy-floor');}
-    });
-
-    restoreFloorActionSelections();
+      restoreFloorActionSelections();
+      _lastFloorsSig = newSig;
+    }
   }
 
   populateSelects();
@@ -561,7 +827,7 @@ function renderState(s){
   renderMarketListings();
 }
 
-async function refresh(){ const data = await get('/me/state'); renderState(data); }
+async function refresh(opts = {}){ const data = await get('/me/state'); renderState(data, opts); }
 
 /* ---------- AUTH ---------- */
 $('#btnLogin').addEventListener('click', async ()=>{
@@ -592,6 +858,12 @@ $$('.subtabs button').forEach(b=>b.addEventListener('click', ()=>{
   $$('.subtab').forEach(sec=>sec.classList.add('hidden'));
   $('#'+b.dataset.sub).classList.remove('hidden');
 }));
+
+/* ---------- INVENTORY FILTER EVENTS + PLANT ALL ---------- */
+$('#fltInvState')?.addEventListener('change', renderInventorySeeds);
+$('#fltInvClass')?.addEventListener('change', renderInventorySeeds);
+$('#fltInvMut')?.addEventListener('change', renderInventorySeeds);
+$('#btnPlantAll')?.addEventListener('click', plantAllFiltered);
 
 /* ---------- SHOP / TRAP ---------- */
 $('#buyTrap')?.addEventListener('click', async ()=>{ try{ await api('/shop/buy-trap',{}); await refresh(); }catch(e){ showError(e,'buy-trap'); } });
@@ -714,65 +986,10 @@ async function renderVisitedFloor(uid, floorId){
     wrap.className = 'plots';
 
     data.plots.forEach(p=>{
-      const el = document.createElement('div');
-      el.className = 'plot';
-      el.dataset.plotId = p.id;
-      el.dataset.stage  = p.stage || 'empty';
-      el.dataset.class  = p.class  || '';
-      if (p.mature_at) el.dataset.matureAt = p.mature_at;
-      if (p.mutation_name) el.dataset.mutation = p.mutation_name;
-
-      const meta = getMutationMeta(p);
-      el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
-
-      const stats = document.createElement('div');
-      stats.className = 'stats';
-
-      const statClass = document.createElement('div');
-      statClass.className = 'stat cls';
-      statClass.innerHTML = `<div class="label">Class</div><div class="value">${p.class || 'empty'}</div>`;
-      stats.appendChild(statClass);
-
-      const statTime = document.createElement('div');
-      statTime.className = 'stat time';
-      statTime.innerHTML = `<div class="label">Time left</div><div class="value"></div>`;
-      stats.appendChild(statTime);
-
-      if (p.mutation_name || Number.isFinite(p?.mutation_mult)) {
-        const mut = document.createElement('div');
-        mut.className = 'stat mut';
-        mut.innerHTML = `<div class="label">Mut</div><div class="value">${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}</div>`;
-        stats.appendChild(mut);
-      }
-
-      const visual = document.createElement('div');
-      visual.className = 'visual';
-
-      if (p.pot_type){
-        const potImg = document.createElement('img');
-        potImg.className = 'pot';
-        potImg.src = `/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
-        visual.appendChild(potImg);
-      }
-
-      if (p.class && p.stage){
-        const folder = p.stage==='planted' ? 'Seed_Planted'
-                     : p.stage==='growing' ? 'Seed_Growing'
-                     : 'Seed_Mature';
-        const plantImg = document.createElement('img');
-        plantImg.className = 'plant';
-        plantImg.src = `/assets/${folder}/seed_${p.stage}_${p.class}.png`;
-        visual.appendChild(plantImg);
-
-        addMutationBadge(visual, p); // chỉ badge
-      }
-
-      el.append(stats, visual);
-      if (p.stage==='mature') {
-        el.classList.add('mature');
-        el.title = (el.title ? el.title + ' — ' : '') + 'Click để ăn trộm';
-      }
-
+      const el = buildPlotElement(p);
+      // theo dõi viewport cho timer ở trang visit
+      ensureObservers();
+      timerVisObserver?.observe(el);
       wrap.appendChild(el);
     });
 
@@ -795,7 +1012,7 @@ $('#onlineList')?.addEventListener('click', async (e)=>{
   await renderVisitedFloor(uid, floorId);
 });
 
-/* ---------- FLOOR NAV ---------- */
+/* ---------- FLOOR NAV (cuộn trong trang đang hiển thị) ---------- */
 function ensureFloorVisible(){
   const floors = $$('#floors .floor');
   if (floors.length===0) return;
@@ -823,22 +1040,46 @@ document.getElementById('btnHarvestAll')?.addEventListener('click', harvestAllMa
 
 /* ---------- WS & timers ---------- */
 let ws;
+let _wsPendingPayload = null;
+let _wsTimer = null;
 function connectWS(){
   ws = new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host);
-  ws.onmessage = (ev)=>{ try{ const msg=JSON.parse(ev.data); if(msg.type==='state:update'){ renderState(msg.payload); } }catch(e){} };
+  ws.onmessage = (ev)=>{
+    try{
+      const msg=JSON.parse(ev.data);
+      if(msg.type==='state:update'){
+        // Gộp nhiều event nhanh thành 1 lần render
+        _wsPendingPayload = msg.payload;
+        if (_wsTimer) return;
+        _wsTimer = setTimeout(()=>{
+          const payload = _wsPendingPayload;
+          _wsPendingPayload = null;
+          _wsTimer = null;
+          renderState(payload, { soft:false, forceFloors:true }); // action => render mạnh tay
+        }, 120);
+      }
+    }catch(e){}
+  };
 }
 function fmtMs(ms){ if (ms<=0) return 'Mature'; const s=Math.ceil(ms/1000); const m=Math.floor(s/60); const r=s%60; return `${m}:${String(r).padStart(2,'0')}`; }
 
-function tickTimers(){
+/** cập nhật timer cho 1 plot element */
+function updatePlotTimer(el){
+  const tVal = el.querySelector('.stat.time .value');
+  if (!tVal) return;
+  const st = el.dataset.stage;
+  if (st === 'mature'){ tVal.textContent = 'Mature'; return; }
+  const mAt = +el.dataset.matureAt || 0;
   const now = Date.now();
-  $$('.plot').forEach(el=>{
-    const tVal = el.querySelector('.stat.time .value');
-    if (!tVal) return;
-    const st = el.dataset.stage;
-    if (st === 'mature'){ tVal.textContent = 'Mature'; return; }
-    const mAt = +el.dataset.matureAt || 0;
-    tVal.textContent = mAt ? fmtMs(mAt - now) : '';
-  });
+  tVal.textContent = mAt ? fmtMs(mAt - now) : '';
+}
+
+/** chỉ quét các plot đang trong viewport (đã theo dõi bằng IntersectionObserver) */
+function tickTimers(){
+  if (visibleTimerPlots.size === 0) return;
+  for (const el of visibleTimerPlots){
+    updatePlotTimer(el);
+  }
 }
 setInterval(tickTimers, 1000);
 
@@ -1089,8 +1330,30 @@ function startAutoLoop(){
   });
 })();
 
+/* ---------- Phím tắt ← / → để chuyển trang tầng ---------- */
+document.addEventListener('keydown', (e)=>{
+  // bỏ qua khi gõ trong input/select/textarea
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag==='input' || tag==='select' || tag==='textarea' || e.altKey || e.ctrlKey || e.metaKey) return;
+  const activeTab = Array.from($$('.tabs button')).find(b=>b.classList.contains('active'))?.dataset.tab;
+  if (activeTab !== 'farm' && activeTab !== 'shop' && activeTab !== 'inventory') {
+    // vẫn cho phép ở hầu hết tab chính liên quan farm
+  }
+  if (e.key === 'ArrowLeft'){
+    const total = getTotalFloorPagesFromState(state||{plots:[]});
+    if (floorPage > 0){ floorPage--; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
+    e.preventDefault();
+  }
+  if (e.key === 'ArrowRight'){
+    const total = getTotalFloorPagesFromState(state||{plots:[]});
+    if (floorPage < total - 1){ floorPage++; saveFloorPageToStorage(); renderState(state, {forceFloors:true}); }
+    e.preventDefault();
+  }
+});
+
+// Polling nhẹ (soft) mỗi 10s, bỏ qua khi đang ở tab online
 setInterval(()=>{ if($('#tabs').classList.contains('hidden')) return;
   const active = Array.from($$('.tabs button')).find(b=>b.classList.contains('active'))?.dataset.tab;
   if (active === 'online') return;
-  refresh().catch(()=>{});
+  refresh({ soft: true }).catch(()=>{});
 }, 10000);
