@@ -174,6 +174,9 @@
       <button id="btnNextFloor">↓ Floor</button>
       <button id="btnHarvestAll">Harvest All Mature</button>
 
+      <!-- NEW: Remove Mode (click bật, sau đó click vào plot để remove pot) -->
+      <button id="btnRemoveMode" class="btn btn-ghost">Remove Mode: OFF</button>
+
       <!-- Nút mở Map overview (hook) -->
       <button id="btnOpenMap" class="btn btn-ghost">Map</button>
 
@@ -194,27 +197,8 @@
       </div>
     </div>
 
-    <!-- Form actions (giữ nguyên để tương thích code cũ) -->
-    <div>
-      <h3>Actions</h3>
-      <select id="plantFloor"></select>
-      <select id="plantSlot"></select>
-      <select id="plantPot"></select>
-      <select id="plantSeed"></select>
-      <!-- NEW: chọn mutation -->
-      <select id="plantMutation">
-        <option value="">(no mutation)</option>
-        <option value="green">Green</option>
-        <option value="blue">Blue</option>
-        <option value="yellow">Yellow</option>
-        <option value="pink">Pink</option>
-        <option value="red">Red</option>
-        <option value="gold">Gold</option>
-        <option value="rainbow">Rainbow</option>
-      </select>
-      <button id="btnPlacePot">Place Pot</button>
-      <button id="btnPlant">Plant</button>
-    </div>
+    <!-- ĐÃ BỎ: Form Actions cũ để giảm DOM & giật lag -->
+    <!-- (Các id plantFloor/plantSlot/plantPot/plantSeed/plantMutation/btnPlacePot/btnPlant không còn trong HTML) -->
   </section>
 </div>
 

@@ -470,6 +470,48 @@ app.post('/plot/plant', auth, (req, res) => {
   res.json({ ok: true, mature_at: mAt, mutation: mutFinal });
 });
 
+app.post('/plot/remove', auth, (req, res) => {
+  try {
+    const userId = req.userId;   // ✅ sửa lại đúng biến
+    const { floorId, slot } = req.body || {};
+    if (!floorId || !slot) {
+      return res.status(400).json({ error: 'floorId và slot là bắt buộc' });
+    }
+
+    // Xác thực plot thuộc về user
+    const plot = db.prepare(`
+      SELECT p.id
+      FROM plots p
+      JOIN floors f ON f.id = p.floor_id
+      WHERE f.user_id = ? AND f.id = ? AND p.slot = ?
+    `).get(userId, floorId, slot);
+
+    if (!plot) {
+      return res.status(404).json({ error: 'Plot không tồn tại hoặc không thuộc user' });
+    }
+
+    // Dọn sạch plot
+    db.prepare(`
+      UPDATE plots
+      SET pot_id = NULL,
+          pot_type = NULL,
+          seed_id = NULL,
+          class = NULL,
+          mutation = NULL,
+          planted_at = NULL,
+          mature_at = NULL,
+          stage = 'empty'
+      WHERE id = ?
+    `).run(plot.id);
+
+    return res.json({ ok: true, plotId: plot.id });
+  } catch (e) {
+    console.error('[plot/remove] fail', e);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+
 
 // tick: planted -> growing -> mature
 setInterval(() => {

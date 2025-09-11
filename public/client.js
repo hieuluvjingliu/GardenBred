@@ -739,6 +739,7 @@ function buildPlotPlaceholder(p){
   ph.className = 'plot';
   ph.style.minHeight = '260px';
   ph.innerHTML = `<div class="skeleton" style="height:100%;"></div>`;
+    ph.dataset.slot = p.slot;
   ph.__plotData = p;
   return ph;
 }
@@ -748,6 +749,7 @@ function buildPlotElement(p){
   el.dataset.plotId=p.id;
   el.dataset.stage=p.stage||'empty';
   el.dataset.class=p.class||'';
+  el.dataset.slot=p.slot;
   if(p.mature_at) el.dataset.matureAt=p.mature_at;
   if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
   const meta = getMutationMeta(p);
@@ -841,61 +843,8 @@ function renderState(s, opts = {}){
         const wrap=document.createElement('div'); wrap.className='plots';
         virtualizePlotsInto(wrap, fp.plots);
         f.appendChild(wrap);
-
-        const act=document.createElement('div'); act.className='floor-actions';
-        act.innerHTML=`
-          <span class="floor-tag">Floor ${fp.floor.idx}</span>
-          <select class="sel-slot">${Array.from({length:10},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select>
-          <select class="sel-pot">${(s.potInv||[]).map(p=>`<option value="${p.id}">#${p.id} ${p.type}</option>`).join('')}</select>
-          <select class="sel-seed">${(s.seedInv||[]).filter(x=>!x.is_mature).map(x=>`<option value="${x.id}">${decorateSeedText(x)}</option>`).join('')}</select>
-          <button class="btn-place">Place Pot</button>
-          <button class="btn-plant">Plant</button>
-          <button class="btn-remove danger">Remove Plot</button>`;
-        f.appendChild(act);
-
-        act.addEventListener('change',()=>{
-          floorActionSel[fp.floor.id]={
-            slot:  act.querySelector('.sel-slot')?.value,
-            potId: act.querySelector('.sel-pot')?.value,
-            seedId:act.querySelector('.sel-seed')?.value
-          };
-        });
-        act.addEventListener('click',async e=>{
-          const floorId=fp.floor.id,slot=parseInt(act.querySelector('.sel-slot').value,10);
-
-          if(e.target.closest('.btn-place')){
-            const potId=parseInt(act.querySelector('.sel-pot').value,10);
-            if(!potId) return;
-            try{
-              await api('/plot/place-pot',{ floorId, slot, potId });
-              notifInfo('Đã đặt pot', `#${potId}`, `Floor ${fp.floor.idx} · Slot ${slot}`);
-              await refresh();
-            }catch(err){showError(err,'place-pot');}
-          }
-
-          if(e.target.closest('.btn-plant')){
-            const seedId=parseInt(act.querySelector('.sel-seed').value,10);
-            if(!seedId) return;
-            try{
-              await api('/plot/plant',{ floorId, slot, seedId });
-              const sseed = (state?.seedInv||[]).find(x=>x.id===seedId);
-              notifPlant({ cls: sseed?.class, seedName:sseed?.class, floorName:`Floor ${fp.floor.idx}`, potId:slot, mutation: sseed?.mutation || sseed?.mutation_name, seed: sseed });
-              await refresh();
-            }catch(err){showError(err,'plant');}
-          }
-
-          if(e.target.closest('.btn-remove')){
-            if(!confirm('Xóa ô này?'))return;
-            try{
-              await api('/plot/remove',{ floorId, slot });
-              notifyBus.show({ type:'warn', title:'Đã xoá ô', meta:`Floor ${fp.floor.idx} · Slot ${slot}` });
-              await refresh();
-            }catch(err){showError(err,'remove');}
-          }
-        });
-
         frag.appendChild(f);
-      });
+});
 
       const maxIdx = (s.floors||[]).reduce((m,f)=>Math.max(m,f.idx),0);
       const price = nextFloorPrice();
@@ -1420,7 +1369,55 @@ function ensureFarmAutoControls(){
     const syncBtnPlant = ()=> {
       btnPlant.classList.toggle('active', Auto.plant);
       btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
-    };
+    }
+// === Remove Pot mode ===
+if (!bar.querySelector('.btnRemoveMode')) {
+  const btnRemove = document.createElement('button');
+  btnRemove.className = 'btnRemoveMode';
+  btnRemove.textContent = 'Remove Pot: OFF';
+
+  let removeMode = false;
+  const sync = ()=> {
+    btnRemove.classList.toggle('active', removeMode);
+    btnRemove.textContent = 'Remove Pot: ' + (removeMode ? 'ON' : 'OFF');
+    document.body.classList.toggle('remove-mode', removeMode);
+  };
+  btnRemove.addEventListener('click', ()=>{
+    removeMode = !removeMode;
+    sync();
+    notifyBus.show({
+      type: removeMode ? 'warn' : 'info',
+      title: 'Remove Pot',
+      desc: removeMode ? 'Click vào ô muốn xoá pot' : 'Đã tắt',
+    });
+  });
+  sync();
+  bar.appendChild(btnRemove);
+
+  // Gắn handler click vào plots (delegate)
+  const floorsRoot = document.getElementById('floors');
+  if (floorsRoot && !floorsRoot.__removeModeBound){
+    floorsRoot.__removeModeBound = true;
+    floorsRoot.addEventListener('click', async (e)=>{
+      if (!removeMode) return;
+      const plot = e.target.closest('.plot');
+      if (!plot) return;
+      const floor = plot.closest('.floor');
+      const floorId = parseInt(floor?.dataset.floorId, 10);
+      const slot = parseInt(plot?.dataset.slot, 10);
+      if (!floorId || !slot) return;
+
+      const floorName = floor?.querySelector('h3')?.textContent || `#${floorId}`;
+      if (!confirm(`Remove pot ở ${floorName} · Slot ${slot}?`)) return;
+      try{
+        await api('/plot/remove', { floorId, slot });
+        notifyBus.show({ type:'warn', title:'Removed', meta:`Floor ${floorId} · Slot ${slot}` });
+        await refresh({ soft:true });
+      }catch(err){ showError(err,'remove'); }
+    });
+  }
+}
+;
     btnPlant.addEventListener('click', ()=>{
       Auto.plant = !Auto.plant; syncBtnPlant(); autoSave();
       notifyBus.show({ type: Auto.plant?'success':'warn', title:'Auto Plant', desc: Auto.plant?'ON':'OFF' });
@@ -1432,7 +1429,55 @@ function ensureFarmAutoControls(){
     btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
   }
 
-  let box = bar.querySelector('.auto-filters');
+  
+// === Remove Pot mode ===
+if (!bar.querySelector('.btnRemoveMode')) {
+  const btnRemove = document.createElement('button');
+  btnRemove.className = 'btnRemoveMode';
+  btnRemove.textContent = 'Remove Pot: OFF';
+
+  let removeMode = false;
+  const sync = ()=> {
+    btnRemove.classList.toggle('active', removeMode);
+    btnRemove.textContent = 'Remove Pot: ' + (removeMode ? 'ON' : 'OFF');
+    document.body.classList.toggle('remove-mode', removeMode);
+  };
+  btnRemove.addEventListener('click', ()=>{
+    removeMode = !removeMode;
+    sync();
+    notifyBus.show({
+      type: removeMode ? 'warn' : 'info',
+      title: 'Remove Pot',
+      desc: removeMode ? 'Click vào ô muốn xoá pot' : 'Đã tắt',
+    });
+  });
+  sync();
+  bar.appendChild(btnRemove);
+
+  // Gắn handler click vào plots (delegate)
+  const floorsRoot = document.getElementById('floors');
+  if (floorsRoot && !floorsRoot.__removeModeBound){
+    floorsRoot.__removeModeBound = true;
+    floorsRoot.addEventListener('click', async (e)=>{
+      if (!removeMode) return;
+      const plot = e.target.closest('.plot');
+      if (!plot) return;
+      const floor = plot.closest('.floor');
+      const floorId = parseInt(floor?.dataset.floorId, 10);
+      const slot = parseInt(plot?.dataset.slot, 10);
+      if (!floorId || !slot) return;
+
+      const floorName = floor?.querySelector('h3')?.textContent || `#${floorId}`;
+      if (!confirm(`Remove pot ở ${floorName} · Slot ${slot}?`)) return;
+      try{
+        await api('/plot/remove', { floorId, slot });
+        notifyBus.show({ type:'warn', title:'Removed', meta:`Floor ${floorId} · Slot ${slot}` });
+        await refresh({ soft:true });
+      }catch(err){ showError(err,'remove'); }
+    });
+  }
+}
+let box = bar.querySelector('.auto-filters');
   if (!box){ box = document.createElement('div'); box.className = 'auto-filters'; bar.appendChild(box); }
   box.innerHTML = '';
 
