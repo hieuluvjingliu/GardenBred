@@ -73,6 +73,49 @@ const AUTO_RECENT_PLANTED = new Set();  // seedId vừa trồng xong (đợi sta
 const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
 /* ====================================================================== */
 
+/* ===================== Breed Result Card (NEW) ===================== */
+function getBreedFeedEl(){
+  return document.getElementById('breedFeed') || document.getElementById('breedOut');
+}
+function renderBreedCard(out){
+  // out: { mutation, seedName, resultClass }
+  const feed = getBreedFeedEl();
+  if (!feed) return;
+
+  const mutKey = (out.mutation || '').toLowerCase();
+  const meta = MUT_INFO[mutKey] || null;
+  const badgeBg = meta?.color || '#444';
+  const badgeText = meta ? `${meta.name} ×${meta.mult}` : 'normal';
+
+  const seedName = out.seedName || out.resultClass || 'Unknown';
+  const cls = (out.resultClass || seedName || '').toLowerCase();
+
+  // ảnh Planted: theo naming bạn đang dùng ở shop
+  const imgSrc = `/assets/Seed_Planted/seed_planted_${cls}.png`;
+
+  const card = document.createElement('div');
+  card.className = 'breed-card';
+  card.innerHTML = `
+    <div class="mut-badge" style="background:${badgeBg}">${badgeText}</div>
+    <div class="seed-wrap">
+      <img class="seed-img plant" alt="${seedName}">
+    </div>
+    <div class="seed-name">seed : <b>${seedName}</b></div>
+  `;
+  const img = card.querySelector('.seed-img');
+  img.src = imgSrc;
+  img.loading = 'lazy';
+  img.onerror = ()=>{ img.style.display='none'; };
+  if (meta?.key) applyMutationFilterToPlant(img, meta.key);
+
+if (feed) {
+  feed.innerHTML = ''; // luôn clear trước
+  feed.appendChild(card);
+}
+
+}
+/* =================================================================== */
+
 /* ========================= NOTIFIER (Toast dùng chung) ========================= */
 class Notifier {
   constructor(opts={}){
@@ -111,7 +154,7 @@ class Notifier {
         if (descEl && !descEl.textContent.includes('×')) {
           descEl.insertAdjacentText('beforeend', ` ×${last.count}`);
         } else if (descEl) {
-          descEl.textContent = descEl.textContent.replace(/×\d+$/, `×${last.count}`);
+          descEl.textContent = descEl.textContent.replace(/×\\d+$/, `×${last.count}`);
         }
         last.ts = now;
         return last.el;
@@ -825,6 +868,14 @@ function buildPlotPlaceholder(p){
   ph.__plotData = p;
   return ph;
 }
+
+/* ====== FIX: mỗi plot chỉ giữ 1 ảnh pot + 1 ảnh plant mới nhất ====== */
+function setSingleImages(visual){
+  if (!visual) return;
+  // Xóa toàn bộ ảnh cũ nếu có (bất kỳ render trước đó)
+  visual.querySelectorAll('img.plant, img.pot').forEach(n => n.remove());
+}
+
 function buildPlotElement(p){
   const el=document.createElement('div');
   el.className='plot';
@@ -848,10 +899,15 @@ function buildPlotElement(p){
   stats.innerHTML = lines.join('');
 
   const visual=document.createElement('div'); visual.className='visual';
+  // ĐẢM BẢO CHỈ 1 ẢNH MỚI NHẤT
+  setSingleImages(visual);
+
   if(p.pot_type){
     const pot=document.createElement('img'); pot.className='pot';
     pot.src=`/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
     pot.loading = 'lazy';
+    // Đảm bảo fit card (thêm guard JS, ngoài CSS)
+    pot.style.objectFit = 'contain';
     visual.appendChild(pot);
   }
   if(p.class&&p.stage){
@@ -859,6 +915,8 @@ function buildPlotElement(p){
     const plant = document.createElement('img'); plant.className = 'plant';
     plant.src = `/assets/${folder}/seed_${p.stage}_${p.class}.png`;
     plant.loading = 'lazy';
+    // Fit với card
+    plant.style.objectFit = 'contain';
     visual.appendChild(plant);
     const mmeta = getMutationMeta(p);
     if (mmeta?.key) applyMutationFilterToPlant(plant, mmeta.key);
@@ -1058,35 +1116,40 @@ $('#btnBreed')?.addEventListener('click', async ()=>{
   try{
     const r = await api('/breed',{ seedAId:a, seedBId:b });
     $('#breedOut').innerHTML = `${renderMutationBadge(r.mutation)} Out: <b>${r.outClass}</b> (base ${r.base})`;
+    renderBreedCard({ mutation: r.mutation, seedName: r.outClass, resultClass: r.outClass });
     notifBreed({ resultCls:r.outClass, parents:[`#${a}`, `#${b}`], mutation:r.mutation, base:r.base });
     await refresh();
   }catch(e){ showError(e, 'breed'); }
 });
-// Random Breed
-document.getElementById('btnRandomBreed')?.addEventListener('click', ()=>{
-  const inv = (window.state?.seedInv || state?.seedInv || []).filter(s => s.is_mature === 1);
-  const breedOut = document.getElementById('breedOut');
-  const byClass = {};
-  for (const s of inv) (byClass[s.class] ||= []).push(s);
-  const classes = Object.keys(byClass);
-  if (classes.length < 2) {
-    if (breedOut) breedOut.textContent = 'Cần ít nhất 2 hạt mature thuộc 2 class khác nhau!';
-    return;
-  }
-  const i = Math.floor(Math.random()*classes.length);
-  let j = Math.floor(Math.random()*(classes.length-1));
-  if (j >= i) j++;
-  const c1 = classes[i], c2 = classes[j];
-  const seed1 = byClass[c1][Math.floor(Math.random()*byClass[c1].length)];
-  const seed2 = byClass[c2][Math.floor(Math.random()*byClass[c2].length)];
-  const selA = document.getElementById('breedSelectA');
-  const selB = document.getElementById('breedSelectB');
-  if (selA && selB) {
-    selA.value = String(seed1.id);
-    selB.value = String(seed2.id);
-    document.getElementById('btnBreed')?.click();
-  }
-});
+// Random Breed (cooldown 1s + render card)
+(function bindRandomBreed(){
+  const btnRB = document.getElementById('btnRandomBreed');
+  if (!btnRB) return;
+  btnRB.addEventListener('click', withCooldown(btnRB, async ()=>{
+    const inv = (window.state?.seedInv || state?.seedInv || []).filter(s => s.is_mature === 1);
+    const breedOut = document.getElementById('breedOut');
+    const byClass = {};
+    for (const s of inv) (byClass[s.class] ||= []).push(s);
+    const classes = Object.keys(byClass);
+    if (classes.length < 2) {
+      if (breedOut) breedOut.textContent = 'Cần ít nhất 2 hạt mature thuộc 2 class khác nhau!';
+      return;
+    }
+    const i = Math.floor(Math.random()*classes.length);
+    let j = Math.floor(Math.random()*(classes.length-1));
+    if (j >= i) j++;
+    const c1 = classes[i], c2 = classes[j];
+    const seed1 = byClass[c1][Math.floor(Math.random()*byClass[c1].length)];
+    const seed2 = byClass[c2][Math.floor(Math.random()*byClass[c2].length)];
+    const selA = document.getElementById('breedSelectA');
+    const selB = document.getElementById('breedSelectB');
+    if (selA && selB) {
+      selA.value = String(seed1.id);
+      selB.value = String(seed2.id);
+      document.getElementById('btnBreed')?.click();
+    }
+  }));
+})();
 
 /* ---------- MARKET ---------- */
 $('#btnList')?.addEventListener('click', async ()=>{
@@ -1748,7 +1811,88 @@ document.addEventListener('keydown', (e)=>{
     e.preventDefault();
   }
 });
+/* =========================
+   PATCH: One-image-only & in-place plot sync (avoid duplicates)
+   - After soft updates (WS/poll), clean the .visual and re-add *one* pot and *one* plant.
+   - Keeps sizes constrained by CSS so images always fit the card.
+   ========================= */
 
+function __gbg_buildVisualInto(visual, p){
+  // Clean existing children to enforce ONE pot + ONE plant
+  visual.innerHTML = '';
+
+  // POT
+  if (p.pot_type){
+    const pot = document.createElement('img');
+    pot.className = 'pot';
+    pot.src = `/assets/Pots_Image/${p.pot_type==='gold'?'pot2.png':(p.pot_type==='timeskip'?'pot3.png':'pot1.png')}`;
+    pot.loading = 'lazy';
+    visual.appendChild(pot);
+  }
+
+  // PLANT
+  if (p.class && p.stage){
+    const folder = p.stage==='planted' ? 'Seed_Planted' : (p.stage==='growing' ? 'Seed_Growing' : 'Seed_Mature');
+    const plant = document.createElement('img');
+    plant.className = 'plant';
+    plant.src = `/assets/${folder}/seed_${p.stage}_${p.class}.png`;
+    plant.loading = 'lazy';
+    visual.appendChild(plant);
+
+    const mmeta = getMutationMeta(p);
+    if (mmeta?.key) applyMutationFilterToPlant(plant, mmeta.key);
+    addMutationBadge(visual, p);
+  }
+}
+
+function __gbg_patchPlotsInPlace(newState){
+  try{
+    const plotMap = new Map();
+    (newState?.plots||[]).forEach(fp=> (fp.plots||[]).forEach(p=> plotMap.set(p.id, p)));
+
+    document.querySelectorAll('#floors .plot').forEach(el=>{
+      const id = parseInt(el.dataset.plotId, 10);
+      if (!id) return;
+      const p = plotMap.get(id);
+      if (!p) return;
+
+      // Update datasets
+      el.dataset.stage = p.stage || 'empty';
+      el.dataset.class = p.class || '';
+      if (p.mature_at) el.dataset.matureAt = p.mature_at; else delete el.dataset.matureAt;
+      if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation; else delete el.dataset.mutation;
+      el.classList.toggle('mature', p.stage === 'mature');
+
+      // Update stat text (class, mut)
+      const clsVal = el.querySelector('.stat.cls .value');
+      if (clsVal) clsVal.textContent = p.class || 'empty';
+
+      const mutBox = el.querySelector('.stat.mut .value');
+      if (mutBox){
+        const mutText = (p.mutation_name || p.mutation) ? `${p.mutation_name || p.mutation}${Number.isFinite(p?.mutation_mult) ? ` ×${p.mutation_mult}`:''}` : '';
+        mutBox.textContent = mutText;
+      }
+
+      // Rebuild the visual area to guarantee only one image each
+      const visual = el.querySelector('.visual');
+      if (visual) __gbg_buildVisualInto(visual, p);
+    });
+  }catch(err){
+    console.warn('patchPlotsInPlace failed:', err);
+  }
+}
+
+// Wrap the existing renderState to always patch visuals after soft updates
+(function(){
+  if (typeof renderState === 'function'){
+    const __orig = renderState;
+    renderState = function(s, opts={}){
+      __orig(s, opts);
+      // After any render, do an in-place sync to eliminate image duplicates
+      __gbg_patchPlotsInPlace(s);
+    };
+  }
+})();
 // Polling nhẹ (soft) mỗi 10s, bỏ qua khi đang ở tab online
 setInterval(()=>{
   if($('#tabs').classList.contains('hidden')) return;

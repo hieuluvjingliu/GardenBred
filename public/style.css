@@ -1,4 +1,4 @@
-:root{   
+:root{    
   --bg-0:#060912;
   --bg-1:#0c1224;
   --panel:#0f1526;
@@ -849,3 +849,161 @@ button:disabled{
 #btnRemoveMode,
 #btnOpenMap,
 #farmMapModal { display: none !important; }
+/* --- Mutation boost --- */
+
+/* Red mutation: border + nhấp nháy đỏ */
+.plot[data-mutation="red"] {
+  border-color: #ef4444;
+  box-shadow: 0 0 20px #ef444488, inset 0 0 8px #ef444455;
+  animation: mutRedPulse 1s ease-in-out infinite;
+}
+@keyframes mutRedPulse {
+  0%, 100% { box-shadow: 0 0 20px #ef444488, inset 0 0 8px #ef444455; }
+  50%      { box-shadow: 0 0 28px #ef4444aa, inset 0 0 12px #ef444477; }
+}
+
+/* Rainbow mutation: border multi-color + spin nhanh hơn */
+.plot[data-mutation="rainbow"] {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(#0d1431, #0a1023),              /* nền card cũ */
+    linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet, red);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  animation: rainbowBorder 6s linear infinite;
+}
+@keyframes rainbowBorder {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Plant riêng khi rainbow: xoay màu liên tục */
+.mut-rainbow-plant {
+  animation: hueSpin 4s linear infinite;   /* nhanh hơn */
+  filter: saturate(1.35) brightness(1.08);
+}
+
+/* ===== Breed card feed (for lai result UI) ===== */
+.breed-feed{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap:12px; margin-top:12px;
+}
+.breed-card{
+  background:#0b1320;
+  border:1px solid #2a3a60;
+  border-radius:12px;
+  padding:10px;
+  display:grid; grid-template-columns: 80px 1fr; gap:10px; align-items:center;
+}
+.breed-card .thumb{
+  width:80px; height:80px; border-radius:10px; background:#0e1733;
+  display:grid; place-items:center; overflow:hidden; position:relative;
+}
+.breed-card .thumb img{ width:100%; height:100%; object-fit:contain; }
+.breed-card .mut{ font-weight:900; font-size:12px; padding:2px 6px; border-radius:999px; border:1px solid #fff2; width:max-content; margin-bottom:4px;}
+.breed-card .name{ font-weight:800; }
+.breed-card .seed{ opacity:.85; font-size:12px; }
+/* ===== Breed result compact card ===== */
+#breed .breed-out{ margin-top:10px; }
+.breed-card{
+  width: min(360px, 100%);
+  height: 420px;
+  background:#0b1320;
+  border:1px solid #2a3a60;
+  border-radius:14px;
+  box-shadow: var(--shadow);
+  display:grid;
+  grid-template-rows: auto 1fr;
+  overflow:hidden;
+}
+.breed-top{
+  display:flex; align-items:center; gap:8px;
+  padding:10px 12px; border-bottom:1px solid #203054;
+}
+.breed-top .name{ font-weight:800; }
+.breed-top .base{ margin-left:auto; opacity:.8; font-weight:700; }
+.breed-img{
+  display:flex; align-items:center; justify-content:center;
+  padding:12px;
+  height: 280px;             /* cố định chiều cao để ảnh luôn fit */
+}
+.breed-img img{
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+/* === PATCH: Make pot/plant images fit neatly inside the card, not oversized === */
+.plot .visual{
+  position: relative;
+  /* give the visual area a safe inner padding so images never touch the edges */
+  padding-right: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pot is smaller and sits near the bottom center */
+.plot img.pot{
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  width: 52%;
+  max-width: 180px;
+  height: auto;
+  z-index: 1;
+  opacity: 1; /* ensure visible after earlier fade-in */
+}
+
+/* Plant sits above the pot and MUST contain within the visual */
+.plot img.plant{
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(64px, 32%);
+  max-width: 66%;
+  max-height: 70%;
+  object-fit: contain;
+  z-index: 2;
+  opacity: 1;
+}
+
+/* On very small screens make the plant a bit smaller to avoid overflow */
+@media (max-width: 640px){
+  .plot img.pot{ width: 58%; }
+  .plot img.plant{ max-width: 72%; max-height: 68%; bottom: max(60px, 34%); }
+}
+
+/* === Added compact breed card sizing (override) === */
+.breed-card {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #2a3a60;
+  border-radius: 12px;
+  background: #0b1320;
+  max-width: 200px;  /* thu nhỏ card */
+  text-align: center;
+}
+.breed-card .seed-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 140px;
+}
+.breed-card .seed-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.breed-card .mut-badge {
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #fff;
+}
