@@ -1007,3 +1007,28 @@ button:disabled{
   margin-bottom: 4px;
   color: #fff;
 }
+/* --- Rainbow Mutation --- */
+.plant.rainbow {
+  animation: rainbowShift 6s linear infinite;
+}
+
+@keyframes rainbowShift {
+  0%   { filter: hue-rotate(0deg); }
+  25%  { filter: hue-rotate(90deg); }
+  50%  { filter: hue-rotate(180deg); }
+  75%  { filter: hue-rotate(270deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+/* Rainbow mutation: toàn bộ cây đổi màu cầu vồng */
+.plot[data-mutation="rainbow"] img.plant {
+  animation: rainbowShift 5s linear infinite;
+  filter: saturate(1.35) brightness(1.08);
+}
+
+@keyframes rainbowShift {
+  0%   { filter: hue-rotate(0deg)   saturate(1.35) brightness(1.08); }
+  25%  { filter: hue-rotate(90deg)  saturate(1.35) brightness(1.08); }
+  50%  { filter: hue-rotate(180deg) saturate(1.35) brightness(1.08); }
+  75%  { filter: hue-rotate(270deg) saturate(1.35) brightness(1.08); }
+  100% { filter: hue-rotate(360deg) saturate(1.35) brightness(1.08); }
+}

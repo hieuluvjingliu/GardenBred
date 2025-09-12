@@ -13,11 +13,11 @@ import multer from 'multer';
 // ==== MUTATION TIERS ====
 const MUTATION_TIERS = [
   { key: 'green',   mult: 1.20, p: 0.10 },
-  { key: 'blue',    mult: 1.50, p: 0.08 },
-  { key: 'yellow',  mult: 2.00, p: 0.05 },
-  { key: 'pink',    mult: 3.00, p: 0.03 },
-  { key: 'red',     mult: 4.00, p: 0.02 },
-  { key: 'gold',    mult: 6.00, p: 0.01 },
+  { key: 'blue',    mult: 1.50, p: 0.05 },
+  { key: 'yellow',  mult: 2.00, p: 0.025 },
+  { key: 'pink',    mult: 3.00, p: 0.0125 },
+  { key: 'red',     mult: 4.00, p: 0.01 },
+  { key: 'gold',    mult: 6.00, p: 0.0075 },
   { key: 'rainbow', mult: 11.0, p: 0.005 }
 ];
 function rollMutationTier() {
