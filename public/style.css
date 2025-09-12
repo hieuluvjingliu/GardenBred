@@ -1,4 +1,4 @@
-:root{  
+:root{   
   --bg-0:#060912;
   --bg-1:#0c1224;
   --panel:#0f1526;
@@ -478,7 +478,7 @@ h1, h2, h3 {
   min-width: 160px;
   padding: 10px 14px;
   border-radius: 12px;
-  border: 1px solid #28407a;
+  border:  1px solid #28407a;
   background: linear-gradient(180deg,#1b2d58,#152449);
   color: #eaf4ff;
   font-weight: 800;
@@ -774,3 +774,78 @@ h1, h2, h3 {
 #farmControls .btnRemoveMode.active { background:#7f1d1d; border-color:#b91c1c; }
 body.remove-mode .plot { cursor: crosshair; }
 body.remove-mode .plot:hover { outline: 2px solid #ef4444; outline-offset: 2px; }
+
+/* ===== Inventory Split View (NEW) ===== */
+.inv-split{
+  display:grid; grid-template-columns: 320px 1fr; gap:12px;
+}
+.inv-left{
+  border:1px solid #263247; border-radius:12px; background:#0e1733;
+  padding:10px; position:sticky; top:64px; height:fit-content;
+}
+.inv-search input{ width:100%; }
+.group-list{ margin-top:8px; display:grid; gap:8px; }
+.group-item{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 12px; border:1px solid #2a3a60; border-radius:10px; background:#0b1320; cursor:pointer;
+  transition: border-color .15s, box-shadow .15s, transform .06s;
+}
+.group-item:hover{ border-color:#53b7ff; box-shadow:0 0 12px #53b7ff22; transform: translateY(-1px); }
+.group-item.active{ border-color:#6ee7ff; box-shadow:0 0 16px #6ee7ff33; }
+.group-item .name{ font-weight:800; display:flex; align-items:center; gap:8px; }
+.group-item .count{
+  padding:2px 8px; border-radius:999px; background:#0b1527; border:1px solid #2a3a60; font-weight:900;
+}
+.group-item .chev{ opacity:.7; transition: transform .12s, opacity .12s; }
+.group-item.active .chev{ transform: rotate(90deg); opacity:1; }
+
+.inv-right .pill{ padding:6px 10px; border-radius:999px; background:#0b1320; border:1px solid #2a3a60; }
+.inv-right .chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.inv-right .chips .chip{
+  padding:6px 10px; border:1px solid #2a3a60; border-radius:999px; cursor:pointer;
+  background:#0b1320; user-select:none; transition:.15s;
+}
+.inv-right .chips .chip:hover{ border-color:#4b7fff; box-shadow:0 0 10px #4b7fff22; }
+.inv-right .chips .chip.active{ border-color:#53b7ff; box-shadow:0 0 10px #53b7ff33; }
+
+@media (max-width: 980px){
+  .inv-split{ grid-template-columns: 1fr; }
+  .inv-left{ position: static; }
+}
+
+/* ===== Buy Anti-spam visual (disabled) ===== */
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+  filter: grayscale(.2);
+}
+/* Inventory master–detail */
+.inv-split{
+  display:grid; grid-template-columns: 260px 1fr; gap:12px;
+}
+.inv-master{
+  background:#0b1320; border:1px solid #2a3a60; border-radius:12px; padding:8px;
+  max-height:60vh; overflow:auto;
+}
+.inv-master li{
+  padding:10px 12px; border-bottom:1px dashed #1c2435; cursor:pointer;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+}
+.inv-master li.active{ background:#0e1733; border-left:3px solid #53b7ff; }
+.inv-master .count{ opacity:.85; font-weight:800; }
+
+.inv-detail{
+  display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+  gap:12px; align-content:start;
+}
+.inv-detail li{
+  background:#0b1320; border:1px solid #2a3a60; border-radius:12px; padding:10px;
+  display:grid; gap:6px;
+}
+.inv-detail .mut{ font-weight:900; font-size:12px; padding:2px 6px; border-radius:999px; border:1px solid #fff2; width:max-content; }
+.inv-detail .meta{ font-size:12px; opacity:.8; }
+/* === Tắt tạm các UI đã bỏ === */
+#miniHud,
+#btnRemoveMode,
+#btnOpenMap,
+#farmMapModal { display: none !important; }

@@ -1,4 +1,4 @@
-const $ = (s, el=document)=>el.querySelector(s);
+const $ = (s, el=document)=>el.querySelector(s); 
 const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
 let state = null;
 let currentFloorIdx = 0;
@@ -244,6 +244,17 @@ async function get(path){
   return res.json();
 }
 
+/* ======= BUY COOLDOWN (1s) ======= */
+const COOLDOWN_MS = 1000;
+function withCooldown(btn, fn, ms=COOLDOWN_MS){
+  return async (...args)=>{
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    try { await fn(...args); }
+    finally { setTimeout(()=>{ btn.disabled = false; }, ms); }
+  };
+}
+
 function setActive(tab){
   $$('.tabs button').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   $$('.tab').forEach(sec=>sec.classList.toggle('hidden', sec.id!==tab));
@@ -334,11 +345,11 @@ function renderShop(){
         style:'height:72px;display:flex;align-items:center;justify-content:center'
       }));
     };
-    const lbl = document.createElement('span'); lbl.className='label'; lbl.textContent = cls;
+    const lbl = document.createElement('span'); lbl.className = 'label'; lbl.textContent = cls;
     const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({ cache: seedQtyCache, key: cls });
     const btn = document.createElement('button');
     btn.textContent = `Buy ${cls} (100)`;
-    btn.addEventListener('click', async ()=>{
+    btn.addEventListener('click', withCooldown(btn, async ()=>{
       const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
       seedQtyCache[cls] = String(qty);
       try{
@@ -346,7 +357,7 @@ function renderShop(){
         notifBuy({ what:`seed ${cls}`, qty, price: 100*qty, where: 'Shop' });
         await refresh();
       }catch(e){ showError(e,'buy-seed'); }
-    });
+    }));
     el.append(img, lbl, qtyWrap, btn);
     seedGrid.appendChild(el);
   });
@@ -373,7 +384,7 @@ function renderShop(){
     const lbl = document.createElement('span'); lbl.className = 'label'; lbl.textContent = p.type;
     const { wrap: qtyWrap, input: qtyInput } = buildQtyControl({ cache: potQtyCache, key: p.type });
     const btn = document.createElement('button'); btn.textContent = p.label;
-    btn.addEventListener('click', async ()=>{
+    btn.addEventListener('click', withCooldown(btn, async ()=>{
       const qty = Math.max(1, parseInt(qtyInput.value,10) || 1);
       potQtyCache[p.type] = String(qty);
       try{
@@ -381,7 +392,7 @@ function renderShop(){
         notifBuy({ what:`pot ${p.type}`, qty, price: p.price*qty, where:'Shop' });
         await refresh();
       }catch(e){ showError(e,'buy-pot'); }
-    });
+    }));
     el.append(img,lbl,qtyWrap,btn);
     potGrid.appendChild(el);
   });
@@ -515,6 +526,76 @@ async function plantAllFiltered(){
   await refresh();
 }
 
+/* ===== INVENTORY: Master–Detail (new) ===== */
+// Lấy seeds đang hiển thị theo filter hiện có
+function getFilteredSeedsForMasterDetail(){
+  const list = Array.isArray(state?.seedInv) ? state.seedInv.slice() : [];
+  const f = getInventoryFilters();
+  return list.filter(s => seedMatchFilter(s, f));
+}
+
+// Gom nhóm cho cột trái (mặc định theo class; có thể đổi sang s.name nếu có)
+function groupForMaster(list){
+  const by = new Map(); // key -> { key, count }
+  for (const s of list){
+    const key = s.class; // đổi thành s.name nếu có field tên riêng
+    const o = by.get(key) || { key, count:0 };
+    o.count++; by.set(key, o);
+  }
+  return Array.from(by.values()).sort((a,b)=> a.key.localeCompare(b.key));
+}
+
+let _invSelectedKey = null;
+function renderInvMasterDetail(){
+  const left = document.getElementById('invMaster');
+  const right = document.getElementById('invDetail');
+  if (!left || !right) return;
+
+  const filtered = getFilteredSeedsForMasterDetail();
+  const groups = groupForMaster(filtered);
+
+  // chọn mặc định / hoặc reset nếu key hiện tại không còn nữa
+  if (!_invSelectedKey && groups[0]) _invSelectedKey = groups[0].key;
+  if (_invSelectedKey && !groups.find(g => g.key === _invSelectedKey)) {
+    _invSelectedKey = groups[0]?.key || null;
+  }
+
+  // render cột trái
+  left.innerHTML = '';
+  if (groups.length === 0){
+    left.innerHTML = '<li><small>Không có seed phù hợp filter.</small></li>';
+  } else {
+    for (const g of groups){
+      const li = document.createElement('li');
+      li.className = g.key === _invSelectedKey ? 'active' : '';
+      li.innerHTML = `<b>${g.key}</b> <span class="count">${g.count}</span>`;
+      li.addEventListener('click', ()=>{
+        _invSelectedKey = g.key;
+        renderInvMasterDetail(); // re-render cả 2 cột
+      });
+      left.appendChild(li);
+    }
+  }
+
+  // render cột phải: các seed thuộc nhóm đang chọn
+  right.innerHTML = '';
+  const rows = filtered.filter(s => (s.class === _invSelectedKey));
+  if (rows.length === 0){
+    right.innerHTML = '<li><small>Chưa có item trong nhóm này.</small></li>';
+  } else {
+    for (const s of rows){
+      const li = document.createElement('li');
+      const mut = getMutationMeta(s);
+      li.innerHTML = `
+        <div><b>#${s.id} ${s.class}</b></div>
+        ${mut ? `<div class="mut" style="background:${mut.color};color:${pickTextColorForBg(mut.color)};border-color:${mut.color}">${mut.name} ×${mut.mult}</div>` : ''}
+        <div class="meta">base: ${s.base_price ?? '-'}</div>
+      `;
+      right.appendChild(li);
+    }
+  }
+}
+
 /* ---------- SELECTS & POPULATE ---------- */
 function populateSelects(){
   if (!state) return;
@@ -627,7 +708,8 @@ function populateSelects(){
   }
 
   ensureInventoryClassOptions();
-  renderInventorySeeds();
+  // THAY renderInventorySeeds() bằng master–detail renderer
+  renderInvMasterDetail();
 }
 
 function nextFloorPrice(){
@@ -850,14 +932,15 @@ function renderState(s, opts = {}){
       const price = nextFloorPrice();
       const card=document.createElement('div'); card.className='buy-floor-card';
       card.innerHTML=`<div class="price">Mở tầng ${maxIdx+1}: <b>${price}</b> coins</div><button class="do-buy-floor">Buy Floor</button>`;
-      card.querySelector('.do-buy-floor').addEventListener('click',async()=>{
+      const bfBtn = card.querySelector('.do-buy-floor');
+      bfBtn.addEventListener('click', withCooldown(bfBtn, async()=>{
         if(!confirm(`Mở tầng ${maxIdx+1} với giá ${price} coins?`))return;
         try{
           await api('/floors/buy',{});
           notifInfo('Đã mở tầng', `Floor ${maxIdx+1}`, `Giá ${price} coins`);
           await refresh();
         }catch(err){showError(err,'buy-floor');}
-      });
+      }));
       frag.appendChild(card);
 
       const totalPages = getTotalFloorPagesFromState(s);
@@ -938,18 +1021,21 @@ $$('.subtabs button').forEach(b=>b.addEventListener('click', ()=>{
 }));
 
 /* ---------- INVENTORY FILTER EVENTS + PLANT ALL ---------- */
-$('#fltInvState')?.addEventListener('change', renderInventorySeeds);
-$('#fltInvClass')?.addEventListener('change', renderInventorySeeds);
-$('#fltInvMut')?.addEventListener('change', renderInventorySeeds);
+$('#fltInvState')?.addEventListener('change', renderInvMasterDetail);
+$('#fltInvClass')?.addEventListener('change', renderInvMasterDetail);
+$('#fltInvMut')?.addEventListener('change', renderInvMasterDetail);
 $('#btnPlantAll')?.addEventListener('click', plantAllFiltered);
 
 /* ---------- SHOP / TRAP ---------- */
-$('#buyTrap')?.addEventListener('click', async ()=>{
-  try{
-    await api('/shop/buy-trap',{});
-    notifBuy({ what:'trap', qty:1, price: state?.trapPrice, where:'Shop' });
-    await refresh();
-  }catch(e){ showError(e,'buy-trap'); }
+$('#buyTrap')?.addEventListener('click', (ev)=>{
+  const btn = ev.currentTarget;
+  withCooldown(btn, async ()=>{
+    try{
+      await api('/shop/buy-trap',{});
+      notifBuy({ what:'trap', qty:1, price: state?.trapPrice, where:'Shop' });
+      await refresh();
+    }catch(e){ showError(e,'buy-trap'); }
+  })();
 });
 
 /* ---------- SELL ---------- */
@@ -1016,12 +1102,17 @@ $('#btnList')?.addEventListener('click', async ()=>{
 $('#marketList')?.addEventListener('click', async (e)=>{
   const b=e.target.closest('.buy-listing');
   if(!b) return;
-  const id=parseInt(b.dataset.id,10);
+  if (b.disabled) return;
+  b.disabled = true;
   try{
+    const id=parseInt(b.dataset.id,10);
     await api('/market/buy',{ listingId:id });
     notifBuy({ what:`listing #${id}`, qty:1, where:'Market' });
     await refresh();
   }catch(e){ showError(e, 'market-buy'); }
+  finally {
+    setTimeout(()=>{ b.disabled = false; }, COOLDOWN_MS);
+  }
 });
 
 /* ---------- FORM cũ ---------- */
@@ -1342,9 +1433,8 @@ function ensureFarmAutoControls(){
   const bar = document.getElementById('farmControls');
   if (!bar) return;
 
+  // --- Auto Pot button ---
   let btnPot = bar.querySelector('.btnAutoPot');
-  let btnPlant = bar.querySelector('.btnAutoPlant');
-
   if (!btnPot) {
     btnPot = document.createElement('button');
     btnPot.className = 'btnAutoPot';
@@ -1363,61 +1453,15 @@ function ensureFarmAutoControls(){
     btnPot.textContent = 'Auto Pot: ' + (Auto.pot ? 'ON' : 'OFF');
   }
 
+  // --- Auto Plant button ---
+  let btnPlant = bar.querySelector('.btnAutoPlant');
   if (!btnPlant) {
     btnPlant = document.createElement('button');
     btnPlant.className = 'btnAutoPlant';
     const syncBtnPlant = ()=> {
       btnPlant.classList.toggle('active', Auto.plant);
       btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
-    }
-// === Remove Pot mode ===
-if (!bar.querySelector('.btnRemoveMode')) {
-  const btnRemove = document.createElement('button');
-  btnRemove.className = 'btnRemoveMode';
-  btnRemove.textContent = 'Remove Pot: OFF';
-
-  let removeMode = false;
-  const sync = ()=> {
-    btnRemove.classList.toggle('active', removeMode);
-    btnRemove.textContent = 'Remove Pot: ' + (removeMode ? 'ON' : 'OFF');
-    document.body.classList.toggle('remove-mode', removeMode);
-  };
-  btnRemove.addEventListener('click', ()=>{
-    removeMode = !removeMode;
-    sync();
-    notifyBus.show({
-      type: removeMode ? 'warn' : 'info',
-      title: 'Remove Pot',
-      desc: removeMode ? 'Click vào ô muốn xoá pot' : 'Đã tắt',
-    });
-  });
-  sync();
-  bar.appendChild(btnRemove);
-
-  // Gắn handler click vào plots (delegate)
-  const floorsRoot = document.getElementById('floors');
-  if (floorsRoot && !floorsRoot.__removeModeBound){
-    floorsRoot.__removeModeBound = true;
-    floorsRoot.addEventListener('click', async (e)=>{
-      if (!removeMode) return;
-      const plot = e.target.closest('.plot');
-      if (!plot) return;
-      const floor = plot.closest('.floor');
-      const floorId = parseInt(floor?.dataset.floorId, 10);
-      const slot = parseInt(plot?.dataset.slot, 10);
-      if (!floorId || !slot) return;
-
-      const floorName = floor?.querySelector('h3')?.textContent || `#${floorId}`;
-      if (!confirm(`Remove pot ở ${floorName} · Slot ${slot}?`)) return;
-      try{
-        await api('/plot/remove', { floorId, slot });
-        notifyBus.show({ type:'warn', title:'Removed', meta:`Floor ${floorId} · Slot ${slot}` });
-        await refresh({ soft:true });
-      }catch(err){ showError(err,'remove'); }
-    });
-  }
-}
-;
+    };
     btnPlant.addEventListener('click', ()=>{
       Auto.plant = !Auto.plant; syncBtnPlant(); autoSave();
       notifyBus.show({ type: Auto.plant?'success':'warn', title:'Auto Plant', desc: Auto.plant?'ON':'OFF' });
@@ -1429,59 +1473,60 @@ if (!bar.querySelector('.btnRemoveMode')) {
     btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
   }
 
-  
-// === Remove Pot mode ===
-if (!bar.querySelector('.btnRemoveMode')) {
-  const btnRemove = document.createElement('button');
-  btnRemove.className = 'btnRemoveMode';
-  btnRemove.textContent = 'Remove Pot: OFF';
+  // --- Remove Pot mode (chỉ gắn 1 lần) ---
+  if (!bar.querySelector('.btnRemoveMode')) {
+    const btnRemove = document.createElement('button');
+    btnRemove.className = 'btnRemoveMode';
+    btnRemove.textContent = 'Remove Pot: OFF';
 
-  let removeMode = false;
-  const sync = ()=> {
-    btnRemove.classList.toggle('active', removeMode);
-    btnRemove.textContent = 'Remove Pot: ' + (removeMode ? 'ON' : 'OFF');
-    document.body.classList.toggle('remove-mode', removeMode);
-  };
-  btnRemove.addEventListener('click', ()=>{
-    removeMode = !removeMode;
+    let removeMode = false;
+    const sync = ()=> {
+      btnRemove.classList.toggle('active', removeMode);
+      btnRemove.textContent = 'Remove Pot: ' + (removeMode ? 'ON' : 'OFF');
+      document.body.classList.toggle('remove-mode', removeMode);
+    };
+    btnRemove.addEventListener('click', ()=>{
+      removeMode = !removeMode;
+      sync();
+      notifyBus.show({
+        type: removeMode ? 'warn' : 'info',
+        title: 'Remove Pot',
+        desc: removeMode ? 'Click vào ô muốn xoá pot' : 'Đã tắt',
+      });
+    });
     sync();
-    notifyBus.show({
-      type: removeMode ? 'warn' : 'info',
-      title: 'Remove Pot',
-      desc: removeMode ? 'Click vào ô muốn xoá pot' : 'Đã tắt',
-    });
-  });
-  sync();
-  bar.appendChild(btnRemove);
+    bar.appendChild(btnRemove);
 
-  // Gắn handler click vào plots (delegate)
-  const floorsRoot = document.getElementById('floors');
-  if (floorsRoot && !floorsRoot.__removeModeBound){
-    floorsRoot.__removeModeBound = true;
-    floorsRoot.addEventListener('click', async (e)=>{
-      if (!removeMode) return;
-      const plot = e.target.closest('.plot');
-      if (!plot) return;
-      const floor = plot.closest('.floor');
-      const floorId = parseInt(floor?.dataset.floorId, 10);
-      const slot = parseInt(plot?.dataset.slot, 10);
-      if (!floorId || !slot) return;
+    // Delegate click lên plots (gắn duy nhất 1 lần)
+    const floorsRoot = document.getElementById('floors');
+    if (floorsRoot && !floorsRoot.__removeModeBound){
+      floorsRoot.__removeModeBound = true;
+      floorsRoot.addEventListener('click', async (e)=>{
+        if (!removeMode) return;
+        const plot = e.target.closest('.plot');
+        if (!plot) return;
+        const floor = plot.closest('.floor');
+        const floorId = parseInt(floor?.dataset.floorId, 10);
+        const slot = parseInt(plot?.dataset.slot, 10);
+        if (!floorId || !slot) return;
 
-      const floorName = floor?.querySelector('h3')?.textContent || `#${floorId}`;
-      if (!confirm(`Remove pot ở ${floorName} · Slot ${slot}?`)) return;
-      try{
-        await api('/plot/remove', { floorId, slot });
-        notifyBus.show({ type:'warn', title:'Removed', meta:`Floor ${floorId} · Slot ${slot}` });
-        await refresh({ soft:true });
-      }catch(err){ showError(err,'remove'); }
-    });
+        const floorName = floor?.querySelector('h3')?.textContent || `#${floorId}`;
+        if (!confirm(`Remove pot ở ${floorName} · Slot ${slot}?`)) return;
+        try{
+          await api('/plot/remove', { floorId, slot });
+          notifyBus.show({ type:'warn', title:'Removed', meta:`Floor ${floorId} · Slot ${slot}` });
+          await refresh({ soft:true });
+        }catch(err){ showError(err,'remove'); }
+      });
+    }
   }
-}
-let box = bar.querySelector('.auto-filters');
+
+  // --- Auto Filters box ---
+  let box = bar.querySelector('.auto-filters');
   if (!box){ box = document.createElement('div'); box.className = 'auto-filters'; bar.appendChild(box); }
   box.innerHTML = '';
 
-  // ====== Class group (collapsed) ======
+  // Class group
   const classes = getAvailableClassesFromState();
   classes.forEach(cls=>{ if (!(cls in Auto.filters.classes)) Auto.filters.classes[cls] = true; });
   box.appendChild(buildCollapsedFilterGroup({
@@ -1497,7 +1542,7 @@ let box = bar.querySelector('.auto-filters');
     }))
   }));
 
-  // ====== Pot group (collapsed) ======
+  // Pot group
   ['timeskip','gold','basic'].forEach(pt=>{ if (!(pt in Auto.filters.pots)) Auto.filters.pots[pt] = true; });
   box.appendChild(buildCollapsedFilterGroup({
     titleText:'Pot',
@@ -1511,7 +1556,7 @@ let box = bar.querySelector('.auto-filters');
     }))
   }));
 
-  // ====== Mutation group (collapsed) ======
+  // Mutation group
   MUT_KEYS.forEach(k=>{ if (!(k in Auto.filters.muts)) Auto.filters.muts[k] = true; });
   box.appendChild(buildCollapsedFilterGroup({
     titleText:'Mutation',
@@ -1526,6 +1571,7 @@ let box = bar.querySelector('.auto-filters');
     }))
   }));
 }
+
 
 function findEmptyNoPotPlot() {
   if (!state) return null;

@@ -26,14 +26,7 @@
         <svg class="ico coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
         <b id="hudCoins">0</b>
       </span>
-
-      <!-- MiniHUD floating controls (hook cho client.js về sau) -->
-      <div id="miniHud" class="hidden" style="margin-left:8px;display:flex;gap:8px;flex-wrap:wrap;">
-        <button id="miniAutoPot" class="pill small">Auto Pot: OFF</button>
-        <button id="miniAutoPlant" class="pill small">Auto Plant: OFF</button>
-        <span class="pill small" id="miniTraps">Traps: 0</span>
-        <span class="pill small" id="miniMature">Mature: 0</span>
-      </div>
+      <!-- ĐÃ GỠ miniHud ở đây -->
     </div>
   </header>
 
@@ -49,21 +42,13 @@
   <!-- SHOP -->
   <section id="shop" class="tab">
     <h2>Shop</h2>
-
     <div class="subtabs" id="shopTabs">
       <button data-sub="shopSeeds" class="active">Seeds</button>
       <button data-sub="shopPots">Pots</button>
       <button data-sub="shopTrap">Trap</button>
     </div>
-
-    <div id="shopSeeds" class="subtab">
-      <div id="seedShopGrid" class="shop-grid"></div>
-    </div>
-
-    <div id="shopPots" class="subtab hidden">
-      <div id="potShopGrid" class="shop-grid"></div>
-    </div>
-
+    <div id="shopSeeds" class="subtab"><div id="seedShopGrid" class="shop-grid"></div></div>
+    <div id="shopPots" class="subtab hidden"><div id="potShopGrid" class="shop-grid"></div></div>
     <div id="shopTrap" class="subtab hidden">
       <div class="card">
         <h3>Trap</h3>
@@ -76,7 +61,6 @@
   <!-- INVENTORY -->
   <section id="inventory" class="tab hidden">
     <h2>Kho</h2>
-
     <div class="subtabs">
       <button data-sub="inv-seeds" class="active">Seeds (Not Planted)</button>
       <button data-sub="inv-pots">Pots</button>
@@ -85,32 +69,19 @@
 
     <!-- Seeds (Not Planted) + Filters + Plant All -->
     <div id="inv-seeds" class="subtab">
-      <!-- Bộ lọc inventory (hook cho client.js nâng cấp) -->
       <div class="row" id="invSeedFilters" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-        <select id="fltInvState" title="State">
-          <option value="all">All</option>
-          <option value="not">Not Planted</option>
-          <option value="mat">Mature</option>
-        </select>
-        <select id="fltInvClass" title="Class">
-          <option value="all">All classes</option>
-        </select>
-        <select id="fltInvMut" title="Mutation">
-          <option value="all">All mutations</option>
-          <option value="none">None</option>
-          <option value="green">green</option>
-          <option value="blue">blue</option>
-          <option value="yellow">yellow</option>
-          <option value="pink">pink</option>
-          <option value="red">red</option>
-          <option value="gold">gold</option>
-          <option value="rainbow">rainbow</option>
-        </select>
+        <select id="fltInvState" title="State"> … </select>
+        <select id="fltInvClass" title="Class"> … </select>
+        <select id="fltInvMut" title="Mutation"> … </select>
         <button id="btnPlantAll" class="btn">Plant All (filtered)</button>
       </div>
 
-      <ul id="seedInv" class="inv-grid"></ul>
+      <div class="inv-split">
+        <ul id="invMaster" class="inv-master"></ul>
+        <ul id="invDetail" class="inv-detail"></ul>
+      </div>
 
+      <!-- GIỮ bản Sell to Shop ở đây -->
       <h3>Sell to Shop</h3>
       <div class="row">
         <select id="sellSeedSelect"></select>
@@ -118,12 +89,9 @@
       </div>
     </div>
 
-    <div id="inv-pots" class="subtab hidden">
-      <ul id="potInv" class="inv-grid"></ul>
-    </div>
-
+    <!-- ĐÃ GIỮ nguyên split view, và GỠ bản Sell to Shop trùng ở dưới -->
+    <div id="inv-pots" class="subtab hidden"><ul id="potInv" class="inv-grid"></ul></div>
     <div id="inv-mature" class="subtab hidden">
-      <!-- Batch list bar (hook cho client.js nâng cấp) -->
       <div class="row" id="batchListBar" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
         <button id="btnSelectAllMat">Select All</button>
         <input id="batchAskPrice" placeholder="ask price (áp cho tất cả)" />
@@ -140,10 +108,8 @@
       <select id="breedSelectA"></select>
       <select id="breedSelectB"></select>
       <button id="btnBreed">Breed</button>
-      <!-- Random Breed -->
       <button id="btnRandomBreed" class="btn btn-ghost">Random Breed</button>
     </div>
-    <!-- Kết quả có thể chứa badge mutation -->
     <p id="breedOut" class="breed-out"></p>
   </section>
 
@@ -168,43 +134,22 @@
   <!-- FARM -->
   <section id="farm" class="tab hidden">
     <h2>Khu trồng</h2>
-
     <div class="row" id="farmControls" style="gap:8px;flex-wrap:wrap;">
       <button id="btnPrevFloor">↑ Floor</button>
       <button id="btnNextFloor">↓ Floor</button>
       <button id="btnHarvestAll">Harvest All Mature</button>
-
-      <!-- NEW: Remove Mode (click bật, sau đó click vào plot để remove pot) -->
-      <button id="btnRemoveMode" class="btn btn-ghost">Remove Mode: OFF</button>
-
-      <!-- Nút mở Map overview (hook) -->
-      <button id="btnOpenMap" class="btn btn-ghost">Map</button>
-
-      <!-- Các hook cũ (giữ lại, client.js có thể dùng) -->
+      <!-- ĐÃ GỠ nút Remove Mode và Map -->
       <span id="buyFloorPrice" style="margin-left:8px; display:none;"></span>
       <button id="btnBuyFloor" style="display:none;">Buy Floor</button>
     </div>
 
-    <!-- Floors sẽ render bằng JS -->
     <div id="floors"></div>
 
-    <!-- Modal Farm Map Overview (hook cho client.js nâng cấp) -->
-    <div id="farmMapModal" class="hidden">
-      <div class="modal-inner">
-        <h3>Farm Map</h3>
-        <div id="farmMapGrid" class="map-grid"></div>
-        <button id="btnCloseMap">Close</button>
-      </div>
-    </div>
-
-    <!-- ĐÃ BỎ: Form Actions cũ để giảm DOM & giật lag -->
-    <!-- (Các id plantFloor/plantSlot/plantPot/plantSeed/plantMutation/btnPlacePot/btnPlant không còn trong HTML) -->
+    <!-- ĐÃ GỠ modal Farm Map -->
   </section>
 </div>
 
-<!-- Notifications container (cho hệ thống toast dùng chung) -->
 <div id="toastContainer" class="notify-wrap" aria-live="polite" aria-atomic="true"></div>
-
 <script src="/client.js" defer></script>
 </body>
 </html>
