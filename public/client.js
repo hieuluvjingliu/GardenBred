@@ -1,4 +1,4 @@
-const $ = (s, el=document)=>el.querySelector(s); 
+const $ = (s, el=document)=>el.querySelector(s);  
 const $$ = (s, el=document)=>Array.from(el.querySelectorAll(s));
 let state = null;
 let currentFloorIdx = 0;
@@ -154,7 +154,7 @@ class Notifier {
         if (descEl && !descEl.textContent.includes('×')) {
           descEl.insertAdjacentText('beforeend', ` ×${last.count}`);
         } else if (descEl) {
-          descEl.textContent = descEl.textContent.replace(/×\\d+$/, `×${last.count}`);
+          descEl.textContent = descEl.textContent.replace(/×\d+$/, `×${last.count}`);
         }
         last.ts = now;
         return last.el;
@@ -206,6 +206,8 @@ class Notifier {
       this._lastByKey.set(cfg.key, {ts: Date.now(), count: 1, el});
       setTimeout(()=> this._lastByKey.delete(cfg.key), this.coalesceMs + 50);
     }
+    el.append(stats, visual);
+
     return el;
   }
 }
@@ -864,7 +866,8 @@ function buildPlotPlaceholder(p){
   ph.className = 'plot';
   ph.style.minHeight = '260px';
   ph.innerHTML = `<div class="skeleton" style="height:100%;"></div>`;
-    ph.dataset.slot = p.slot;
+  ph.dataset.plotId = p.id;     // ← thêm
+  ph.dataset.slot = p.slot;
   ph.__plotData = p;
   return ph;
 }
@@ -885,6 +888,8 @@ function buildPlotElement(p){
   el.dataset.slot=p.slot;
   if(p.mature_at) el.dataset.matureAt=p.mature_at;
   if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation;
+  // NEW: lock state
+  el.dataset.locked = (p.locked ? '1' : '0');
   const meta = getMutationMeta(p);
   el.title = meta ? `${p.class} [${meta.name} ×${meta.mult}]` : (p.class || 'empty');
 
@@ -896,6 +901,8 @@ function buildPlotElement(p){
     const mutText = `${p.mutation_name || 'mutation'}${Number.isFinite(p?.mutation_mult) ? ` ×${p?.mutation_mult}` : ''}`;
     lines.push(`<div class="stat mut"><div class="label">Mut</div><div class="value">${mutText}</div></div>`);
   }
+  // NEW: lock indicator
+  lines.push(`<div class="stat lock"><div class="label">Lock</div><div class="value">${p.locked ? 'ON' : 'OFF'}</div></div>`);
   stats.innerHTML = lines.join('');
 
   const visual=document.createElement('div'); visual.className='visual';
@@ -922,8 +929,20 @@ function buildPlotElement(p){
     if (mmeta?.key) applyMutationFilterToPlant(plant, mmeta.key);
     addMutationBadge(visual, p);
   }
-  el.append(stats,visual);
+
+  // NEW: lock toggle button
+  const lockBtn = document.createElement('button');
+  lockBtn.type = 'button';
+  lockBtn.className = 'btn-lock';
+  const locked = !!p.locked;
+  lockBtn.textContent = locked ? '🔒' : '🔓';
+  lockBtn.title = locked ? 'Unlock plot' : 'Lock plot';
+  stats.appendChild(lockBtn);
+
   if(p.stage==='mature') el.classList.add('mature');
+  el.classList.toggle('is-locked', !!p.locked);
+  el.append(stats, visual);
+
   return el;
 }
 function virtualizePlotsInto(container, plots){
@@ -942,7 +961,7 @@ function computeFloorsSig(s){
   try{
     const parts = (s?.plots||[]).map(fp=>[
       fp.floor?.id, fp.floor?.idx,
-      ...(fp.plots||[]).map(p=>[p.id,p.stage,p.class,p.mature_at,p.pot_type,p.mutation_name,p.mutation_mult])
+      ...(fp.plots||[]).map(p=>[p.id,p.stage,p.class,p.mature_at,p.pot_type,p.mutation_name,p.mutation_mult,p.locked?1:0])
     ]);
     return JSON.stringify(parts);
   }catch{ return ''; }
@@ -1032,6 +1051,11 @@ function renderState(s, opts = {}){
 
   // Ẩn (gỡ) nút Floor lên/xuống cũ trước Harvest All nếu còn tồn tại
   removeLegacyFloorButtons();
+
+  // Soft hook: nếu tab Gacha đang mở, đồng bộ lại gacha header nhanh
+  if (document.querySelector('.tabs button.active')?.dataset.tab === 'gacha') {
+    gachaSoftRefresh();
+  }
 }
 async function refresh(opts = {}){
   const data = await get('/me/state');
@@ -1052,6 +1076,7 @@ $('#btnLogin').addEventListener('click', async ()=>{
 $$('.tabs button').forEach(b=>b.addEventListener('click', ()=> {
   setActive(b.dataset.tab);
   if (b.dataset.tab==='online') maybeLoadOnline();
+  if (b.dataset.tab==='gacha') gachaMaybeLoad();
 }));
 let _lastOnlineLoad = 0;
 function maybeLoadOnline(){
@@ -1212,7 +1237,7 @@ async function loadOnline(){
     if (!ul) return;
     ul.innerHTML='';
     r.users.forEach(async (u)=>{
-      const li=document.createElement('li');
+      const li = document.createElement('li');
       li.innerHTML = `
         <div class="row"><b>${u.username}</b> (#${u.id})
           <select class="visit-floor" data-uid="${u.id}"></select>
@@ -1324,7 +1349,7 @@ async function harvestAllMature() {
   try {
     const r = await api('/plot/harvest-all', {});
     alert(`Đã thu hoạch ${r.harvested} plot mature`);
-    notifyBus.show({ type:'success', title:'Harvest', desc:`${r.harvested} plots` });
+    notifyBus.show({ type:'success', title:'Harvest', desc:`${r.harvested} plots (bỏ qua ô lock)` });
     await refresh();
   } catch (e) {
     showError(e, 'harvest-all');
@@ -1440,9 +1465,8 @@ function getAvailableClassesFromState(){
   return Array.from(set).sort();
 }
 
-// Tạo 1 nhóm filter thu gọn: chỉ hiện "All" + nút "›" để bung
-function buildCollapsedFilterGroup({ titleText, allChecked, onToggleAll, isOpen, onToggleOpen, chips // [{id,label,checked,disabled,onChange}]
-}){
+// Tạo 1 nhóm filter thu gọn: chỉ hiện "All" + nút "›" để bung + thêm nút Clear
+function buildCollapsedFilterGroup({ titleText, allChecked, onToggleAll, isOpen, onToggleOpen, chips, onClearAll }){
   const group = document.createElement('div'); group.className = 'filter-group';
   const label = document.createElement('span'); label.className = 'label'; label.textContent = titleText;
   group.appendChild(label);
@@ -1459,9 +1483,26 @@ function buildCollapsedFilterGroup({ titleText, allChecked, onToggleAll, isOpen,
       onToggleOpen(true);
       autoSave();
       ensureFarmAutoControls();
+    } else {
+      // Khi bật All, re-render để vô hiệu hoá các chip con
+      ensureFarmAutoControls();
     }
   });
   group.appendChild(allWrap);
+
+  // Nút Clear All (Remove all tick)
+  const clearBtn = document.createElement('button');
+  clearBtn.type = 'button';
+  clearBtn.className = 'btn btn-ghost';
+  clearBtn.textContent = 'Clear';
+  clearBtn.title = `Bỏ chọn tất cả ${titleText.toLowerCase()}`;
+  clearBtn.style.padding = '6px 10px';
+  clearBtn.addEventListener('click', ()=>{
+    onClearAll?.();
+    autoSave();
+    ensureFarmAutoControls();
+  });
+  group.appendChild(clearBtn);
 
   // Nút "›" bung/thu
   const toggleBtn = document.createElement('button');
@@ -1490,6 +1531,20 @@ function buildCollapsedFilterGroup({ titleText, allChecked, onToggleAll, isOpen,
     });
   }
   return group;
+}
+
+// Sync text/trạng thái 2 nút Auto khi thay đổi từ nơi khác
+function syncAutoButtons(){
+  const btnPot = document.querySelector('#farmControls .btnAutoPot');
+  if (btnPot){
+    btnPot.classList.toggle('active', Auto.pot);
+    btnPot.textContent = 'Auto Pot: ' + (Auto.pot ? 'ON' : 'OFF');
+  }
+  const btnPlant = document.querySelector('#farmControls .btnAutoPlant');
+  if (btnPlant){
+    btnPlant.classList.toggle('active', Auto.plant);
+    btnPlant.textContent = 'Auto Plant: ' + (Auto.plant ? 'ON' : 'OFF');
+  }
 }
 
 function ensureFarmAutoControls(){
@@ -1598,6 +1653,10 @@ function ensureFarmAutoControls(){
     onToggleAll: (v)=>{ Auto.filters.useAllClasses = v; },
     isOpen: ()=> Auto.ui.clsOpen,
     onToggleOpen: (v)=>{ Auto.ui.clsOpen = v; },
+    onClearAll: ()=>{
+      Auto.filters.useAllClasses = false;
+      classes.forEach(c=> Auto.filters.classes[c] = false);
+    },
     chips: classes.map(cls=>({
       id:'cls-'+cls, label:cls, checked: !!Auto.filters.classes[cls],
       disabled: Auto.filters.useAllClasses,
@@ -1613,6 +1672,11 @@ function ensureFarmAutoControls(){
     onToggleAll: (v)=>{ Auto.filters.pots.timeskip = Auto.filters.pots.gold = Auto.filters.pots.basic = v; },
     isOpen: ()=> Auto.ui.potOpen,
     onToggleOpen: (v)=>{ Auto.ui.potOpen = v; },
+    onClearAll: ()=>{
+      Auto.filters.pots.timeskip = false;
+      Auto.filters.pots.gold = false;
+      Auto.filters.pots.basic = false;
+    },
     chips: ['timeskip','gold','basic'].map(pt=>({
       id:'pot-'+pt, label:pt, checked: !!Auto.filters.pots[pt],
       disabled:false, onChange: (v)=>{ Auto.filters.pots[pt] = v; }
@@ -1626,7 +1690,11 @@ function ensureFarmAutoControls(){
     allChecked: Auto.filters.useAllMuts,
     onToggleAll: (v)=>{ Auto.filters.useAllMuts = v; },
     isOpen: ()=> Auto.ui.mutOpen,
-    onToggleOpen: (v)=>{ Auto.ui.mutOpen = v; },
+    onToggleOpen: (v)=> { Auto.ui.mutOpen = v; },
+    onClearAll: ()=>{
+      Auto.filters.useAllMuts = false;
+      MUT_KEYS.forEach(k=> Auto.filters.muts[k] = false);
+    },
     chips: MUT_KEYS.map(k=>({
       id:'mut-'+k, label:k, checked: !!Auto.filters.muts[k],
       disabled: Auto.filters.useAllMuts,
@@ -1706,6 +1774,11 @@ async function autoTickOnce(){
         notifInfo('Auto Pot', `#${pot.id} (${pot.type})`, `Floor ${target.floorIdx} · Slot ${target.slot}`);
         await refresh({ soft:true });
         return;
+      } else {
+        // NEW: Auto Pot tự tắt nếu không còn slot trống hoặc hết pot
+        Auto.pot = false;
+        syncAutoButtons();
+        notifyBus.show({ type:'info', title:'Auto Pot', desc:'Đã tự tắt (hết slot trống hoặc không còn pot phù hợp)' });
       }
     }
 
@@ -1861,9 +1934,11 @@ function __gbg_patchPlotsInPlace(newState){
       el.dataset.class = p.class || '';
       if (p.mature_at) el.dataset.matureAt = p.mature_at; else delete el.dataset.matureAt;
       if (p.mutation_name || p.mutation) el.dataset.mutation = p.mutation_name || p.mutation; else delete el.dataset.mutation;
+      el.dataset.locked = (p.locked ? '1' : '0');
+      el.classList.toggle('is-locked', !!p.locked);
       el.classList.toggle('mature', p.stage === 'mature');
 
-      // Update stat text (class, mut)
+      // Update stat text (class, mut, lock)
       const clsVal = el.querySelector('.stat.cls .value');
       if (clsVal) clsVal.textContent = p.class || 'empty';
 
@@ -1871,6 +1946,15 @@ function __gbg_patchPlotsInPlace(newState){
       if (mutBox){
         const mutText = (p.mutation_name || p.mutation) ? `${p.mutation_name || p.mutation}${Number.isFinite(p?.mutation_mult) ? ` ×${p.mutation_mult}`:''}` : '';
         mutBox.textContent = mutText;
+      }
+      const lockBox = el.querySelector('.stat.lock .value');
+      if (lockBox){
+        lockBox.textContent = p.locked ? 'ON' : 'OFF';
+      }
+      const lockBtn = el.querySelector('.btn-lock');
+      if (lockBtn){
+        lockBtn.textContent = p.locked ? '🔒' : '🔓';
+        lockBtn.title = p.locked ? 'Unlock plot' : 'Lock plot';
       }
 
       // Rebuild the visual area to guarantee only one image each
@@ -1900,3 +1984,255 @@ setInterval(()=>{
   if (active === 'online') return;
   refresh({ soft: true }).catch(()=>{});
 }, 10000);
+
+/* ===================== GACHA (NEW TAB) ===================== */
+
+const Gacha = {
+  loaded: false,
+  busy: false,
+  lastState: null
+};
+
+// Label helper with backward-compat (class/count vs cls/cnt)
+function gachaReqSeqLabel(req){
+  if (!req) return '';
+  const cls = req.class ?? req.cls ?? '?';
+  const cnt = req.count ?? req.cnt ?? 0;
+  return `${cnt} × ${cls}`;
+}
+function gachaMatureHaveFor(cls){
+  const by = groupMatureByClass();
+  return by[cls] || 0;
+}
+async function gachaFetchState(){
+  try {
+    const d = await get('/gacha/state');
+    // Server có thể trả {ok:true, gacha:{...}} hoặc trả thẳng {...}
+    return d?.gacha || d || null;
+  } catch (e) {
+    const statusEl = document.getElementById('gachaStatus');
+    if (statusEl) statusEl.textContent = 'Gacha chưa khả dụng (server chưa cập nhật /gacha/state).';
+    console.warn('[gacha] state failed', e);
+    return null;
+  }
+}
+
+function gachaRenderBars(gs){
+  // pity 10
+  const p10 = Math.min(10, Math.max(0, +gs.pity10 || 0));
+  const p10Bar = document.getElementById('gachaPity10Bar');
+  const p10Txt = document.getElementById('gachaPity10Text');
+  if (p10Bar) p10Bar.style.width = `${(p10/10)*100}%`;
+  if (p10Txt) p10Txt.textContent = `${p10}/10`;
+
+  // pity 90
+  const p90 = Math.min(90, Math.max(0, +gs.pity90 || 0));
+  const p90Bar = document.getElementById('gachaPity90Bar');
+  const p90Txt = document.getElementById('gachaPity90Text');
+  if (p90Bar) p90Bar.style.width = `${(p90/90)*100}%`;
+  if (p90Txt) p90Txt.textContent = `${p90}/90`;
+}
+
+function gachaRenderQueue(gs){
+  const nowEl = document.getElementById('gachaNowReq');
+  const listEl = document.getElementById('gachaQueue');
+  if (nowEl){
+    const nowReq = gs?.requirement || gs?.current || null;
+    if (nowReq){
+      const nowCls = nowReq.class ?? nowReq.cls ?? '?';
+      const nowCnt = nowReq.count ?? nowReq.cnt ?? 0;
+      const have = gachaMatureHaveFor(nowCls);
+      nowEl.textContent = `Hiện tại cần: ${nowCnt} ${nowCls} (có sẵn: ${have})`;
+    } else {
+      nowEl.textContent = 'Chưa có yêu cầu hiện tại.';
+    }
+  }
+  if (listEl){
+    listEl.innerHTML='';
+    const q = gs?.queue || gs?.next || [];
+    q.slice(0, 10).forEach((req, i)=>{
+      const li = document.createElement('li');
+      li.textContent = `${i+1}) ${gachaReqSeqLabel(req)}`;
+      listEl.appendChild(li);
+    });
+  }
+  const cnts = document.getElementById('gachaHaveCounts');
+  if (cnts){
+    const by = groupMatureByClass();
+    const keys = Object.keys(by).sort();
+    cnts.textContent = keys.length ? keys.map(k=>`${k}:${by[k]}`).join(' · ') : '(chưa có hạt mature)';
+  }
+}
+
+function gachaRenderHeader(gs){
+  const totalEl = document.getElementById('gachaTotalPulls');
+  const stepEl  = document.getElementById('gachaStep');
+  const baseEl  = document.getElementById('gachaBaseHint');
+  if (totalEl) totalEl.textContent = String(gs?.totalPulls ?? gs?.total ?? 0);
+  if (stepEl)  stepEl.textContent  = String(gs?.step ?? 0);
+  if (baseEl)  baseEl.textContent  = `Base Rainbow = pull_index × 100000`;
+}
+
+function gachaSoftRefresh(){
+  // chỉ update phần "have" và enable nút theo state Gacha hiện có
+  if (!Gacha.lastState) return;
+  gachaRenderQueue(Gacha.lastState);
+  gachaUpdateButtons(Gacha.lastState);
+}
+
+function gachaCanRoll(gs){
+  const req = gs?.requirement || gs?.current;
+  if (!req) return false;
+  const cls = req.class ?? req.cls ?? '?';
+  const cnt = req.count ?? req.cnt ?? 0;
+  const have = gachaMatureHaveFor(cls);
+  return have >= cnt;
+}
+function gachaUpdateButtons(gs){
+  const b1 = document.getElementById('btnGachaRoll');
+  const b10= document.getElementById('btnGachaRoll10');
+  const can = gachaCanRoll(gs);
+  if (b1) b1.disabled = !can || Gacha.busy;
+  if (b10){
+    // chỉ enable Roll10 nếu có thể đáp ứng được dãy 10 theo preview hiện tại
+    const first = gs?.requirement || gs?.current;
+    const rest = gs?.queue || gs?.next || [];
+    const q = [first, ...rest].filter(Boolean).slice(0, 10);
+    const have = groupMatureByClass();
+    let ok10 = true;
+    const need = {};
+    q.forEach(req=>{
+      const cls = req.class ?? req.cls ?? '?';
+      const cnt = req.count ?? req.cnt ?? 0;
+      need[cls] = (need[cls]||0) + cnt;
+    });
+    for (const k in need){
+      if ((have[k]||0) < need[k]) { ok10 = false; break; }
+    }
+    b10.disabled = !ok10 || Gacha.busy;
+  }
+}
+
+function notifGachaResult(r){
+  // Hỗ trợ cả 2 format: 
+  // 1) flat: { out_class, out_mutation, out_base, pull_index, consumed:{class,count} }
+  // 2) nested: { reward:{class, mutation, base}, totals:{pulls}, consumed:{cls,cnt} }
+  const reward = r?.reward || r;
+  const cls = reward?.class || reward?.out_class || reward?.outClass || '?';
+  const mut = reward?.mutation || reward?.out_mutation || reward?.outMutation || null;
+  const base = (reward?.base ?? reward?.out_base ?? r?.out_base) ?? null;
+  const pull = (r?.pull_index ?? r?.pullIndex ?? r?.totals?.pulls) ?? null;
+
+  let consumed = r?.consumed || {};
+  const consCls = consumed.class ?? consumed.cls;
+  const consCnt = consumed.count ?? consumed.cnt;
+
+  const mutTxt = formatMutationShort(mut);
+
+  let type = 'success';
+  if (mut === 'rainbow') type = 'gold';
+  else if (mut === 'red' || mut === 'gold') type = 'warn';
+
+  const metaParts = [];
+  if (consCls) metaParts.push(`Tiêu hao: ${consCnt} × ${consCls}`);
+  if (pull != null) metaParts.push(`Pull #${pull}`);
+
+  notifyBus.show({
+    type,
+    title: 'Gacha',
+    desc: `→ ${cls}${mutTxt? ` · Mut: ${mutTxt}`:''}${base!=null? ` · base ${base}`:''}`,
+    meta: metaParts.join(' · '),
+    key: `gacha:${cls}:${mut||'normal'}`
+  });
+}
+
+async function gachaRefresh(){
+  const gs = await gachaFetchState();
+  if (!gs) return;
+  Gacha.lastState = gs;
+  gachaRenderHeader(gs);
+  gachaRenderBars(gs);
+  gachaRenderQueue(gs);
+  gachaUpdateButtons(gs);
+}
+
+function gachaMaybeLoad(){
+  if (Gacha.loaded) {
+    gachaSoftRefresh();
+    return;
+  }
+  Gacha.loaded = true;
+  // bind buttons once
+  const b1  = document.getElementById('btnGachaRoll');
+  const b10 = document.getElementById('btnGachaRoll10');
+  if (b1 && !b1.__bound){
+    b1.__bound = true;
+    b1.addEventListener('click', withCooldown(b1, async ()=>{
+      if (Gacha.busy) return;
+      Gacha.busy = true;
+      try{
+        const r = await api('/gacha/roll', {});
+        notifGachaResult(r);
+        await refresh({ soft:true });
+        await gachaRefresh();
+      }catch(e){ showError(e,'gacha-roll'); }
+      finally { Gacha.busy = false; }
+    }));
+  }
+  if (b10 && !b10.__bound){
+    b10.__bound = true;
+    b10.addEventListener('click', withCooldown(b10, async ()=>{
+      if (Gacha.busy) return;
+      Gacha.busy = true;
+      try{
+        let okCount = 0;
+        for (let i=0;i<10;i++){
+          try{
+            const r = await api('/gacha/roll', {});
+            okCount++;
+            notifGachaResult(r);
+            // Nếu ra rainbow, server sẽ reset step/queue => vẫn tiếp tục hoặc có thể dừng tuỳ thích
+            if ((r?.out_mutation||r?.outMutation||r?.reward?.mutation) === 'rainbow') {
+              // dừng sớm để người chơi xem thưởng
+              break;
+            }
+          }catch(err){
+            // thiếu nguyên liệu giữa chừng -> dừng
+            break;
+          }
+        }
+        await refresh({ soft:true });
+        await gachaRefresh();
+        if (okCount===0) notifyBus.show({ type:'error', title:'Gacha', desc:'Thiếu nguyên liệu để Roll.' });
+      }catch(e){ showError(e,'gacha-roll10'); }
+      finally { Gacha.busy = false; }
+    }));
+  }
+  // initial load
+  gachaRefresh();
+}
+
+/* =============== END GACHA =============== */
+
+/* =================== EXTRA: LOCK TOGGLE DELEGATION =================== */
+(function bindLockToggle(){
+  const floorsRoot = document.getElementById('floors');
+  if (!floorsRoot) return;
+  if (floorsRoot.__lockBound) return;
+  floorsRoot.__lockBound = true;
+  floorsRoot.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.btn-lock');
+    if (!btn) return;
+    const plotEl = btn.closest('.plot');
+    if (!plotEl) return;
+    const plotId = parseInt(plotEl.dataset.plotId, 10);
+    const locked = plotEl.dataset.locked === '1';
+    try{
+      await api('/plot/lock', { plotId, locked: locked ? 0 : 1 });
+      notifyBus.show({ type: locked ? 'info' : 'warn', title:'Plot Lock', desc: locked ? 'Unlocked' : 'Locked' });
+      await refresh({ soft:true });
+    }catch(err){
+      showError(err, 'plot-lock');
+    }
+  });
+})();

@@ -26,7 +26,6 @@
         <svg class="ico coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>
         <b id="hudCoins">0</b>
       </span>
-      <!-- ĐÃ GỠ miniHud ở đây -->
     </div>
   </header>
 
@@ -37,6 +36,7 @@
     <button data-tab="online">🌐 Online</button>
     <button data-tab="market">🪙 Chợ trời</button>
     <button data-tab="farm">🌱 Khu trồng</button>
+    <button data-tab="gacha">🎰 Gacha</button>
   </nav>
 
   <!-- SHOP -->
@@ -67,7 +67,6 @@
       <button data-sub="inv-mature">Mature</button>
     </div>
 
-    <!-- Seeds (Not Planted) + Filters + Plant All -->
     <div id="inv-seeds" class="subtab">
       <div class="row" id="invSeedFilters" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
         <select id="fltInvState" title="State"> … </select>
@@ -81,7 +80,6 @@
         <ul id="invDetail" class="inv-detail"></ul>
       </div>
 
-      <!-- GIỮ bản Sell to Shop ở đây -->
       <h3>Sell to Shop</h3>
       <div class="row">
         <select id="sellSeedSelect"></select>
@@ -89,7 +87,6 @@
       </div>
     </div>
 
-    <!-- ĐÃ GIỮ nguyên split view, và GỠ bản Sell to Shop trùng ở dưới -->
     <div id="inv-pots" class="subtab hidden"><ul id="potInv" class="inv-grid"></ul></div>
     <div id="inv-mature" class="subtab hidden">
       <div class="row" id="batchListBar" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;">
@@ -111,9 +108,7 @@
       <button id="btnRandomBreed" class="btn btn-ghost">Random Breed</button>
     </div>
 
-    <!-- Khu hiển thị kết quả dạng card (ảnh planted + badge mutation) -->
     <div id="breedFeed" class="breed-feed"></div>
-    <!-- Giữ lại breedOut để tương thích, client.js sẽ thay thế nội dung khi cần -->
     <p id="breedOut" class="breed-out"></p>
   </section>
 
@@ -142,14 +137,78 @@
       <button id="btnPrevFloor">↑ Floor</button>
       <button id="btnNextFloor">↓ Floor</button>
       <button id="btnHarvestAll">Harvest All Mature</button>
-      <!-- ĐÃ GỠ nút Remove Mode và Map -->
       <span id="buyFloorPrice" style="margin-left:8px; display:none;"></span>
       <button id="btnBuyFloor" style="display:none;">Buy Floor</button>
     </div>
 
-    <div id="floors"></div>
+    <!-- New filter groups -->
+    <div class="filter-group">
+      <div class="row">
+        <h3>Class</h3>
+        <button class="btn tiny danger" id="clearClassTicks">Remove all tick</button>
+      </div>
+      <div id="classFilter"></div>
+    </div>
 
-    <!-- ĐÃ GỠ modal Farm Map -->
+    <div class="filter-group">
+      <div class="row">
+        <h3>Pot</h3>
+        <button class="btn tiny danger" id="clearPotTicks">Remove all tick</button>
+      </div>
+      <div id="potFilter"></div>
+    </div>
+
+    <div class="filter-group">
+      <div class="row">
+        <h3>Mutation</h3>
+        <button class="btn tiny danger" id="clearMutTicks">Remove all tick</button>
+      </div>
+      <div id="mutFilter"></div>
+    </div>
+
+    <div id="floors"></div>
+  </section>
+
+  <!-- GACHA -->
+  <section id="gacha" class="tab hidden">
+    <h2>Gacha</h2>
+    <div id="gachaStatus" class="card">
+      <div class="row" style="gap:12px; flex-wrap:wrap;">
+        <div>Pulls: <b id="gachaTotalPulls">0</b></div>
+        <div>Step: <b id="gachaStep">0</b></div>
+        <div class="muted" id="gachaBaseHint">Base: 0</div>
+      </div>
+      <div class="row" style="gap:16px; flex-wrap:wrap; align-items:center; margin-top:8px;">
+        <div class="pity">
+          <div class="label">Pity 10 (Red/Gold guaranteed)</div>
+          <div class="progress" aria-label="Pity 10">
+            <div id="gachaPity10Bar" class="bar" style="width:0%"></div>
+          </div>
+          <small id="gachaPity10Text">0 / 10</small>
+        </div>
+        <div class="pity">
+          <div class="label">Pity 90 (Rainbow guaranteed)</div>
+          <div class="progress" aria-label="Pity 90">
+            <div id="gachaPity90Bar" class="bar" style="width:0%"></div>
+          </div>
+          <small id="gachaPity90Text">0 / 90</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Nguyên liệu cần</h3>
+      <p>Hiện cần: <b id="gachaNowReq">-</b></p>
+      <p>Các nguyên liệu tiếp theo: <span id="gachaQueue" class="muted">-</span></p>
+      <div class="muted" style="margin-top:6px;">Kho hiện có: <span id="gachaHaveCounts">-</span></div>
+    </div>
+
+    <div class="row" style="gap:8px; margin: 12px 0;">
+      <button id="btnGachaRoll" class="btn">Roll 1</button>
+      <button id="btnGachaRoll10" class="btn">Roll 10</button>
+    </div>
+
+    <div id="gachaResult" class="breed-feed"></div>
   </section>
 </div>
 

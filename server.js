@@ -1,4 +1,6 @@
-// server.js (ESM) — GardenBred: Express + WS + SQLite + safe backup/restore
+/**
+ * server.js (ESM) — GardenBred: Express + WS + SQLite + safe backup/restore + Gacha
+ */
 import express from 'express';
 import http from 'http';
 import { WebSocketServer } from 'ws';
@@ -33,6 +35,32 @@ function mutationMultiplier(key) {
   return (MUTATION_TIERS.find(t => t.key === key)?.mult) ?? 1.0;
 }
 
+/* ====== GACHA FIXED RATES (NEW) ====== */
+const GACHA_RATES = Object.freeze({
+  coins: 0.30,
+  seed_planted: 0.30,
+  seed_mature: 0.30,
+  redgold: 0.09,
+  rainbow: 0.01
+});
+function pickGachaOutcome() {
+  const order = [
+    ['coins',        GACHA_RATES.coins],
+    ['seed_planted', GACHA_RATES.seed_planted],
+    ['seed_mature',  GACHA_RATES.seed_mature],
+    ['redgold',      GACHA_RATES.redgold],
+    ['rainbow',      GACHA_RATES.rainbow],
+  ];
+  let r = Math.random();
+  for (const [k, p] of order) {
+    if ((r -= p) <= 0) return k;
+  }
+  return 'seed_planted';
+}
+function randIntInclusive(min, max){
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // ==== Paths / constants ====
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR   = __dirname;
@@ -41,6 +69,47 @@ const TOOLS_DIR  = path.join(ROOT_DIR, 'tools');
 
 // DB file ở root (có thể override qua ENV)
 const DB_PATH = process.env.DB_PATH || path.join(ROOT_DIR, 'game.db');
+
+
+
+// ==== Auto-migration helpers (idempotent) ====
+let db; // (đặt sớm để helpers dùng được)
+
+function hasColumn(table, name) {
+  try {
+    const rows = db.prepare(`PRAGMA table_info(${table})`).all();
+    return rows.some(c => c.name === name);
+  } catch {
+    return false;
+  }
+}
+function ensureColumn(table, name, defSql) {
+  if (!hasColumn(table, name)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${name} ${defSql}`);
+    console.log(`[MIGRATE] Added column ${table}.${name}`);
+  }
+}
+function ensureGachaColumns() {
+  // các cột đã dùng trong code + biến thể "_after" để tương thích
+  ensureColumn('users', 'gacha_total_pulls', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'gacha_step',        'INTEGER NOT NULL DEFAULT 0');
+
+  // Tên ngắn đang được code tham chiếu
+  ensureColumn('users', 'gacha_pity10',      'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'gacha_pity90',      'INTEGER NOT NULL DEFAULT 0');
+
+  // Queue JSON cho preview/step (bổ sung để SELECT/UPDATE không lỗi)
+  ensureColumn('users', 'gacha_queue_json',  'TEXT NOT NULL DEFAULT "[]"');
+
+  // Nếu bạn vẫn giữ schema.sql cũ có *_after*, vẫn thêm cho đủ để không lỗi nơi khác
+  ensureColumn('users', 'pity10_after',      'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'pity90_after',      'INTEGER NOT NULL DEFAULT 0');
+}
+// NEW: đảm bảo cột lock cho plots
+function ensurePlotColumns() {
+  ensureColumn('plots', 'locked', 'INTEGER NOT NULL DEFAULT 0');
+}
+
 
 // SCHEMA & CLASS_WEIGHTS trong tools/
 const SCHEMA_PATH = process.env.SCHEMA_PATH || path.join(TOOLS_DIR, 'schema.sql');
@@ -129,15 +198,24 @@ app.get('/admin/download-db', (req, res) => {
 });
 
 // ==== DB open + migrations (safe) ====
-let db;
 let restoring = false;
 function safeDbReady() { return db && db.open === true && !restoring; }
 
 function openDb() { db = new Database(DB_PATH); }
 function runMigrations() {
   const sql = fs.readFileSync(SCHEMA_PATH, 'utf8');
-  db.exec(sql);
+  db.exec(sql); // tạo bảng nếu chưa có (gacha_logs, v.v.)
+
+  // Đảm bảo các cột Gacha trên bảng users (idempotent, không crash nếu đã tồn tại)
+  ensureColumn('users', 'gacha_total_pulls', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'pity10_after',      'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'pity90_after',      'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn('users', 'gacha_step',        'INTEGER NOT NULL DEFAULT 0');
+
+  // NEW: đảm bảo cột lock cho plots
+  ensurePlotColumns();
 }
+
 function integrityOk(dbFilePath) {
   const t = new Database(dbFilePath);
   try {
@@ -149,7 +227,7 @@ function integrityOk(dbFilePath) {
 // ==== Prepared statements ====
 let upsertUserStmt, getUserStmt, getUserByIdStmt, insertSessionStmt, getSessionStmt;
 let getStateStmt, getFloorsStmt, getFloorsCountStmt, ensureFloorStmt;
-let getPlotsByFloorStmt, ensurePlotStmt;
+let getPlotsByFloorStmt, ensurePlotStmt, getPlotByIdStmt, setPlotLockStmt;
 let seedBasePriceStmt, upsertSeedCatalogStmt;
 let addCoinsStmt, subCoinsStmt;
 let invAddSeedStmt, invListSeedsStmt, invGetSeedStmt, invDelSeedStmt;
@@ -158,6 +236,11 @@ let setPlotPotStmt, setPlotAfterPlantStmt, setPlotStageStmt, clearPlotSeedOnlySt
 let listUsersOnlineStmt, addTrapToFloorStmt, useTrapOnFloorStmt, listFloorsByUserStmt, getFloorByIdStmt;
 let marketCreateStmt, marketOpenStmt, marketGetStmt, marketCloseStmt;
 let logStmt;
+
+// ==== Gacha statements ====
+let getGachaUserStmt, updateGachaStmt, updateGachaQueueStmt;
+let invCountMatureByClassStmt, invPickMatureByClassStmt;
+let gachaLogStmt;
 
 function prepareAll() {
   // users/sessions
@@ -177,6 +260,8 @@ function prepareAll() {
   ensureFloorStmt = db.prepare(`INSERT OR IGNORE INTO floors (user_id, idx, unlocked, trap_count) VALUES (?, ?, 1, 0)`);
   getPlotsByFloorStmt = db.prepare(`SELECT * FROM plots WHERE floor_id = ? ORDER BY slot ASC`);
   ensurePlotStmt = db.prepare(`INSERT OR IGNORE INTO plots (floor_id, slot, stage) VALUES (?, ?, 'empty')`);
+  getPlotByIdStmt = db.prepare(`SELECT * FROM plots WHERE id = ?`);
+  setPlotLockStmt = db.prepare(`UPDATE plots SET locked = ? WHERE id = ?`);
 
   // seed catalog
   seedBasePriceStmt = db.prepare(`SELECT class as class_name, base_price FROM seed_catalog WHERE class = ?`);
@@ -234,12 +319,49 @@ function prepareAll() {
 
   // logs
   logStmt = db.prepare(`INSERT INTO logs (user_id, action, payload, at) VALUES (?, ?, ?, ?)`);
+
+  // ===== GACHA =====
+  getGachaUserStmt = db.prepare(`
+    SELECT id, username,
+           COALESCE(gacha_total_pulls,0) AS total_pulls,
+           COALESCE(gacha_pity10,0)      AS pity10,
+           COALESCE(gacha_pity90,0)      AS pity90,
+           COALESCE(gacha_step,0)        AS step,
+           COALESCE(gacha_queue_json,'[]') AS queue_json
+    FROM users WHERE id = ?
+  `);
+  updateGachaStmt = db.prepare(`
+    UPDATE users
+    SET gacha_total_pulls = ?,
+        gacha_pity10      = ?,
+        gacha_pity90      = ?,
+        gacha_step        = ?,
+        gacha_queue_json  = ?
+    WHERE id = ?
+  `);
+  updateGachaQueueStmt = db.prepare(`UPDATE users SET gacha_queue_json = ? WHERE id = ?`);
+  invCountMatureByClassStmt = db.prepare(`
+    SELECT COUNT(*) AS cnt
+    FROM inventory_seeds
+    WHERE user_id = ? AND is_mature = 1 AND class = ?
+  `);
+  invPickMatureByClassStmt = db.prepare(`
+    SELECT id FROM inventory_seeds
+    WHERE user_id = ? AND is_mature = 1 AND class = ?
+    LIMIT ?
+  `);
+  gachaLogStmt = db.prepare(`
+    INSERT INTO gacha_logs (user_id, consumed_cls, consumed_cnt, out_class, out_mutation, out_base, pull_index, pity10_after, pity90_after, step_after, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+  `);
 }
 
 try {
   openDb();
   if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
-  runMigrations();
+  runMigrations();       
+  ensureGachaColumns();   // ✅ thêm dòng gọi ensureGachaColumns trong luồng khởi động chính
+  ensurePlotColumns();    // ✅ đảm bảo cột locked cho plots
   prepareAll();
   console.log('[DB] ready');
   console.log('[PATHS]', { ROOT_DIR, PUBLIC_DIR, TOOLS_DIR, DB_PATH, SCHEMA_PATH, CLASS_WEIGHTS_PATH });
@@ -305,6 +427,9 @@ app.post('/auth/login', (req, res) => {
   insertSessionStmt.run(sid, user.id, now());
   res.cookie('sid', sid, { httpOnly: true });
 
+  // Init gacha queue nếu chưa có
+  try { ensureGachaQueue(user.id, 24); } catch {}
+
   logAction(user.id, 'auth_login', { username });
   res.json({ userId: user.id, username: user.username, coins: user.coins });
 });
@@ -316,6 +441,81 @@ function auth(req, res, next) {
   if (!s) return res.status(401).json({ error: 'Invalid session' });
   req.userId = s.user_id;
   next();
+}
+
+// ====== Gacha helpers ======
+function parseJSONSafe(s, fallback){
+  try{ return JSON.parse(s); }catch{ return fallback; }
+}
+// cost cho step hiện tại: 1,3,5,7,...
+function gachaCostForStep(step){ return (2 * step) + 1; }
+// luôn đảm bảo queue đủ dài (cần N phần tử từ chỉ số step hiện tại)
+function ensureGachaQueue(userId, needLen=24){
+  const row = getGachaUserStmt.get(userId);
+  let q = parseJSONSafe(row.queue_json, []);
+  const targetLen = Math.max(needLen, (row.step||0) + 16);
+  while (q.length < targetLen){
+    q.push(pickWeightedClass(CLASS_WEIGHTS));
+  }
+  if (q.length !== parseJSONSafe(row.queue_json, []).length){
+    updateGachaQueueStmt.run(JSON.stringify(q), userId);
+  }
+  return q;
+}
+function getGachaState(userId, preview=11){
+  const info = getGachaUserStmt.get(userId);
+  const q = ensureGachaQueue(userId, (info.step||0) + preview + 4);
+  const step = info.step || 0;
+
+  const currentCls = q[step] || pickWeightedClass(CLASS_WEIGHTS);
+  const currentCnt = gachaCostForStep(step);
+
+  // trả cả 2 dạng key: class/count và cls/cnt để client cũ/mới đều đọc được
+  const current = {
+    class: currentCls, count: currentCnt,
+    cls:   currentCls, cnt:   currentCnt
+  };
+
+  const list = [];
+  for (let i=1; i<=preview; i++){
+    const idx = step + i;
+    const cls = q[idx] || pickWeightedClass(CLASS_WEIGHTS);
+    const cnt = gachaCostForStep(idx);
+    list.push({
+      class: cls, count: cnt,
+      cls,   cnt
+    });
+  }
+
+  const counts = {};
+  try {
+    const rows = db.prepare(`
+      SELECT class, COUNT(*) AS c FROM inventory_seeds
+      WHERE user_id = ? AND is_mature = 1
+      GROUP BY class
+    `).all(userId);
+    for (const r of rows) counts[r.class] = r.c;
+  } catch {}
+
+  return {
+    totalPulls: info.total_pulls || 0,
+    pity10: info.pity10 || 0,
+    pity90: info.pity90 || 0,
+    step,
+    current,
+    next: list,
+    invCounts: counts
+  };
+}
+
+// chọn mutation theo pity rule (10 -> red/gold, 90 -> rainbow)
+function pickGachaMutation(p10, p90){
+  if ((p90+1) >= 90) return { key:'rainbow', mult: mutationMultiplier('rainbow') };
+  if ((p10+1) >= 10) {
+    const key = Math.random()<0.5 ? 'red' : 'gold';
+    return { key, mult: mutationMultiplier(key) };
+  }
+  return rollMutationTier(); // có thể trả về {key:null} -> normal
 }
 
 // ==== State ====
@@ -331,11 +531,13 @@ app.get('/me/state', auth, (req, res) => {
   const potInv = invListPotsStmt.all(req.userId);
   const seedInv = invListSeedsStmt.all(req.userId);
   const market = marketOpenStmt.all();
+  const gacha = getGachaState(req.userId, 11);
   logAction(req.userId, 'state_fetch', {});
   res.json({
     me, floors, plots, potInv, seedInv, market,
     trapPrice: trapPriceForUser(req.userId),
-    trapMax: trapMaxForUser(req.userId)
+    trapMax: trapMaxForUser(req.userId),
+    gacha
   });
 });
 
@@ -457,7 +659,6 @@ app.post('/plot/plant', auth, (req, res) => {
   const growTime = Math.floor(base * speed);
   const mAt = now() + growTime;
 
-  // nếu client gửi mutation thì override, còn không thì lấy mutation của seed
   const mutFinal = req.body.mutation || seed.mutation || null;
 
   setPlotAfterPlantStmt.run(seedId, seed.class, mutFinal, now(), mAt, plot.id);
@@ -472,13 +673,12 @@ app.post('/plot/plant', auth, (req, res) => {
 
 app.post('/plot/remove', auth, (req, res) => {
   try {
-    const userId = req.userId;   // ✅ sửa lại đúng biến
+    const userId = req.userId;
     const { floorId, slot } = req.body || {};
     if (!floorId || !slot) {
       return res.status(400).json({ error: 'floorId và slot là bắt buộc' });
     }
 
-    // Xác thực plot thuộc về user
     const plot = db.prepare(`
       SELECT p.id
       FROM plots p
@@ -490,7 +690,6 @@ app.post('/plot/remove', auth, (req, res) => {
       return res.status(404).json({ error: 'Plot không tồn tại hoặc không thuộc user' });
     }
 
-    // Dọn sạch plot
     db.prepare(`
       UPDATE plots
       SET pot_id = NULL,
@@ -500,7 +699,8 @@ app.post('/plot/remove', auth, (req, res) => {
           mutation = NULL,
           planted_at = NULL,
           mature_at = NULL,
-          stage = 'empty'
+          stage = 'empty',
+          locked = 0
       WHERE id = ?
     `).run(plot.id);
 
@@ -511,6 +711,25 @@ app.post('/plot/remove', auth, (req, res) => {
   }
 });
 
+// NEW: toggle lock plot
+app.post('/plot/lock', auth, (req, res) => {
+  try {
+    const { plotId, locked } = req.body || {};
+    if (!Number.isInteger(plotId) || (locked !== 0 && locked !== 1)) {
+      return res.status(400).json({ error: 'Invalid params' });
+    }
+    const p = getPlotByIdStmt.get(plotId);
+    if (!p) return res.status(404).json({ error: 'plot not found' });
+    const floor = getFloorByIdStmt.get(p.floor_id);
+    if (!floor || floor.user_id !== req.userId) return res.status(403).json({ error: 'not your plot' });
+    setPlotLockStmt.run(locked, plotId);
+    logAction(req.userId, 'plot_lock', { plotId, locked });
+    return res.json({ ok: true, plotId, locked });
+  } catch (e) {
+    console.error('[plot/lock] fail', e);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
 
 
 // tick: planted -> growing -> mature
@@ -536,6 +755,7 @@ app.post('/plot/harvest', auth, (req, res) => {
   const p = db.prepare(`SELECT * FROM plots WHERE id = ?`).get(plotId);
   if (!p) return res.status(404).json({ error: 'plot not found' });
   if (p.stage !== 'mature') return res.status(400).json({ error: 'not mature yet' });
+  if (p.locked) return res.status(409).json({ error: 'Plot is locked' });
   const base = floorPriceBase(p.class);
   invAddSeedStmt.run(req.userId, p.class, base, 1, p.mutation || null);
   clearPlotSeedOnlyStmt.run(plotId);
@@ -549,7 +769,7 @@ app.post('/plot/harvest-all', auth, (req, res) => {
   for (const f of floors) {
     const plots = getPlotsByFloorStmt.all(f.id);
     for (const p of plots) {
-      if (p.stage === 'mature') {
+      if (p.stage === 'mature' && !p.locked) {
         const base = floorPriceBase(p.class);
         invAddSeedStmt.run(req.userId, p.class, base, 1, p.mutation || null);
         clearPlotSeedOnlyStmt.run(p.id);
@@ -675,6 +895,155 @@ app.post('/floors/buy', auth, (req, res) => {
 });
 app.get('/floors/buy', (_req, res) => res.status(405).json({ error: 'USE_POST' }));
 
+/* ===================== GACHA API ===================== */
+app.get('/gacha/state', auth, (req, res) => {
+  try {
+    const gacha = getGachaState(req.userId, 11);
+    return res.json({ ok: true, gacha });
+  } catch (e) {
+    console.error('[gacha/state]', e);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
+// ====== NEW /gacha/roll WITH FIXED RATES ======
+app.post('/gacha/roll', auth, (req, res) => {
+  try {
+    const u = getGachaUserStmt.get(req.userId);
+    const queue = ensureGachaQueue(req.userId, (u.step||0) + 16);
+    const step = u.step || 0;
+    const needCnt = gachaCostForStep(step);
+    const needCls = queue[step] || pickWeightedClass(CLASS_WEIGHTS);
+
+    // check đủ nguyên liệu (mature seeds)
+    const have = invCountMatureByClassStmt.get(req.userId, needCls)?.cnt || 0;
+    if (have < needCnt) {
+      return res.status(400).json({ error: 'NOT_ENOUGH_MATERIALS', need: { cls: needCls, cnt: needCnt }, have });
+    }
+
+    // Pick ids để đốt
+    const ids = invPickMatureByClassStmt.all(req.userId, needCls, needCnt).map(r=>r.id);
+    if (ids.length < needCnt) {
+      return res.status(400).json({ error: 'INV_CHANGED_RETRY' });
+    }
+
+    // Gacha result (fixed rates)
+    const nextPullIndex = (u.total_pulls || 0) + 1;
+    const outcome = pickGachaOutcome();
+
+    let rewardType;           // 'coins' | 'seed_planted' | 'seed_mature'
+    let outClass = null;
+    let outMutation = null;   // null | 'red' | 'gold' | 'rainbow'
+    let outBase = null;       // base or coin amount for logs
+    let coinAmount = null;
+
+    if (outcome === 'rainbow') {
+      // 1%: seed mature + rainbow, base = pulls × 100000
+      rewardType = 'seed_mature';
+      outClass = pickWeightedClass(CLASS_WEIGHTS);
+      outMutation = 'rainbow';
+      outBase = nextPullIndex * 100000;
+    } else if (outcome === 'redgold') {
+      // 9%: seed mature + red/gold, base = pulls × 10000
+      rewardType = 'seed_mature';
+      outClass = pickWeightedClass(CLASS_WEIGHTS);
+      outMutation = (Math.random() < 0.5) ? 'red' : 'gold';
+      outBase = nextPullIndex * 10000;
+    } else if (outcome === 'coins') {
+      // 30%: coins 1..1,000,000
+      rewardType = 'coins';
+      coinAmount = randIntInclusive(1, 1_000_000);
+      outClass = 'coins';
+      outBase = coinAmount;
+      outMutation = null;
+    } else if (outcome === 'seed_mature') {
+      // 30%: seed mature, base = pulls × 10000 (no forced mutation)
+      rewardType = 'seed_mature';
+      outClass = pickWeightedClass(CLASS_WEIGHTS);
+      outMutation = null;
+      outBase = nextPullIndex * 10000;
+    } else {
+      // 30%: seed_planted, base = base chuẩn theo class
+      rewardType = 'seed_planted';
+      outClass = pickWeightedClass(CLASS_WEIGHTS);
+      outMutation = null;
+      outBase = floorPriceBase(outClass);
+    }
+
+    // Counters after (pity tăng bình thường, reset khi dính red/gold/rainbow)
+    let pity10 = (u.pity10 || 0) + 1;
+    let pity90 = (u.pity90 || 0) + 1;
+    if (outMutation === 'red' || outMutation === 'gold' || outMutation === 'rainbow') pity10 = 0;
+    if (outMutation === 'rainbow') pity90 = 0;
+
+    let newStep = step + 1;
+    let newQueue = queue.slice();
+    // (giữ behavior) Nếu ra rainbow: reset step về 0 và random lại queue
+    if (outMutation === 'rainbow') {
+      newStep = 0;
+      newQueue = [];
+      const N = 32;
+      for (let i=0;i<N;i++) newQueue.push(pickWeightedClass(CLASS_WEIGHTS));
+    }
+
+    const tx = db.transaction(() => {
+      // consume
+      for (const id of ids) invDelSeedStmt.run(id, req.userId);
+
+      // reward
+      if (rewardType === 'coins') {
+        addCoinsStmt.run(coinAmount, req.userId);
+      } else {
+        upsertSeedCatalogStmt.run(outClass, outBase);
+        const isMature = (rewardType === 'seed_mature') ? 1 : 0;
+        invAddSeedStmt.run(req.userId, outClass, outBase, isMature, outMutation || null);
+      }
+
+      // update user gacha fields
+      updateGachaStmt.run(
+        nextPullIndex, pity10, pity90, newStep, JSON.stringify(newQueue), req.userId
+      );
+
+      // log
+      gachaLogStmt.run(
+        req.userId,
+        needCls, needCnt,
+        outClass, (outMutation || null), outBase, nextPullIndex,
+        pity10, pity90, newStep
+      );
+    });
+    tx();
+
+    logAction(req.userId, 'gacha_roll', {
+      consumed: { cls: needCls, cnt: needCnt, ids },
+      reward: (rewardType === 'coins')
+        ? { type:'coins', amount: coinAmount }
+        : { type:rewardType, class: outClass, mutation: outMutation, base: outBase },
+      totals_after: { pulls: nextPullIndex, pity10, pity90, step: newStep }
+    });
+
+    // Build response with new state pieces
+    const gacha = getGachaState(req.userId, 11);
+    return res.json({
+      ok: true,
+      reward_type: rewardType,
+      out_class: outClass,
+      out_mutation: outMutation,
+      out_base: outBase,
+      pull_index: nextPullIndex,
+      consumed: { class: needCls, count: needCnt },
+      reward: (rewardType === 'coins')
+        ? { type:'coins', amount: coinAmount }
+        : { type:rewardType, class: outClass, mutation: outMutation, base: outBase },
+      totals: { pulls: nextPullIndex, pity10, pity90, step: newStep },
+      gacha
+    });
+  } catch (e) {
+    console.error('[gacha/roll]', e);
+    return res.status(500).json({ error: 'server_error' });
+  }
+});
+
 // ==== Online / Visit ====
 app.get('/online', auth, (req, res) => {
   const rows = listUsersOnlineStmt.all();
@@ -783,8 +1152,11 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
 
     // mở lại DB chính
     openDb();
-    runMigrations();
-    prepareAll();
+    if (!integrityOk(DB_PATH)) throw new Error('Integrity check failed on boot');
+    runMigrations();       // đọc schema.sql
+    ensureGachaColumns();  // ✅ tự thêm cột còn thiếu (an toàn, idempotent)
+    ensurePlotColumns();   // ✅ đảm bảo cột locked tồn tại
+    prepareAll();   
 
     try { fs.unlinkSync(BAK); } catch {}
     logLine('restore', 'success');
@@ -798,7 +1170,7 @@ app.post('/admin/upload-db', upload.single('db'), (req, res) => {
         try { if (fs.existsSync(DB_PATH)) fs.unlinkSync(DB_PATH); } catch {}
         fs.renameSync(BAK, DB_PATH);
       }
-      openDb(); runMigrations(); prepareAll();
+      openDb(); runMigrations(); ensureGachaColumns(); ensurePlotColumns(); prepareAll();
     } catch {}
     try { if (fs.existsSync(TMP)) fs.unlinkSync(TMP); } catch {}
     restoring = false;
@@ -834,13 +1206,15 @@ function pushState(userId) {
   const potInv = invListPotsStmt.all(userId);
   const seedInv = invListSeedsStmt.all(userId);
   const market = marketOpenStmt.all();
+  const gacha = getGachaState(userId, 11);
 
   ws.send(JSON.stringify({
     type: 'state:update',
     payload: {
       me, floors, plots, potInv, seedInv, market,
       trapPrice: trapPriceForUser(userId),
-      trapMax: trapMaxForUser(userId)
+      trapMax: trapMaxForUser(userId),
+      gacha
     }
   }));
 }
